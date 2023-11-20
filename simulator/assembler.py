@@ -1,0 +1,214 @@
+from enum import Enum
+import numpy as np
+import scipy as sp
+from numba import njit, typed
+from numba.core import types
+
+
+# TODO: check if this should be moved to another module
+class EquationSide(Enum):
+    """This enum just creates labels to identify the side of the equation"""
+
+    RHS = 1  # right-hand side
+    LHS = 2  # left-hand side
+
+
+class Assembler:
+    """This class register and call assembling functions given a equation name and a element list to be assembled"""
+
+    def __init__(self):
+        self.assembling_functions_register = {}
+        # it holds for each equation how much variables are solved
+        # it indicates the size of global vector assembled which must have dimension (total_variables, total_assemble_variables)
+        self.lhs_total_variables_assembled = {}
+
+    def get_assembling_function_name(self, equation_name, equation_side, element_type):
+        """
+        Get the registered equation by concatenating as 'equation_name/equation_side/element_type' being:
+        - equation_name a string to identify the equation,
+        - equation_side a number to identify equation side RHS=1 and LHS=2 (see EquationSide enum)
+        - element_type a number to identify the element type (see ElementType enum)
+        """
+        return f"{equation_name}/{equation_side}/{element_type}"
+
+    def register_function(
+        self, equation_name, equation_side, element_type, assembling_function
+    ):
+        """
+        Register a function to be used to assembling elements of type element_type for the equation named equation_name
+        See get_assembling_function_name to know how the functions are named.
+        """
+        self.assembling_functions_register[
+            self.get_assembling_function_name(
+                equation_name, equation_side, element_type
+            )
+        ] = assembling_function
+
+    def get_registered_function(self, equation_name, equation_side, element_type):
+        """This function try to retrive the assembling function for a equation and element type passed as argument"""
+        assembling_function_name = self.get_assembling_function_name(
+            equation_name, equation_side, element_type
+        )
+        if assembling_function_name in self.assembling_functions_register:
+            return self.assembling_functions_register[assembling_function_name]
+        error_message = f"assemble equation: {equation_name}\nside of the equation: {equation_side}\nelement of type: {element_type}\n"
+        raise NotImplementedError(
+            "There is no assembling function registered for:\n" + error_message
+        )
+
+    def register_equation_total_variables_assembled(
+        self, equation_name, total_variables_assembled
+    ):
+        """
+        Register the amount of variables assembled in LHS assembling for a given equation.
+        This amount represents how many variables must be solved in this equation.
+        e.g. for step 1 in CBS it can be the velocities in two dimensions u_1 and u_2.
+        """
+        self.lhs_total_variables_assembled[equation_name] = total_variables_assembled
+
+    def get_registered_equation_total_variables_assembled(self, equation_name):
+        """
+        Get the of variables assembled in LHS assembling for a given equation.
+        """
+        if equation_name in self.lhs_total_variables_assembled:
+            return self.lhs_total_variables_assembled[equation_name]
+        raise NotImplementedError(
+            f"There is no registered value for total variables assembled in LHS for the equation {equation_name}"
+        )
+
+    def assemble_rhs(self, equation_name, mesh):
+        """Do the RHS assembling process for a equation named equation_name all elements in the element_containers from the mesh"""
+        # TODO: review these parameters sould be passed as variables in nodes or for elements
+        additional_parameters = typed.Dict.empty(types.unicode_type, types.float64)
+        # dictionary to be used to hold data for indices and values of dictionary
+        global_matrix_values = typed.Dict.empty(
+            types.UniTuple(types.int64, 2), types.float64
+        )
+        # assemble each container depending on the registered element type
+        for element_container in mesh.element_containers:
+            assembling_function = self.get_registered_function(
+                equation_name, EquationSide.RHS.value, element_container.element_type
+            )
+            _assemble_element_container_rhs(
+                assembling_function,
+                element_container.elements,
+                additional_parameters,
+                global_matrix_values,
+            )
+        # convert the assembled data of the matrix to the array of indices and values
+        # in order to get build the sparse matrix for RHS of this equation
+        indices_row, indices_column, values = _get_indices_values_sparse_matrix(
+            global_matrix_values
+        )
+        return sp.sparse.csr_array(
+            (values, (indices_row, indices_column)),
+            shape=(mesh.total_nodes, mesh.total_nodes),
+        )
+
+    def assemble_lhs(self, equation_name, mesh):
+        """
+        Do the LHS assembling process for a equation named equation_name all elements in the element_containers from the mesh
+        This function returns a dictionary with values for each assembled variable of the equation LHS.
+        This is done like this because some steps of the model can assemble multiple variables together
+        e.g. step 1 and step 3 can assemble all velocity directions
+        """
+        # TODO: review these parameters sould be passed as variables in nodes or for elements
+        additional_parameters = typed.Dict.empty(types.unicode_type, types.float64)
+        # dictionary to be used to hold data for variable name and array with values for LHS
+        # TODO : aleterar aqui para ser uma matriz
+        total_variables = self.get_registered_equation_total_variables_assembled(
+            equation_name
+        )
+        global_array_values = np.zeros(
+            (mesh.total_nodes, total_variables), dtype=np.float64
+        )
+        # assemble each container depending on the registered element type
+        for element_container in mesh.element_containers:
+            assembling_function = self.get_registered_function(
+                equation_name, EquationSide.LHS.value, element_container.element_type
+            )
+            _assembling_element_container_lhs(
+                assembling_function,
+                element_container.elements,
+                additional_parameters,
+                global_array_values,
+            )
+        return global_array_values
+
+
+@njit
+def _assemble_element_container_rhs(
+    assembling_elemental_function,
+    elements,
+    additional_parameters,
+    global_matrix_values,
+):
+    """
+    This assembles all elements in a global matrix (vector) RHS
+    assembling_elemental_function: the function used to assemble elements
+    elements: are the elements to be assembled
+    additional_parameters: are values that can be passed to the assembled elements
+    global_matrix_values: is a dictionary that holds indices and values of assembled matrix
+    """
+    for element in elements:
+        # the assembled_elemental comes as a numpy two dimension array
+        assembled_elemental = assembling_elemental_function(
+            element, additional_parameters
+        )
+        # assemble elemental matrix to the global matrix dict
+        for column in range(element.nodes_per_element):
+            for row in range(element.nodes_per_element):
+                row_global = element.node_ids[row] - 1
+                column_global = element.node_ids[column] - 1
+                # if is a diagonal position or if it already exist in dict
+                # then just sum the value, otherwise just insert new value to the dict
+                if (row_global, column_global) in global_matrix_values:
+                    global_matrix_values[
+                        (row_global, column_global)
+                    ] += assembled_elemental[row, column]
+                else:
+                    global_matrix_values[
+                        (row_global, column_global)
+                    ] = assembled_elemental[row, column]
+
+
+@njit
+def _get_indices_values_sparse_matrix(global_matrix_values):
+    """This converts the dict data of the sparse matrix into the arrays of indices and values"""
+    total_values = len(global_matrix_values)
+    indices_row = np.empty(total_values, dtype=np.int32)
+    indices_column = np.empty(total_values, dtype=np.int32)
+    values = np.empty(total_values, dtype=np.float64)
+    i = 0
+    for index, value in global_matrix_values.items():
+        indices_row[i], indices_column[i] = index[0]
+        values[i] = value
+        i += 1
+    return indices_row, indices_column, values
+
+
+@njit
+def _assembling_element_container_lhs(
+    assembling_elemental_function,
+    elements,
+    additional_parameters,
+    global_matrix_values,
+):
+    """
+    This assembles all elements in a global matrix (vector) LHS.
+    elements: are the elements to be assembled
+    additional_parameters: are values that can be passed to the assembled elements
+    global_matrix_values: is a array that holds indices and values of assembled matrix
+    """
+    for element in elements:
+        # this assembled_elemental comes as dict[str, np.ndarray] for each variable assembled in LHS
+        # for the current equation
+        assembled_elemental = assembling_elemental_function(
+            element, additional_parameters
+        )
+        # assemble elemental matrix to the global arrays dict
+        for column in range(assembled_elemental.shape[1]):
+            for row in range(assembled_elemental.shape[0]):
+                global_matrix_values[
+                    element.node_ids[row] - 1, column
+                ] += assembled_elemental[row, column]
