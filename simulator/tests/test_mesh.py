@@ -1,3 +1,4 @@
+import numpy as np
 from pytest_regressions.data_regression import DataRegressionFixture
 from simulator.mesh import Mesh
 from simulator.element import ElementType
@@ -9,9 +10,10 @@ from simulator.element import ElementType
 def test_import_mesh(shared_datadir, data_regression):
     mesh = Mesh(shared_datadir / "mesh.msh")
     # check nodes stuff
-    assert mesh.nodes.dimensions == 2
-    assert mesh.nodes.coordinates.shape == (2129, 2)
-    assert len(mesh.nodes.variables) == 0 and len(mesh.nodes.variables_old) == 0
+    assert mesh.nodes_handler.dimensions == 2
+    assert mesh.nodes_handler.total_nodes == 2129
+    assert np.all(len(node.variables) == 0 for node in mesh.nodes_handler.nodes)
+    assert np.all(len(node.variables_old) == 0 for node in mesh.nodes_handler.nodes)
     # check elements stuff
     assert len(mesh.element_containers) == 2
     assert (

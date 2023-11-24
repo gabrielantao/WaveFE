@@ -1,6 +1,7 @@
 # project specific
 simulator/tests/data/old_results
 TODO.md
+scripts/
 
 # Byte-compiled / optimized / DLL files
 __pycache__/

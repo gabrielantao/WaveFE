@@ -5,7 +5,6 @@ from numba.experimental import jitclass
 from typing import List
 
 
-# TODO: complete this class when implement other element types
 class ElementType(Enum):
     """All types of element supported for now"""
 
@@ -13,72 +12,103 @@ class ElementType(Enum):
     SEGMENT = auto()
     TRIANGLE = auto()
     QUADRILATERAL = auto()
+    # TODO: complete this class when implement other element types
     # ...
 
 
 @jitclass(
     {
-        "coordinates": types.float64[:, :],
-        "variables": types.DictType(keyty=types.unicode_type, valty=types.float64[:]),
-        "variables_old": types.DictType(
-            keyty=types.unicode_type, valty=types.float64[:]
-        ),
+        "physical_group": types.int32,
+        "geometrical_group": types.int32,
+        "coordinates": types.float64[:],
+        "variables": types.DictType(keyty=types.unicode_type, valty=types.float64),
+        "variables_old": types.DictType(keyty=types.unicode_type, valty=types.float64),
     }
 )
-class NodesHandler(object):
-    """
-    A class that holds data for all nodes such as coordinates and variables values.
-    """
+class Node(object):
+    """This class works as a struct to hold node data"""
 
-    # TODO: maybe add group data for nodes ...
-    def __init__(self, dimension, coordinate_matrix):
-        self.coordinates = coordinate_matrix[:, :dimension]
+    def __init__(self, physical_group, geometrical_group, coordinates):
+        self.physical_group = physical_group
+        self.geometrical_group = geometrical_group
+        self.coordinates = coordinates
         # it maps the name of the variable to number of the column it belongs to
         self.variables = typed.Dict.empty(
-            key_type=types.unicode_type, value_type=types.float64[:]
+            key_type=types.unicode_type, value_type=types.float64
         )
         self.variables_old = typed.Dict.empty(
-            key_type=types.unicode_type, value_type=types.float64[:]
+            key_type=types.unicode_type, value_type=types.float64
         )
 
-    @property
-    def dimensions(self):
-        """The nodes dimension"""
-        return self.coordinates.shape[1]
+
+@jitclass()
+class NodesHandler(object):
+    """A class that holds and manages nodes instances"""
+
+    dimensions: int
+    nodes: List[Node]
+
+    def __init__(self, dimensions, coordinate_matrix):
+        self.dimensions = dimensions
+        # TODO: insert geometrical and physical groups for this
+        self.nodes = typed.List(
+            [
+                Node(0, 0, coordinates)
+                for coordinates in coordinate_matrix[:, :dimensions]
+            ]
+        )
 
     @property
     def total_nodes(self):
         """The total amount of nodes"""
-        return self.coordinates.shape[0]
+        return len(self.nodes)
 
-    def get_coordinate(self, node_id):
-        """Return the coordinates given a node id"""
-        return self.coordinates[node_id, :]
+    def get_nodes_instances(self, node_ids):
+        """Return node instances with node_ids passed as argument"""
+        return typed.List([self.nodes[node_id] for node_id in node_ids])
 
-    def get_node_variable(self, variable_name, node_id):
-        """Return the variables values given a node id"""
-        return self.variables[variable_name][node_id]
+    def get_coordinates(self):
+        """Return the coordinates of all nodes"""
+        return typed.List(
+            [self.nodes[node_id].coordinates for node_id in range(self.total_nodes)]
+        )
 
-    def get_node_variable_old(self, variable_name, node_id):
+    def get_variables(self, variable_name):
+        """Return the variables values for all nodes"""
+        return typed.List(
+            [
+                self.nodes[node_id].variables[variable_name]
+                for node_id in range(self.total_nodes)
+            ]
+        )
+
+    def get_variables_old(self, variable_name):
         """Return the variables old values given a node id"""
-        return self.variables_old[variable_name][node_id]
+        return typed.List(
+            [
+                self.nodes[node_id].variables_old[variable_name]
+                for node_id in range(self.total_nodes)
+            ]
+        )
 
-    def update_all_coordinates(self, new_coordinates):
+    def update_coordinates(self, new_coordinates):
         """Update coordinate of all nodes in the mesh"""
-        assert self.coordinates.shape == new_coordinates.shape
-        self.coordinates = new_coordinates
-
-    def update_coordinate(self, node_id, new_coordinate):
-        """Update coordinates for node_ids passed values"""
-        self.coordinates[node_id, :] = new_coordinate[:]
+        assert (
+            self.total_nodes == new_coordinates.shape[0]
+            and self.dimensions == new_coordinates.shape[1]
+        )
+        for node_id in range(self.total_nodes):
+            self.nodes[node_id].coordinates = new_coordinates[node_id, :]
 
     def update_variables(self, variable_name, new_values):
         """Update the values of a variables for all nodes"""
-        self.variables[variable_name] = new_values
+        for node_id in range(self.total_nodes):
+            self.nodes[node_id].variables[variable_name] = new_values[node_id]
 
     def update_variables_old(self, variable_name, new_values):
         """Update the values of a variables_old for all nodes"""
-        self.variables_old[variable_name] = new_values
+        for node_id in range(self.total_nodes):
+            self.nodes[node_id].variables_old[variable_name] = new_values[node_id]
 
 
 @jitclass(
@@ -108,6 +138,7 @@ class Element(object):
         self.length = -1.0
         self.area = -1.0
         self.volume = -1.0
+        # local timestep for CBS model
         self.dt = -1.0
 
     @property
@@ -115,27 +146,9 @@ class Element(object):
         """The amount of nodes for this element"""
         return self.node_ids.shape[0]
 
-    def get_coordinates(self, nodes):
-        """Get all nodes coordinates that belongs to this element"""
-        return nodes.get_coordinate(self.node_ids)
-
-    def get_variables(self, nodes):
-        """Get all variables values for nodes that belongs to this element"""
-        variables = typed.Dict.empty(
-            key_type=types.unicode_type, value_type=types.float64[:]
-        )
-        for name in nodes.variables.keys():
-            variables[name] = nodes.get_node_variable(name, self.node_ids)
-        return variables
-
-    def get_variables_old(self, nodes):
-        """Get all last variables values for nodes that belongs to this element"""
-        variables = typed.Dict.empty(
-            key_type=types.unicode_type, value_type=types.float64[:]
-        )
-        for name in nodes.variables_old.keys():
-            variables[name] = nodes.get_node_variable_old(name, self.node_ids)
-        return variables
+    def get_nodes(self, nodes):
+        """Return a list of instance of nodes to be used"""
+        return nodes.get_nodes_instances(self.node_ids)
 
     # TODO: implement these functions
     # calculate_specific_sizes (maybe save this in memory)

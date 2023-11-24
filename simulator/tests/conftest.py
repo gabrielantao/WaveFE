@@ -9,7 +9,7 @@ from simulator.semi_implicit.assembing_elements import (
     assemble_element_rhs_step_2,
     assemble_element_rhs_step_3,
 )
-from simulator.element import ElementType
+from simulator.element import ElementType, NodesHandler, ElementsContainer
 
 
 @pytest.fixture
@@ -98,16 +98,18 @@ def basic_initial_variables(square_case_configs):
 @pytest.fixture
 def connectivity_matrix(shared_datadir):
     """connectivity matrix for square case"""
-    return np.loadtxt(
+    connectivity = np.loadtxt(
         shared_datadir / "connectivity.csv",
         delimiter=",",
         dtype=np.int32,
     )
+    # these values are in csv shifted a unit so it should be sfited back
+    return connectivity - 1
 
 
 @pytest.fixture
 def coordinate_matrix(shared_datadir):
-    # coordinate matrix
+    """coordinate matrix"""
     return np.loadtxt(
         shared_datadir / "coordinates.csv",
         delimiter=",",
@@ -117,14 +119,14 @@ def coordinate_matrix(shared_datadir):
 
 @pytest.fixture
 def boundary_matrix(shared_datadir):
-    # side matrix
-    return np.asfortranarray(
-        np.loadtxt(
-            shared_datadir / "boundaries.csv",
-            delimiter=",",
-            dtype=np.int32,
-        )
+    """side matrix"""
+    sides = np.loadtxt(
+        shared_datadir / "boundaries.csv",
+        delimiter=",",
+        dtype=np.int32,
     )
+    # these values are in csv shifted a unit so it should be shifted back
+    return sides - 1
 
 
 @pytest.fixture
@@ -139,7 +141,98 @@ def nodes_handler(coordinate_matrix):
     return nodes_handler
 
 
+@pytest.fixture
+def basic_matrix_vum(shared_datadir):
+    # remeber that sizes are optional here
+    dNkdx = np.loadtxt(
+        shared_datadir / "dNkdx.csv",
+        delimiter=",",
+        dtype=np.float64,
+    )
+
+    detJ = np.loadtxt(
+        shared_datadir / "detJ.csv",
+        delimiter=",",
+        dtype=np.float64,
+    )
+
+    elcoe_e = np.loadtxt(
+        shared_datadir / "elcoe_e.csv",
+        delimiter=",",
+        dtype=np.float64,
+    )
+
+    face_norm = np.loadtxt(
+        shared_datadir / "face_norm.csv",
+        delimiter=",",
+        dtype=np.float64,
+    )
+
+    alen_e = np.loadtxt(
+        shared_datadir / "alen_e.csv",
+        delimiter=",",
+        dtype=np.float64,
+    )
+
+    # only for conjugate gradient
+    pdiagE = np.loadtxt(
+        shared_datadir / "pdiagE.csv",
+        delimiter=",",
+        dtype=np.float64,
+    )
+
+    gstifE = np.loadtxt(
+        shared_datadir / "gstifE.csv",
+        delimiter=",",
+        dtype=np.float64,
+    )
+
+    return {
+        "dNkdx": dNkdx,
+        "detJ": detJ,
+        "elcoe_e": elcoe_e,
+        "face_norm": face_norm,
+        "alen_e": alen_e,
+        "pdiagE": pdiagE,
+        "gstifE": gstifE,
+    }
+
+
+@pytest.fixture
+def modified_basic_matrix_set2(basic_matrix_vum, basic_initial_variables):
+    """Modify original matrices to obtain separeted terms b,c, and areas"""
+    b = [
+        basic_matrix_vum["dNkdx"][i : i + 3]
+        for i in range(0, len(basic_matrix_vum["dNkdx"]), 6)
+    ]
+    c = [
+        basic_matrix_vum["dNkdx"][i : i + 3]
+        for i in range(3, len(basic_matrix_vum["dNkdx"]), 6)
+    ]
+    return {
+        "b": np.array(b).reshape(
+            (basic_initial_variables["nelem"], basic_initial_variables["nep"])
+        ),
+        "c": np.array(c).reshape(
+            (basic_initial_variables["nelem"], basic_initial_variables["nep"])
+        ),
+        "areas": basic_matrix_vum["detJ"] / 2.0,
+    }
+
+
+@pytest.fixture
+def element_triangles(connectivity_matrix):
+    return ElementsContainer(
+        ElementType.TRIANGLE.value,
+        connectivity_matrix.astype(np.int32),
+        np.zeros(connectivity_matrix.shape[0]),
+        np.zeros(connectivity_matrix.shape[0]),
+    )
+
+
 # TODO: colocar a fixture com condição de contorno aqui para o caso da caixa quadrada
+
+
 @pytest.fixture
 def assembler():
     assembler = Assembler()
@@ -164,4 +257,8 @@ def assembler():
         ElementType.TRIANGLE.value,
         assemble_element_rhs_step_3,
     )
+    # register how many variables is solved by each equation
+    assembler.register_total_variables_assembled("step 1", 2)
+    assembler.register_total_variables_assembled("step 2", 1)
+    assembler.register_total_variables_assembled("step 3", 2)
     return assembler

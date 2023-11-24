@@ -45,11 +45,11 @@ class Mesh:
         all_zero_dim_2 = all(np.isclose(mesh.points[:, 1], 0.0))
         all_zero_dim_3 = all(np.isclose(mesh.points[:, 2], 0.0))
         if all_zero_dim_2 and all_zero_dim_3:
-            self.nodes = NodesHandler(1, mesh.points)
+            self.nodes_handler = NodesHandler(1, mesh.points)
         elif all_zero_dim_3:
-            self.nodes = NodesHandler(2, mesh.points)
+            self.nodes_handler = NodesHandler(2, mesh.points)
         else:
-            self.nodes = NodesHandler(3, mesh.points)
+            self.nodes_handler = NodesHandler(3, mesh.points)
 
     def setup_elements(self, mesh):
         """Create element containers and configure it with data from mesh file"""
@@ -88,12 +88,17 @@ class Mesh:
     def get_element_containers(self) -> list[ElementsContainer]:
         """Return element container to be used in assembling depending on mesh dimension"""
         element_types = []
-        match self.nodes.dimensions:
+        match self.nodes_handler.dimensions:
             case 1:
-                element_types.append(ElementType.SEGMENT.value)
+                # element_types.append(ElementType.SEGMENT.value)
+                raise NotImplementedError("Not implement 1D meshs yet")
             case 2:
                 element_types.append(ElementType.TRIANGLE.value)
                 element_types.append(ElementType.QUADRILATERAL.value)
             case 3:
                 raise NotImplementedError("Not implement 3D meshs yet")
-        return [self.element_containers[element_type] for element_type in element_types]
+        used_containers = []
+        for element_type in element_types:
+            if element_type in self.element_containers:
+                used_containers.append(self.element_containers[element_type])
+        return used_containers
