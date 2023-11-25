@@ -25,7 +25,7 @@ class Assembler:
     def get_assembling_function_name(self, equation_name, equation_side, element_type):
         """
         Get the registered equation by concatenating as 'equation_name/equation_side/element_type' being:
-        - equation_name a string to identify the equation,
+        - equation_name a string to identify the equation or the matrix,
         - equation_side a number to identify equation side RHS=1 and LHS=2 (see EquationSide enum)
         - element_type a number to identify the element type (see ElementType enum)
         """
@@ -76,10 +76,13 @@ class Assembler:
             f"There is no registered value for total variables assembled in LHS for the equation {equation_name}"
         )
 
-    def assemble_lhs(self, equation_name, mesh):
+    def assemble_lhs(
+        self,
+        equation_name,
+        mesh,
+        simulation_parameters=typed.Dict.empty(types.unicode_type, types.float64),
+    ):
         """Do the LHS assembling process for a equation named equation_name all elements in the element_containers from the mesh"""
-        # TODO: review these parameters sould be passed as variables in nodes or for elements
-        additional_parameters = typed.Dict.empty(types.unicode_type, types.float64)
         # dictionary to be used to hold data for indices and values of dictionary
         global_matrix_values = typed.Dict.empty(
             types.UniTuple(types.int64, 2), types.float64
@@ -93,7 +96,7 @@ class Assembler:
                 assembling_function,
                 mesh.nodes,
                 element_container.elements,
-                additional_parameters,
+                simulation_parameters,
                 global_matrix_values,
             )
         # convert the assembled data of the matrix to the array of indices and values
@@ -160,12 +163,12 @@ def _assemble_element_container_lhs(
         assembled_elemental = assembling_elemental_function(
             element,
             element.get_nodes(nodes),
-            # element.coordinates(nodes),
-            # element.get_variables(nodes),
-            # element.get_variables_old(nodes),
             simulation_parameters,
         )
         # assemble elemental matrix to the global matrix dict
+        # TODO: could be optimized to not assemble off-diag values for mass lumped matrix
+        # (nor the off-diag values for lower values for symmetric matrices, but
+        # I'm not sure if this case worth the effort)
         for column in range(element.nodes_per_element):
             for row in range(element.nodes_per_element):
                 row_global = element.node_ids[row]
@@ -182,6 +185,7 @@ def _assemble_element_container_lhs(
                     ] = assembled_elemental[row, column]
 
 
+# TODO: maybe this could be parallelized
 @njit
 def _get_indices_values_sparse_matrix(global_matrix_values):
     """This converts the dict data of the sparse matrix into the arrays of indices and values"""
@@ -191,13 +195,13 @@ def _get_indices_values_sparse_matrix(global_matrix_values):
     values = np.empty(total_values, dtype=np.float64)
     i = 0
     for index, value in global_matrix_values.items():
-        indices_row[i], indices_column[i] = index[0]
+        indices_row[i], indices_column[i] = index
         values[i] = value
         i += 1
     return indices_row, indices_column, values
 
 
-# @njit
+@njit
 def _assembling_element_container_rhs(
     assembling_elemental_function,
     nodes,

@@ -5,6 +5,9 @@ from numba import typed
 from simulator.element import NodesHandler
 from simulator.assembler import Assembler, EquationSide
 from simulator.semi_implicit.assembing_elements import (
+    assemble_mass_lumped_lhs,
+    assemble_mass_lhs,
+    assemble_stiffness_lhs,
     assemble_element_rhs_step_1,
     assemble_element_rhs_step_2,
     assemble_element_rhs_step_3,
@@ -236,7 +239,37 @@ def element_triangles(connectivity_matrix):
 @pytest.fixture
 def assembler():
     assembler = Assembler()
-    # TODO: register functions for LHS
+    # register functions for left-hand side of solved equations
+    assembler.register_function(
+        "step 1 mass_lumped",
+        EquationSide.LHS.value,
+        ElementType.TRIANGLE.value,
+        assemble_mass_lumped_lhs,
+    )
+    assembler.register_function(
+        "step 1 mass_transient",
+        EquationSide.LHS.value,
+        ElementType.TRIANGLE.value,
+        assemble_mass_lhs,
+    )
+    assembler.register_function(
+        "step 2 stiffness",
+        EquationSide.LHS.value,
+        ElementType.TRIANGLE.value,
+        assemble_stiffness_lhs,
+    )
+    assembler.register_function(
+        "step 3 mass_lumped",
+        EquationSide.LHS.value,
+        ElementType.TRIANGLE.value,
+        assemble_mass_lumped_lhs,
+    )
+    assembler.register_function(
+        "step 3 mass_transient",
+        EquationSide.LHS.value,
+        ElementType.TRIANGLE.value,
+        assemble_mass_lhs,
+    )
     # register functions to be used to assemble the elements
     # for right-side of each equation solved by the model
     assembler.register_function(

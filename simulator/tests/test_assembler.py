@@ -69,7 +69,9 @@ def test_calculate_step1(
         ].dt = timestep[element_id]
     simulation_parameters = typed.Dict.empty(types.unicode_type, types.float64)
     simulation_parameters["Re"] = square_case_configs["Re"]
-    new_fortran_rhs = assembler.assemble_rhs("step 1", mock_mesh, simulation_parameters)
+    new_numba_assembled = assembler.assemble_rhs(
+        "step 1", mock_mesh, simulation_parameters
+    )
 
     # TODO: remove this call here after include a regression
     fortran_rhs = cbs_simulator.step1(
@@ -86,7 +88,7 @@ def test_calculate_step1(
         basic_matrix_vum["detJ"],
     )
     # TODO: use a regression here
-    assert np.allclose(new_fortran_rhs, fortran_rhs.transpose())
+    assert np.allclose(new_numba_assembled, fortran_rhs.transpose())
 
 
 def test_calculate_step2(
@@ -110,7 +112,7 @@ def test_calculate_step2(
     mock_mesh.nodes.update_variables_old("u_2", vel_old[:, 1])
     mock_mesh.nodes.update_variables("u_1", vel_intermediate[:, 0])
     mock_mesh.nodes.update_variables("u_2", vel_intermediate[:, 1])
-    new_fortran_rhs = assembler.assemble_rhs("step 2", mock_mesh)
+    new_numba_assembled = assembler.assemble_rhs("step 2", mock_mesh)
 
     # TODO: remove this call here after include a regression
     fortran_rhs = cbs_simulator.step2(
@@ -122,7 +124,7 @@ def test_calculate_step2(
         square_case_configs["theta"],
     )
     # TODO: this should be a regression
-    assert np.allclose(new_fortran_rhs, fortran_rhs.reshape((2601, 1)))
+    assert np.allclose(new_numba_assembled, fortran_rhs.reshape((2601, 1)))
 
 
 def test_calculate_step3(
@@ -160,7 +162,7 @@ def test_calculate_step3(
             element_id
         ].dt = timestep[element_id]
 
-    new_fortran_rhs = assembler.assemble_rhs("step 3", mock_mesh)
+    new_numba_assembled = assembler.assemble_rhs("step 3", mock_mesh)
 
     # TODO: remove this call here after include a regression
     fortran_rhs = cbs_simulator.step3(
@@ -173,4 +175,64 @@ def test_calculate_step3(
         timestep,
     )
     # TODO: should be regression
-    assert np.allclose(new_fortran_rhs, fortran_rhs.transpose())
+    assert np.allclose(new_numba_assembled, fortran_rhs.transpose())
+
+
+def test_calculate_lumped_mass_lhs(
+    mock_mesh,
+    assembler,
+    connectivity_matrix,
+    basic_matrix_vum,
+    shared_datadir,
+):
+    mass_diag = np.loadtxt(
+        shared_datadir / "old_results" / "mass_clean" / "mass_00001.csv",
+        delimiter=",",
+    )
+    timestep = np.loadtxt(
+        shared_datadir / "old_results" / "dt_clean" / "dt_00001.csv",
+        delimiter=",",
+    )
+    # update element local timesteps
+    for element_id in range(
+        mock_mesh.element_containers[ElementType.TRIANGLE.value].total_elements
+    ):
+        mock_mesh.element_containers[ElementType.TRIANGLE.value].elements[
+            element_id
+        ].dt = timestep[element_id]
+
+    new_numba_assembled = assembler.assemble_lhs("step 1 mass_lumped", mock_mesh)
+    # TODO: should be regression
+    assert np.allclose(new_numba_assembled.diagonal(), mass_diag)
+
+
+def test_calculate_stiffness_lhs(
+    mock_mesh,
+    assembler,
+    connectivity_matrix,
+    basic_matrix_vum,
+    shared_datadir,
+):
+    pdiag = np.loadtxt(
+        shared_datadir / "old_results" / "pdiag_clean" / "pdiag_00001.csv",
+        delimiter=",",
+    )
+    gstif = np.loadtxt(
+        shared_datadir / "old_results" / "gstif_clean" / "gstif_00001.csv",
+        delimiter=",",
+    )
+    timestep = np.loadtxt(
+        shared_datadir / "old_results" / "dt_clean" / "dt_00001.csv",
+        delimiter=",",
+    )
+    # update element local timesteps
+    for element_id in range(
+        mock_mesh.element_containers[ElementType.TRIANGLE.value].total_elements
+    ):
+        mock_mesh.element_containers[ElementType.TRIANGLE.value].elements[
+            element_id
+        ].dt = timestep[element_id]
+
+    new_numba_assembled = assembler.assemble_lhs("step 2 stiffness", mock_mesh)
+    # TODO: should be regression
+    assert np.allclose(new_numba_assembled.diagonal(), pdiag)

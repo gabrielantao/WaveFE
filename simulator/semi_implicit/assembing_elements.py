@@ -3,6 +3,41 @@ from numba import njit, typed
 
 
 @njit
+def assemble_mass_lumped_lhs(element, nodes, simulation_parameters):
+    """Assemble lumped mass matrix M"""
+    # TODO: it assembles a first order triangle
+    # maybe the type should change depending on interpolation order (e.g. TRIANGLE1, TRIANGLE2, etc.)
+    # ref: Nithiarasu eq 7.171 pag 211
+    factor = element.area / element.dt / 3.0
+    # factor = element.area / 3.0
+    return np.array(
+        [[factor, 0.0, 0.0], [0.0, factor, 0.0], [0.0, 0.0, factor]], dtype=np.float64
+    )
+
+
+@njit
+def assemble_mass_lhs(element, nodes, simulation_parameters):
+    """Assemble transient mass matrix M"""
+    # TODO: it assembles a first order triangle
+    # maybe the type should change depending on interpolation order (e.g. TRIANGLE1, TRIANGLE2, etc.)
+    # TODO: check adimensionalization here...
+    mass_matrix = np.array(
+        [[2.0, 1.0, 1.0], [1.0, 2.0, 1.0], [1.0, 1.0, 2.0]], dtype=np.float64
+    )
+    return (element.area / 12.0 / element.dt) * mass_matrix
+
+
+@njit
+def assemble_stiffness_lhs(element, nodes, simulation_parameters):
+    """
+    Calculate stiffness matrix K
+    ref: Nithiarasu eq 7.158 pag 209
+    """
+    stiffness_matrix = np.outer(element.b, element.b) + np.outer(element.c, element.c)
+    return element.dt * element.area * stiffness_matrix
+
+
+@njit
 def assemble_element_rhs_step_1(element, nodes, simulation_parameters):
     """Assemble triangle matrix for step 1"""
     rhse_1 = np.zeros(element.nodes_per_element, dtype=np.float64)
