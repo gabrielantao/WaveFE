@@ -5,6 +5,19 @@ from numba.experimental import jitclass
 from typing import List
 
 
+class GroupType(Enum):
+    """
+    Enum to hold data for type of the group
+    physical and geometrical groups are free to use inside the model
+    (e.g. to define boundary to calculate some properties such as drag and lift in surface)
+    named group is used to define boundary conditions
+    """
+
+    GEOMETRICAL = auto()
+    PHYSICAL = auto()
+    NAMED = auto()
+
+
 class ElementType(Enum):
     """All types of element supported for now"""
 
@@ -12,7 +25,7 @@ class ElementType(Enum):
     SEGMENT = auto()
     TRIANGLE = auto()
     QUADRILATERAL = auto()
-    # TODO: complete this class when implement other element types
+    # TODO: complete this enum when implement other element types
     # ...
 
 
@@ -20,6 +33,7 @@ class ElementType(Enum):
     {
         "physical_group": types.int32,
         "geometrical_group": types.int32,
+        "named_group": types.int32,
         "coordinates": types.float64[:],
         "variables": types.DictType(keyty=types.unicode_type, valty=types.float64),
         "variables_old": types.DictType(keyty=types.unicode_type, valty=types.float64),
@@ -28,9 +42,10 @@ class ElementType(Enum):
 class Node(object):
     """This class works as a struct to hold node data"""
 
-    def __init__(self, physical_group, geometrical_group, coordinates):
-        self.physical_group = physical_group
-        self.geometrical_group = geometrical_group
+    def __init__(self, coordinates):
+        self.physical_group = 0
+        self.geometrical_group = 0
+        self.named_group = 0
         self.coordinates = coordinates
         # it maps the name of the variable to number of the column it belongs to
         self.variables = typed.Dict.empty(
@@ -50,12 +65,8 @@ class NodesHandler(object):
 
     def __init__(self, dimensions, coordinate_matrix):
         self.dimensions = dimensions
-        # TODO: insert geometrical and physical groups for this
         self.nodes = typed.List(
-            [
-                Node(0, 0, coordinates)
-                for coordinates in coordinate_matrix[:, :dimensions]
-            ]
+            [Node(coordinates) for coordinates in coordinate_matrix[:, :dimensions]]
         )
 
     @property
@@ -91,6 +102,24 @@ class NodesHandler(object):
             ]
         )
 
+    def set_group_numbers(self, group_type, group_numbers, node_ids):
+        """
+        Define group number for some nodes.
+        The rule to define node groups is the current number of node is overridden
+        only by a higher group number.
+        """
+        for group_number, node_id in zip(group_numbers, node_ids):
+            match group_type:
+                case GroupType.GEOMETRICAL.value:
+                    if group_number > self.nodes[node_id].geometrical_group:
+                        self.nodes[node_id].geometrical_group = group_number
+                case GroupType.PHYSICAL.value:
+                    if group_number > self.nodes[node_id].physical_group:
+                        self.nodes[node_id].physical_group = group_number
+                case GroupType.NAMED.value:
+                    if group_number > self.nodes[node_id].named_group:
+                        self.nodes[node_id].named_group = group_number
+
     def update_coordinates(self, new_coordinates):
         """Update coordinate of all nodes in the mesh"""
         assert (
@@ -116,6 +145,7 @@ class NodesHandler(object):
         "node_ids": types.int32[:],
         "physical_group": types.int32,
         "geometrical_group": types.int32,
+        "named_group": types.int32,
         "b": types.float64[:],
         "c": types.float64[:],
         "length": types.float64,
@@ -128,10 +158,11 @@ class Element(object):
     """A class for all elements types"""
 
     # TODO: maybe add parameters (e.g. Re, Ra, etc.) as a dict of floats here...
-    def __init__(self, node_ids, physical_group, geometrical_group):
+    def __init__(self, node_ids):
         self.node_ids = node_ids
-        self.physical_group = physical_group
-        self.geometrical_group = geometrical_group
+        self.physical_group = 0
+        self.geometrical_group = 0
+        self.named_group = 0
         # derivative coefficients b, c
         self.b = np.zeros(self.node_ids.shape, dtype=np.float64)
         self.c = np.zeros(self.node_ids.shape, dtype=np.float64)
@@ -170,17 +201,10 @@ class ElementsContainer(object):
     element_type: int
     elements: List[Element]
 
-    def __init__(
-        self, element_type, connectivity_matrix, physical_groups, geometrical_groups
-    ):
+    def __init__(self, element_type, connectivity_matrix):
         self.element_type = element_type
         self.elements = typed.List(
-            [
-                Element(node_ids, physical_group, geometrical_group)
-                for node_ids, physical_group, geometrical_group in zip(
-                    connectivity_matrix, physical_groups, geometrical_groups
-                )
-            ]
+            [Element(node_ids) for node_ids in connectivity_matrix]
         )
 
     @property
@@ -191,3 +215,31 @@ class ElementsContainer(object):
     def get_element(self, element_id):
         """Return an element using id"""
         return self.elements[element_id]
+
+    def set_group_numbers(self, group_type, group_numbers, nodes_handler):
+        """
+        Set the number of the groups for the elements and nodes in each element.
+        The rule to define node groups is the current number of node is overridden
+        only by a higher group number.
+        """
+        assert len(group_numbers) == self.total_elements
+        # for element_id, group_number in enumerate(group_numbers):
+        for element_id in range(self.total_elements):
+            group_number = group_numbers[element_id]
+            # set group number for nodes of this element
+            node_ids = self.elements[element_id].node_ids
+            nodes_group_numbers = np.full_like(node_ids, group_number)
+            nodes_handler.set_group_numbers(group_type, nodes_group_numbers, node_ids)
+            # set the group number for the element
+            match group_type:
+                case GroupType.GEOMETRICAL.value:
+                    if group_number > self.elements[element_id].geometrical_group:
+                        self.elements[element_id].geometrical_group = group_number
+                case GroupType.PHYSICAL.value:
+                    # set the group number for the element
+                    if group_number > self.elements[element_id].physical_group:
+                        self.elements[element_id].physical_group = group_number
+                case GroupType.NAMED.value:
+                    # set the group number for the element
+                    if group_number > self.elements[element_id].named_group:
+                        self.elements[element_id].named_group = group_number

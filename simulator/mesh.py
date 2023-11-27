@@ -1,9 +1,10 @@
 from pathlib import Path
 import logging
+import re
 import numpy as np
 import meshio
 
-from simulator.element import ElementType, NodesHandler, ElementsContainer
+from simulator.element import ElementType, NodesHandler, ElementsContainer, GroupType
 
 
 class Mesh:
@@ -27,6 +28,10 @@ class Mesh:
         "line": ElementType.SEGMENT.value,
         "triangle": ElementType.TRIANGLE.value,
     }
+    ELEMENT_GROUP_TRANSLATION = {
+        "gmsh:geometrical": GroupType.GEOMETRICAL.value,
+        "gmsh:physical": GroupType.PHYSICAL.value,
+    }
 
     # TODO: maybe this class should run a integrity check for the mesh
     def __init__(self, mesh_filepath: Path, interpolation_order: int = 1):
@@ -36,8 +41,7 @@ class Mesh:
         mesh = meshio.read(mesh_filepath)
         self.setup_nodes(mesh)
         self.setup_elements(mesh)
-        # named groups are used by boundary conditions handler
-        self.setup_named_groups(mesh)
+        self.setup_groups(mesh)
 
     def setup_nodes(self, mesh):
         """Create nodes handler with nodes from mesh file"""
@@ -64,18 +68,48 @@ class Mesh:
             self.element_containers[element_type] = ElementsContainer(
                 element_type,
                 connectivity.astype(np.int32),
-                mesh.cell_data_dict["gmsh:physical"][element_name],
-                mesh.cell_data_dict["gmsh:geometrical"][element_name],
             )
 
-    def setup_named_groups(self, mesh):
-        """Configure named groups. These groups are used to easly setup boundary conditions"""
+    def setup_groups(self, mesh):
+        """
+        Configure node and element groups.
+        These groups can be used for example to easly setup boundary conditions.
+        Both element and nodes could be in marked in named groups.
+        """
+        # TODO: this function should log each pass of the group setter to debug propurses
+        #       this can be done saving all nodes and element groups in a pandas dataframe
+        # setup geometrical and physical group numbers for elements and nodes
+        for group_name, elements_groups in mesh.cell_data_dict.items():
+            group_type = self.get_element_group_type(group_name)
+            for element_name, group_numbers in elements_groups.items():
+                element_type = self.get_element_type(element_name)
+                # define directly group of nodes explicitly defined as
+                # geometrical/physical groups in the mesh file
+                if element_type == ElementType.NODE.value:
+                    node_ids = mesh.cells_dict[element_name].flatten()
+                    self.nodes_handler.set_group_numbers(
+                        group_type, group_numbers.astype(np.int32), node_ids
+                    )
+                else:
+                    self.element_containers[element_type].set_group_numbers(
+                        group_type, group_numbers.astype(np.int32), self.nodes_handler
+                    )
+
+        # setup named groups
         self.named_groups = {}
         for group_name, elements in mesh.cell_sets_dict.items():
+            # ignore groups that were not named by user that created the mesh
+            if re.match("gmsh:*", group_name):
+                continue
             self.named_groups[group_name] = {
                 self.get_element_type(element_name): element_indices
                 for element_name, element_indices in elements.items()
             }
+        # setup the number for each group
+        self.named_groups_number = {}
+        for group_name, data in mesh.field_data.items():
+            self.named_groups_number[group_name] = data[0]
+        # TODO: it should log here if there is two or more grupos with same number
 
     def get_element_type(self, element_name: str):
         """
@@ -84,6 +118,14 @@ class Mesh:
         if element_name in self.ELEMENT_NAME_TRANSLATION:
             return self.ELEMENT_NAME_TRANSLATION[element_name]
         raise RuntimeError(f"Element named {element_name} not implemented yet.")
+
+    def get_element_group_type(self, group_name: str) -> None:
+        """
+        Translate the name of group of element that comes from imported mesh into the internal element number (see GroupType)
+        """
+        if group_name in self.ELEMENT_GROUP_TRANSLATION:
+            return self.ELEMENT_GROUP_TRANSLATION[group_name]
+        raise RuntimeError(f"Element group named {group_name} not implemented.")
 
     def get_element_containers(self) -> list[ElementsContainer]:
         """Return element container to be used in assembling depending on mesh dimension"""
