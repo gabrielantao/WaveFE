@@ -96,20 +96,40 @@ class Mesh:
                     )
 
         # setup named groups
-        self.named_groups = {}
-        for group_name, elements in mesh.cell_sets_dict.items():
+        self.named_groups = {
+            group_name: number[0] for group_name, number in mesh.field_data.items()
+        }
+        for group_name, elements_groups in mesh.cell_sets_dict.items():
             # ignore groups that were not named by user that created the mesh
             if re.match("gmsh:*", group_name):
                 continue
-            self.named_groups[group_name] = {
-                self.get_element_type(element_name): element_indices
-                for element_name, element_indices in elements.items()
-            }
-        # setup the number for each group
-        self.named_groups_number = {}
-        for group_name, data in mesh.field_data.items():
-            self.named_groups_number[group_name] = data[0]
-        # TODO: it should log here if there is two or more grupos with same number
+            # the named elements comes with indices instead of an array with all group numbers
+            # so the trick here is just create an array full of zeros and use the indices to
+            # fill the group number only where needed
+            for element_name, indices in elements_groups.items():
+                element_type = self.get_element_type(element_name)
+                # define directly group of nodes explicitly defined as
+                # geometrical/physical groups in the mesh file
+                if element_type == ElementType.NODE.value:
+                    group_numbers = np.full_like(
+                        indices,
+                        self.named_groups[group_name],
+                        dtype=np.int32,
+                    )
+                    self.nodes_handler.set_group_numbers(
+                        GroupType.NAMED.value, group_numbers, indices
+                    )
+                else:
+                    group_numbers = np.zeros(
+                        self.element_containers[element_type].total_elements,
+                        dtype=np.int32,
+                    )
+                    group_numbers[indices] = self.named_groups[group_name]
+                    self.element_containers[element_type].set_group_numbers(
+                        GroupType.NAMED.value,
+                        group_numbers,
+                        self.nodes_handler,
+                    )
 
     def get_element_type(self, element_name: str):
         """

@@ -31,8 +31,8 @@ class ElementType(Enum):
 
 @jitclass(
     {
-        "physical_group": types.int32,
         "geometrical_group": types.int32,
+        "physical_group": types.int32,
         "named_group": types.int32,
         "coordinates": types.float64[:],
         "variables": types.DictType(keyty=types.unicode_type, valty=types.float64),
@@ -43,9 +43,10 @@ class Node(object):
     """This class works as a struct to hold node data"""
 
     def __init__(self, coordinates):
-        self.physical_group = 0
         self.geometrical_group = 0
+        self.physical_group = 0
         self.named_group = 0
+        # TODO: change this name to position, (include velocity and acceleration)
         self.coordinates = coordinates
         # it maps the name of the variable to number of the column it belongs to
         self.variables = typed.Dict.empty(

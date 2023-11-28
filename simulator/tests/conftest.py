@@ -1,6 +1,5 @@
 import pytest
 import numpy as np
-from numba import typed
 
 from simulator.element import NodesHandler
 from simulator.assembler import Assembler, EquationSide
@@ -13,6 +12,7 @@ from simulator.semi_implicit.assembing_elements import (
     assemble_element_rhs_step_3,
 )
 from simulator.element import ElementType, NodesHandler, ElementsContainer
+from simulator.mesh import Mesh
 
 
 @pytest.fixture
@@ -228,8 +228,6 @@ def element_triangles(connectivity_matrix):
     return ElementsContainer(
         ElementType.TRIANGLE.value,
         connectivity_matrix.astype(np.int32),
-        np.zeros(connectivity_matrix.shape[0]),
-        np.zeros(connectivity_matrix.shape[0]),
     )
 
 
@@ -295,3 +293,26 @@ def assembler():
     assembler.register_total_variables_assembled("step 2", 1)
     assembler.register_total_variables_assembled("step 3", 2)
     return assembler
+
+
+@pytest.fixture
+def mock_mesh(
+    nodes_handler, element_triangles, modified_basic_matrix_set2, shared_datadir
+):
+    # TODO: remember to load rigth values for b and c calculated for this mesh
+    mesh = Mesh(shared_datadir / "mesh.msh")
+    mesh.nodes = nodes_handler
+    mesh.element_containers = {ElementType.TRIANGLE.value: element_triangles}
+    for element_id in range(
+        mesh.element_containers[ElementType.TRIANGLE.value].total_elements
+    ):
+        mesh.element_containers[ElementType.TRIANGLE.value].elements[
+            element_id
+        ].b = modified_basic_matrix_set2["b"][element_id, :]
+        mesh.element_containers[ElementType.TRIANGLE.value].elements[
+            element_id
+        ].c = modified_basic_matrix_set2["c"][element_id, :]
+        mesh.element_containers[ElementType.TRIANGLE.value].elements[
+            element_id
+        ].area = modified_basic_matrix_set2["areas"][element_id]
+    return mesh
