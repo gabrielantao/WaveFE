@@ -29,12 +29,19 @@ class ElementType(Enum):
     # ...
 
 
+# Propriedade dos nos
+# cinematica (posicao, velocidade, aceleracao)
+# grupos (geometrico, fisico, named)
+# variaveis (current, last)
+# condicoes de contorno (tipo, variavel associada, grupo)
+
+
 @jitclass(
     {
         "geometrical_group": types.int32,
         "physical_group": types.int32,
         "named_group": types.int32,
-        "coordinates": types.float64[:],
+        "position": types.float64[:],
         "variables": types.DictType(keyty=types.unicode_type, valty=types.float64),
         "variables_old": types.DictType(keyty=types.unicode_type, valty=types.float64),
     }
@@ -42,12 +49,13 @@ class ElementType(Enum):
 class Node(object):
     """This class works as a struct to hold node data"""
 
-    def __init__(self, coordinates):
+    def __init__(self, position):
+        # node groups
         self.geometrical_group = 0
         self.physical_group = 0
         self.named_group = 0
         # TODO: change this name to position, (include velocity and acceleration)
-        self.coordinates = coordinates
+        self.position = position
         # it maps the name of the variable to number of the column it belongs to
         self.variables = typed.Dict.empty(
             key_type=types.unicode_type, value_type=types.float64
@@ -64,10 +72,10 @@ class NodesHandler(object):
     dimensions: int
     nodes: List[Node]
 
-    def __init__(self, dimensions, coordinate_matrix):
+    def __init__(self, dimensions, positions):
         self.dimensions = dimensions
         self.nodes = typed.List(
-            [Node(coordinates) for coordinates in coordinate_matrix[:, :dimensions]]
+            [Node(position) for position in positions[:, :dimensions]]
         )
 
     @property
@@ -79,10 +87,10 @@ class NodesHandler(object):
         """Return node instances with node_ids passed as argument"""
         return typed.List([self.nodes[node_id] for node_id in node_ids])
 
-    def get_coordinates(self):
-        """Return the coordinates of all nodes"""
+    def get_positions(self):
+        """Return the positions of all nodes"""
         return typed.List(
-            [self.nodes[node_id].coordinates for node_id in range(self.total_nodes)]
+            [self.nodes[node_id].position for node_id in range(self.total_nodes)]
         )
 
     def get_variables(self, variable_name):
@@ -121,14 +129,14 @@ class NodesHandler(object):
                     if group_number > self.nodes[node_id].named_group:
                         self.nodes[node_id].named_group = group_number
 
-    def update_coordinates(self, new_coordinates):
-        """Update coordinate of all nodes in the mesh"""
+    def update_positions(self, new_positions):
+        """Update position of all nodes in the mesh"""
         assert (
-            self.total_nodes == new_coordinates.shape[0]
-            and self.dimensions == new_coordinates.shape[1]
+            self.total_nodes == new_positions.shape[0]
+            and self.dimensions == new_positions.shape[1]
         )
         for node_id in range(self.total_nodes):
-            self.nodes[node_id].coordinates = new_coordinates[node_id, :]
+            self.nodes[node_id].position = new_positions[node_id, :]
 
     def update_variables(self, variable_name, new_values):
         """Update the values of a variables for all nodes"""

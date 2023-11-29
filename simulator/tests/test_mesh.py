@@ -35,22 +35,22 @@ def test_mesh_groups(shared_datadir, num_regression):
         geometrical_group.append(node.geometrical_group)
         physical_group.append(node.physical_group)
         named_group.append(node.named_group)
-        if np.allclose(node.coordinates, np.array([0.0, 0.0])):
+        if np.allclose(node.position, np.array([0.0, 0.0])):
             assert node.named_group == 4
-        elif np.allclose(node.coordinates, np.array([0.0, 1.0])):
+        elif np.allclose(node.position, np.array([0.0, 1.0])):
             assert node.named_group == 3
-        elif np.allclose(node.coordinates, np.array([1.0, 0.0])):
+        elif np.allclose(node.position, np.array([1.0, 0.0])):
             assert node.named_group == 3
-        elif np.allclose(node.coordinates, np.array([1.0, 1.0])):
+        elif np.allclose(node.position, np.array([1.0, 1.0])):
             assert node.named_group == 3
         else:
-            if np.isclose(node.coordinates[1], 1.0):
+            if np.isclose(node.position[1], 1.0):
                 assert node.named_group == 2
-            if np.isclose(node.coordinates[1], 0.0):
+            if np.isclose(node.position[1], 0.0):
                 assert node.named_group == 3
-            if np.isclose(node.coordinates[0], 1.0):
+            if np.isclose(node.position[0], 1.0):
                 assert node.named_group == 3
-            if np.isclose(node.coordinates[0], 0.0):
+            if np.isclose(node.position[0], 0.0):
                 assert node.named_group == 3
     num_regression.check(
         {

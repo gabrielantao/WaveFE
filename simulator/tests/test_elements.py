@@ -11,18 +11,18 @@ def test_nodes_handler(nodes_handler):
     assert nodes_handler.dimensions == 2
     assert nodes_handler.total_nodes == 2601
     nodes = nodes_handler.get_nodes_instances([0, 2600])
-    assert np.allclose(nodes[0].coordinates, np.array([0.0, 0.0]))
-    assert np.allclose(nodes[1].coordinates, np.array([1.0, 1.0]))
-    nodes_handler.update_coordinates(
+    assert np.allclose(nodes[0].position, np.array([0.0, 0.0]))
+    assert np.allclose(nodes[1].position, np.array([1.0, 1.0]))
+    nodes_handler.update_positions(
         np.ones((nodes_handler.total_nodes, nodes_handler.dimensions))
     )
     assert np.allclose(
-        np.array(nodes_handler.get_coordinates(), dtype=np.float64),
+        np.array(nodes_handler.get_positions(), dtype=np.float64),
         np.ones((nodes_handler.total_nodes, nodes_handler.dimensions)),
     )
-    nodes_handler.update_coordinates(np.ones((2601, 2)))
+    nodes_handler.update_positions(np.ones((2601, 2)))
     assert np.allclose(
-        np.array(nodes_handler.get_coordinates(), dtype=np.float64),
+        np.array(nodes_handler.get_positions(), dtype=np.float64),
         np.ones((2601, 2)),
     )
     # variables
@@ -33,7 +33,7 @@ def test_nodes_handler(nodes_handler):
 
 
 def test_element(nodes_handler):
-    element = Element(np.array([0, 52, 51], dtype=np.int32), 0, 0)
+    element = Element(np.array([0, 52, 51], dtype=np.int32))
     nodes = element.get_nodes(nodes_handler)
     assert element.physical_group == 0 and element.geometrical_group == 0
     assert np.allclose(element.b, np.zeros(element.nodes_per_element))
@@ -41,7 +41,7 @@ def test_element(nodes_handler):
     assert element.length == -1.0 and element.area == -1.0 and element.volume == -1.0
     assert element.dt == -1.0
     assert np.allclose(
-        np.array([node.coordinates for node in nodes]),
+        np.array([node.position for node in nodes]),
         np.array([[0.0, 0.0], [0.00334014, 0.00334014], [0.0, 0.00334014]]),
     )
 

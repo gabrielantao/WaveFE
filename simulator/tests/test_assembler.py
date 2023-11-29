@@ -3,38 +3,12 @@ import numpy as np
 from numba import typed, types
 import pytest
 from simulator.element import ElementType, NodesHandler
-from simulator.mesh import Mesh
+
 
 # TODO: depois de acertar esses testes, fazer tudo via regression quando já tiver os valores corretos
 # lembrar de apagar essa chamada pro simulator compilado fortran e as fixtures correspondnetes como estão
 # para tal, recriar as fixtures da forma correta usanod já a forma que estão implementadas aqui
 from simulator.cbs import cbs_simulator
-
-
-@pytest.fixture
-def mock_mesh(
-    nodes_handler, element_triangles, modified_basic_matrix_set2, shared_datadir
-):
-    # TODO: change this to use real instance of Mesh
-    # from collections import namedtuple
-    # Mesh = namedtuple("Mesh", ["nodes", "element_containers", "total_nodes"])
-    # TODO: remember to load real mesh here, now it's just a dumy mesh only to instantiate the mesh
-    mesh = Mesh(shared_datadir / "mesh.msh")
-    mesh.nodes = nodes_handler
-    mesh.element_containers = {ElementType.TRIANGLE.value: element_triangles}
-    for element_id in range(
-        mesh.element_containers[ElementType.TRIANGLE.value].total_elements
-    ):
-        mesh.element_containers[ElementType.TRIANGLE.value].elements[
-            element_id
-        ].b = modified_basic_matrix_set2["b"][element_id, :]
-        mesh.element_containers[ElementType.TRIANGLE.value].elements[
-            element_id
-        ].c = modified_basic_matrix_set2["c"][element_id, :]
-        mesh.element_containers[ElementType.TRIANGLE.value].elements[
-            element_id
-        ].area = modified_basic_matrix_set2["areas"][element_id]
-    return mesh
 
 
 def test_calculate_step1(

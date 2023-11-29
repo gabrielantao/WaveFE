@@ -42,6 +42,7 @@ class Mesh:
         self.setup_nodes(mesh)
         self.setup_elements(mesh)
         self.setup_groups(mesh)
+        self.setup_named_groups(mesh)
 
     def setup_nodes(self, mesh):
         """Create nodes handler with nodes from mesh file"""
@@ -72,8 +73,9 @@ class Mesh:
 
     def setup_groups(self, mesh):
         """
-        Configure node and element groups.
-        These groups can be used for example to easly setup boundary conditions.
+        Configure node and element physical and geometrical groups.
+        These groups can be used for example to easly setup nodes movements or
+        to calcualte properties in some some surface (e.g. drag/lift forces).
         Both element and nodes could be in marked in named groups.
         """
         # TODO: this function should log each pass of the group setter to debug propurses
@@ -95,6 +97,14 @@ class Mesh:
                         group_type, group_numbers.astype(np.int32), self.nodes_handler
                     )
 
+    def setup_named_groups(self, mesh):
+        """
+        Configure node and element named groups.
+        These groups can be used for example to easly setup boundary conditions.
+        Both element and nodes could be in marked in named groups.
+        """
+        # TODO: this function should log each pass of the group setter to debug propurses
+        #       this can be done saving all nodes and element groups in a pandas dataframe
         # setup named groups
         self.named_groups = {
             group_name: number[0] for group_name, number in mesh.field_data.items()
