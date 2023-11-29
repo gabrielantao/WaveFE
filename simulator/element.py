@@ -29,13 +29,6 @@ class ElementType(Enum):
     # ...
 
 
-# Propriedade dos nos
-# cinematica (posicao, velocidade, aceleracao)
-# grupos (geometrico, fisico, named)
-# variaveis (current, last)
-# condicoes de contorno (tipo, variavel associada, grupo)
-
-
 @jitclass(
     {
         "geometrical_group": types.int32,
@@ -54,8 +47,8 @@ class Node(object):
         self.geometrical_group = 0
         self.physical_group = 0
         self.named_group = 0
-        # TODO: change this name to position, (include velocity and acceleration)
         self.position = position
+        # TODO: include node velocity and acceleration here...
         # it maps the name of the variable to number of the column it belongs to
         self.variables = typed.Dict.empty(
             key_type=types.unicode_type, value_type=types.float64

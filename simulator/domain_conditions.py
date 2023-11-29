@@ -37,18 +37,17 @@ class DomainConditions:
     def __init__(self, boundary_conditions_filepath: Path, mesh: Mesh):
         with open(boundary_conditions_filepath, "rb") as f:
             self.conditions_data = tomllib.load(f)
-        self.initial_conditions = {}
-        self.boundary_conditions = {}
         self.validate_conditions_data()
         self.setup_conditions(mesh)
 
     def validate_conditions_data(self):
         # TODO: do a logical validation here to ensure :
-        # all group names are valid names,
-        # all variables are valid variable names (just alert if not)
-        # valid condition type number
-        # alert duplicated conditions and pop from imported data
-        # break if there are two conditions with same group and variable and condition type and different values (ambiguous)
+        # - all group names are valid names
+        # - all variables are valid variable names (just alert if not)
+        # - valid condition type number
+        # - alert duplicated conditions and pop from imported data
+        # - break if there are two conditions with same (named group + variable + condition type)
+        # message ambiguous or duplicated
         pass
 
     def setup_conditions(self, mesh):
@@ -58,16 +57,34 @@ class DomainConditions:
         """
         self.initial_conditions = {
             (
-                initial_condition_data["variable_name"],
-                initial_condition_data["condition_type"],
+                condition_data["variable_name"],
+                condition_data["condition_type"],
             ): Conditions([], [])
-            for initial_condition_data in self.conditions_data["initial"]
+            for condition_data in self.conditions_data["initial"]
         }
-        # create initial conditions and
+        self.boundary_conditions = {
+            (
+                condition_data["variable_name"],
+                condition_data["condition_type"],
+            ): Conditions([], [])
+            for condition_data in self.conditions_data["boundary"]
+        }
+
+        # TODO: it should load the default initial conditions set for this model
+        # as a dict inside the class for this model
+
+        # setup initial and boundary conditions from the conditions data file
         for node_id in range(mesh.nodes_handler.total_nodes):
             for condition_data in self.conditions_data["initial"]:
-                group_number = mesh.named_groups[condition_data["group_name"]]
-                if mesh.nodes_handler[node_id].named_group == group_number:
+                # if the group name is empty in the input file then define it always the condition
+                if len(condition_data["group_name"]) == 0:
+                    node_in_group = True
+                else:
+                    group_number = mesh.named_groups[condition_data["group_name"]]
+                    node_in_group = (
+                        mesh.nodes_handler.nodes[node_id].named_group == group_number
+                    )
+                if node_in_group:
                     variable_name = condition_data["variable_name"]
                     condition_type = condition_data["condition_type"]
                     value = condition_data["value"]
@@ -78,14 +95,21 @@ class DomainConditions:
                         (variable_name, condition_type)
                     ].values.append(value)
             for condition_data in self.conditions_data["boundary"]:
-                group_number = mesh.named_groups[condition_data["group_name"]]
-                if mesh.nodes_handler[node_id].named_group == group_number:
+                # if the group name is empty in the input file then define it always the condition
+                if len(condition_data["group_name"]) == 0:
+                    node_in_group = True
+                else:
+                    group_number = mesh.named_groups[condition_data["group_name"]]
+                    node_in_group = (
+                        mesh.nodes_handler.nodes[node_id].named_group == group_number
+                    )
+                if node_in_group:
                     variable_name = condition_data["variable_name"]
                     condition_type = condition_data["condition_type"]
                     value = condition_data["value"]
-                    self.initial_conditions[
+                    self.boundary_conditions[
                         (variable_name, condition_type)
                     ].indices.append(node_id)
-                    self.initial_conditions[
+                    self.boundary_conditions[
                         (variable_name, condition_type)
                     ].values.append(value)
