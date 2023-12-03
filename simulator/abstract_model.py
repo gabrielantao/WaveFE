@@ -1,5 +1,5 @@
 from abc import ABC, abstractmethod
-from simulator.element import ElementType
+from simulator.assembler import Assembler
 
 
 class AbstractCBSModel(ABC):
@@ -9,13 +9,24 @@ class AbstractCBSModel(ABC):
     The user of this method should register all
     """
 
-    # TODO: check if this __init__ is gonna work for abstract class
-    def __init__(self, name, element_assembling_register):
-        self.name = name
-        self.element_assembler = element_assembling_register
+    def __init__(self):
+        pass
 
     @abstractmethod
-    def run_iteration(self, mesh, boundary_conditions, simulation_parameters):
+    def get_default_initial_values(self):
+        """This return the initial values that must used for the variables"""
+        pass
+
+    @abstractmethod
+    def setup_assembler(self, assembler: Assembler):
+        """
+        This function register functions and the number of solved variables for each equation
+        of this model
+        """
+        pass
+
+    @abstractmethod
+    def run_iteration(self, mesh, domain_conditions, simulation_parameters):
         """
         This function runs a single iteration for the model.
         The class that implements this CBS model should define all steps to solve interest variables

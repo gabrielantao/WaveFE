@@ -6,18 +6,16 @@ import logging
 import toml
 from pathlib import Path
 
+from application.constants import SIMULATION_FILENAME, DOMAIN_CONDITIONS_FILENAME
 from application.validator import (
     validate_input_file,
     InputFileType,
 )
+from simulator.simulator import Simulator
 
 
 class SimulationCase:
     """This class hadles a case."""
-
-    # default name for some files
-    DOMAIN_CONDITIONS_FILENAME = "conditions.toml"
-    SIMULATION_FILENAME = "simulation.toml"
 
     def __init__(self, folder: Path):
         """folder is an absolute path"""
@@ -31,21 +29,19 @@ class SimulationCase:
         self.last_result_folder = Path("result")
         self.create_cache_folder()
         # read and run validations
-        # TODO: check if this validation function should be two different functions
-        # one for conditions and other for simualtion files
         self.simulation_data = validate_input_file(
-            self.folder / self.SIMULATION_FILENAME,
+            self.folder / SIMULATION_FILENAME,
             InputFileType.SIMULATION,
         )
         self.conditions_data = validate_input_file(
-            folder / self.DOMAIN_CONDITIONS_FILENAME,
+            folder / DOMAIN_CONDITIONS_FILENAME,
             InputFileType.DOMAIN_CONDITIONS,
         )
         # get input file checksum
         self.input_files_checksum = {}
-        with open(folder / self.SIMULATION_FILENAME, "rb") as f:
+        with open(folder / SIMULATION_FILENAME, "rb") as f:
             self.input_files_checksum["simulation"] = hashlib.md5(f.read()).hexdigest()
-        with open(folder / self.DOMAIN_CONDITIONS_FILENAME, "rb") as f:
+        with open(folder / DOMAIN_CONDITIONS_FILENAME, "rb") as f:
             self.input_files_checksum["conditions"] = hashlib.md5(f.read()).hexdigest()
         with open(folder / self.simulation_data["mesh"]["filename"], "rb") as f:
             self.input_files_checksum["mesh"] = hashlib.md5(f.read()).hexdigest()
@@ -74,11 +70,20 @@ class SimulationCase:
     #     with h5py.File(filepath, "r") as result:
     #         return result
 
-    def write_simulation_info_file(self):
-        """Write data for simulation files with new set values"""
-        logging.info(f"generating simulation file to cache in {self.cache_folder}")
-        with open(self.cache_folder / "simulation.toml", "w", encoding="utf-8") as f:
-            toml.dump(self.simulation_data, f)
+    def copy_input_files_to_cache(self):
+        """Copy the simulation and domain conditions file to the cache folder"""
+        logging.info("copying simulation file to cache in %s", self.cache_folder)
+        shutil.copy(
+            self.folder / SIMULATION_FILENAME, self.cache_folder / SIMULATION_FILENAME
+        )
+        shutil.copy(
+            self.folder / DOMAIN_CONDITIONS_FILENAME,
+            self.cache_folder / DOMAIN_CONDITIONS_FILENAME,
+        )
+        shutil.copy(
+            self.folder / self.simulation_data["mesh"]["filename"],
+            self.cache_folder / self.simulation_data["mesh"]["filename"],
+        )
 
     def generate_cache_files(self) -> None:
         """Check if cached files are updated and regenerate them if they're not updated"""
@@ -96,8 +101,8 @@ class SimulationCase:
                 and cache_data["checksum"]["mesh"] == self.input_files_checksum["mesh"]
             )
         if must_generate_files:
-            logging.info(f"writing cache information {cache_info_filepath}")
-            self.write_simulation_info_file()
+            logging.info("writing cache information %s", cache_info_filepath)
+            self.copy_input_files_to_cache()
             cache_info = {
                 "general": self.simulation_data["general"],
                 "checksum": self.input_files_checksum,
@@ -116,14 +121,12 @@ class SimulationCase:
         shutil.copytree(self.folder, destiny_folder, dirs_exist_ok=True)
         return SimulationCase(destiny_folder)
 
-    def run(self, simulator) -> None:
+    def run(self) -> None:
         """Call simulator to run this case"""
-        case_alias = self.simulation_data["general"]["alias"]
-        case_title = self.simulation_data["general"]["title"]
-        logging.info(f"title: {case_title}\t[{case_alias}]")
         self.generate_cache_files()
-        # run main core function
-        simulator.start(self.cache_folder)
+        # run the simulator
+        simulator = Simulator(self.cache_folder)
+        simulator.run()
         # copy cached result folder to case_path/results/datetime
         self.last_result_folder = self.result_folder / Path(
             datetime.now().strftime("%Y_%m_%d %H_%M_%S")

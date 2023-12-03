@@ -4,7 +4,7 @@ general:
   title: Square Cavity Re=100
   version: 1
 mesh:
-  filename: PosixPath('corner_2d.msh')
+  filename: corner_2d.msh
   interpolation_order: 1
 output:
   frequency: 100
@@ -21,7 +21,7 @@ parameter:
   Re: 100.0
   Ri: 0.0
 simulation:
-  method: CBS semi-implicit
+  model: CBS semi-implicit
   safety_dt_factor: 0.7
   steps_limit: 1100
   tolerance_absolute:

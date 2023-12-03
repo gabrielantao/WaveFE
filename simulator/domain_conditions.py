@@ -34,11 +34,17 @@ class DomainConditions:
     Second type condtions here are Newmann conditions (prescribed derivative values)
     """
 
-    def __init__(self, boundary_conditions_filepath: Path, mesh: Mesh):
-        with open(boundary_conditions_filepath, "rb") as f:
+    def __init__(
+        self,
+        conditions_filepath: Path,
+        mesh: Mesh,
+        default_initial_values: dict[str, float],
+    ):
+        with open(conditions_filepath, "rb") as f:
             self.conditions_data = tomllib.load(f)
         self.validate_conditions_data()
-        self.setup_conditions(mesh)
+        self.setup_default_initial_conditions(default_initial_values)
+        self.setup_user_defined_conditions(mesh)
 
     def validate_conditions_data(self):
         # TODO: do a logical validation here to ensure :
@@ -50,11 +56,9 @@ class DomainConditions:
         # message ambiguous or duplicated
         pass
 
-    def setup_conditions(self, mesh):
-        """
-        Setup the set of indices and values for each variable and condition type configured
-        in the condition files loaded.
-        """
+    def setup_default_initial_conditions(self, default_initial_values):
+        # TODO: it should load the default initial conditions set for this model
+        # as a dict inside the class for this model
         self.initial_conditions = {
             (
                 condition_data["variable_name"],
@@ -70,9 +74,11 @@ class DomainConditions:
             for condition_data in self.conditions_data["boundary"]
         }
 
-        # TODO: it should load the default initial conditions set for this model
-        # as a dict inside the class for this model
-
+    def setup_user_defined_conditions(self, mesh):
+        """
+        Setup the set of indices and values for each variable and condition type configured
+        in the condition files loaded.
+        """
         # setup initial and boundary conditions from the conditions data file
         for node_id in range(mesh.nodes_handler.total_nodes):
             for condition_data in self.conditions_data["initial"]:

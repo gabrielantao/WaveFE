@@ -7,7 +7,7 @@ import logging
 from enum import StrEnum
 import toml
 
-from pydantic import ValidationError, BaseModel
+from pydantic import ValidationError
 
 
 class InputFileType(StrEnum):
@@ -32,5 +32,7 @@ def validate_input_file(filepath: Path, file_type: InputFileType) -> dict[str, A
     try:
         return module.Validator(**content).dict(exclude_unset=True)
     except ValidationError as error:
-        logging.error("invalid input file: %s\n%s", filepath, error)
-        exit()
+        logging.error("Aborted due invalid input file: %s\n%s", filepath, error)
+        raise RuntimeError(
+            "An error occuried during validation. See the log for more information"
+        )

@@ -3,7 +3,7 @@ import numpy as np
 
 from simulator.element import NodesHandler
 from simulator.assembler import Assembler, EquationSide
-from simulator.semi_implicit.assembing_elements import (
+from simulator.models.semi_implicit.assembing_elements import (
     assemble_mass_lumped_lhs,
     assemble_mass_lhs,
     assemble_stiffness_lhs,

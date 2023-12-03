@@ -4,7 +4,9 @@ from pytest_regressions.num_regression import NumericRegressionFixture
 
 def test_domain_conditions(mock_mesh, num_regression, shared_datadir):
     conditions = DomainConditions(
-        shared_datadir / "square_cavity_Re_100" / "conditions.toml", mock_mesh
+        shared_datadir / "square_cavity_Re_100" / "conditions.toml",
+        mock_mesh,
+        {"u_1": 0.0, "u_2": 0.0, "p": 0.0001},
     )
     num_regression.check(
         {
