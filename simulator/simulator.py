@@ -112,19 +112,20 @@ class Simulator:
         self.domain_conditions = DomainConditions(
             self.simulation_path / DOMAIN_CONDITIONS_FILENAME,
             self.mesh,
-            self.model.get_default_initial_values(),
+            self.model.get_default_initial_values(self.mesh.nodes_handler.dimensions),
         )
 
     def get_model_parameters(self):
         """Return data from simulation data file relevant to the model processing"""
         model_parameters = self.simulation_data.copy()
         model_parameters.pop("general")
-        model_parameters.pop("mesh")
         return model_parameters
 
     def run(self):
         """Main function to run simulator based on assembling functions configured for the model"""
         simulation_parameters = self.get_model_parameters()
+        step_limit_reached = True
+        converged = False
         for step_number in range(self.simulation_data["simulation"]["step_limit"]):
             self.model.run_iteration(
                 self.mesh, self.domain_conditions, simulation_parameters

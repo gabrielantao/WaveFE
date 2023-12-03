@@ -10,10 +10,11 @@ class AbstractCBSModel(ABC):
     """
 
     def __init__(self):
+        # TODO: it should assert the velocities and pressure variables as u_1, u_2, u_3 and p
         pass
 
     @abstractmethod
-    def get_default_initial_values(self):
+    def get_default_initial_values(self, dimensions):
         """This return the initial values that must used for the variables"""
         pass
 

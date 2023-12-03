@@ -85,12 +85,10 @@ class CBSSemiImplicit(AbstractCBSModel):
         """Get the list of model variables"""
         return self.VARIABLES
 
-    def get_default_initial_values(self):
+    def get_default_initial_values(self, dimensions: int):
         """Get the initial values for all variables"""
-        # TODO: fix this here
-        dimension = self.mesh.nodes_handler.dimensions
         default_initial_values = self.DEFAULT_INITIAL_VALUES.copy()
-        match dimension:
+        match dimensions:
             case 1:
                 default_initial_values.pop("u_2")
                 default_initial_values.pop("u_3")
