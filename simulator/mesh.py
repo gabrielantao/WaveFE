@@ -61,7 +61,7 @@ class Mesh:
         self.element_containers = {}
         # get total number of elements and groups for a given group type and element type
         for element_name, connectivity in mesh.cells_dict.items():
-            element_type = self.get_element_type(element_name)
+            element_type = self._get_element_type(element_name)
             # ignore nodes in the element connectivity
             if element_type == ElementType.NODE.value:
                 continue
@@ -82,9 +82,9 @@ class Mesh:
         #       this can be done saving all nodes and element groups in a pandas dataframe
         # setup geometrical and physical group numbers for elements and nodes
         for group_name, elements_groups in mesh.cell_data_dict.items():
-            group_type = self.get_element_group_type(group_name)
+            group_type = self._get_element_group_type(group_name)
             for element_name, group_numbers in elements_groups.items():
-                element_type = self.get_element_type(element_name)
+                element_type = self._get_element_type(element_name)
                 # define directly group of nodes explicitly defined as
                 # geometrical/physical groups in the mesh file
                 if element_type == ElementType.NODE.value:
@@ -117,7 +117,7 @@ class Mesh:
             # so the trick here is just create an array full of zeros and use the indices to
             # fill the group number only where needed
             for element_name, indices in elements_groups.items():
-                element_type = self.get_element_type(element_name)
+                element_type = self._get_element_type(element_name)
                 # define directly group of nodes explicitly defined as
                 # geometrical/physical groups in the mesh file
                 if element_type == ElementType.NODE.value:
@@ -141,7 +141,7 @@ class Mesh:
                         self.nodes_handler,
                     )
 
-    def get_element_type(self, element_name: str):
+    def _get_element_type(self, element_name: str):
         """
         Translate the name of element that comes from imported mesh into the internal element number (see ElementType)
         """
@@ -149,7 +149,7 @@ class Mesh:
             return self.ELEMENT_NAME_TRANSLATION[element_name]
         raise RuntimeError(f"Element named {element_name} not implemented yet.")
 
-    def get_element_group_type(self, group_name: str) -> None:
+    def _get_element_group_type(self, group_name: str) -> None:
         """
         Translate the name of group of element that comes from imported mesh into the internal element number (see GroupType)
         """

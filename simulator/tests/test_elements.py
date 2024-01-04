@@ -1,9 +1,9 @@
-# modulo com codigo modificado fortran
 import numpy as np
 import pytest
 
 from simulator.assembler import Assembler
-from simulator.element import NodesHandler, Element, ElementsContainer, ElementType
+from simulator.element import NodesHandler, Element, ElementsContainer
+from simulator.element_enums import ElementType
 
 
 def test_nodes_handler(nodes_handler):
@@ -51,4 +51,40 @@ def test_element_container(element_triangles):
     assert np.allclose(element_triangles.get_element(0).node_ids, np.array([0, 52, 51]))
     assert np.allclose(
         element_triangles.get_element(4999).node_ids, np.array([2548, 2549, 2600])
+    )
+
+
+# TODO: put here to do file regressions instead of assertions
+def test_mesh_parameters(
+    nodes_handler,
+    element_triangles,
+    modified_basic_matrix_set2,
+    square_case_configs,
+    shared_datadir,
+):
+    # calculate parameters for the mesh
+    element_triangles.update_geometry_parameters(nodes_handler)
+    assert np.allclose(
+        [triangle.area for triangle in element_triangles.elements],
+        modified_basic_matrix_set2["areas"],
+    )
+    element_triangles.update_shape_factors(nodes_handler)
+    assert np.allclose(
+        [triangle.b for triangle in element_triangles.elements],
+        modified_basic_matrix_set2["b"],
+    )
+    assert np.allclose(
+        [triangle.c for triangle in element_triangles.elements],
+        modified_basic_matrix_set2["c"],
+    )
+    element_triangles.update_local_time_itervals(
+        nodes_handler, square_case_configs["csafm"], square_case_configs["Re"]
+    )
+    dt = np.loadtxt(
+        shared_datadir / "old_results" / "dt_clean" / "dt_00001.csv",
+        delimiter=",",
+    )
+    assert np.allclose(
+        [triangle.dt for triangle in element_triangles.elements],
+        dt,
     )

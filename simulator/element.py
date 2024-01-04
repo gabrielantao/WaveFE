@@ -1,34 +1,17 @@
-from enum import Enum, auto
+from typing import Callable
 import numpy as np
 from numba import types, typed
 from numba.experimental import jitclass
 from typing import List
 
-from simulator.geometry import GeometryCalculator
-
-
-class GroupType(Enum):
-    """
-    Enum to hold data for type of the group
-    physical and geometrical groups are free to use inside the model
-    (e.g. to define boundary to calculate some properties such as drag and lift in surface)
-    named group is used to define boundary conditions
-    """
-
-    GEOMETRICAL = auto()
-    PHYSICAL = auto()
-    NAMED = auto()
-
-
-class ElementType(Enum):
-    """All types of element supported for now"""
-
-    NODE = auto()
-    SEGMENT = auto()
-    TRIANGLE = auto()
-    QUADRILATERAL = auto()
-    # TODO: complete this enum when implement other element types
-    # ...
+from simulator.geometry import (
+    calculate_length_segment,
+    calculate_area_triangle,
+    calculate_area_quadrilateral,
+    calculate_specific_size_triangle,
+    calculate_shape_factors_triangle,
+)
+from simulator.element_enums import GroupType, ElementType
 
 
 @jitclass(
@@ -145,14 +128,17 @@ class NodesHandler(object):
 
     def calculate_velocity_moduli(self):
         """Calculate for all nodes the velocity moduli"""
-        velocities = np.zeros((self.total_nodes, self.dimensions), dtype=np.float64)
-        velocities[:, 0] = [node.variables["u_1"] for node in self.nodes]
-        if self.dimensions == 3:
-            velocities[:, 1] = [node.variables["u_2"] for node in self.nodes]
-            velocities[:, 2] = [node.variables["u_3"] for node in self.nodes]
-        elif self.dimensions == 2:
-            velocities[:, 1] = [node.variables["u_2"] for node in self.nodes]
-        return np.linalg.norm(velocities, axis=1)
+        # velocities = np.zeros((self.total_nodes, self.dimensions), dtype=np.float64)
+        if self.dimensions == 1:
+            return np.array([node.variables["u_1"] for node in self.nodes])
+        velocity_1 = np.array([node.variables["u_1"] for node in self.nodes])
+        velocity_2 = np.array([node.variables["u_2"] for node in self.nodes])
+        if self.dimensions == 2:
+            return np.sqrt(velocity_1 * velocity_1 + velocity_2 * velocity_2)
+        velocity_3 = np.array([node.variables["u_3"] for node in self.nodes])
+        return np.sqrt(
+            velocity_1 * velocity_1 + velocity_2 * velocity_2 + velocity_3 * velocity_3
+        )
 
 
 @jitclass(
@@ -252,25 +238,29 @@ class ElementsContainer(object):
 
     def update_geometry_parameters(self, nodes_handler):
         """Calculate geometry (e.g. length, area and volume) values for the elements"""
-        geometry_calculator = GeometryCalculator(self.element_type)
-        calculate_geometry = geometry_calculator.get_geometry_function()
-
-        if self.element_type == ElementType.SEGMENT.value:
-            for element in self.elements:
-                element_nodes = element.get_nodes(nodes_handler)
-                element.length = calculate_geometry(element_nodes)
-        if (
-            self.element_type == ElementType.TRIANGLE.value
-            or self.element_type == ElementType.QUADRILATERAL.value
-        ):
-            for element in self.elements:
-                element_nodes = element.get_nodes(nodes_handler)
-                element.area = calculate_geometry(element_nodes)
-        else:
-            # TODO: implement here for other element types (3D)...
-            raise NotImplementedError(
-                "Not implemented shape factors yet for 3D elements"
-            )
+        match self.element_type:
+            case ElementType.SEGMENT.value:
+                calculate_length = calculate_length_segment
+                calculate_area = lambda element_nodes: -1.0
+                calculate_volume = lambda element_nodes: -1.0
+            case ElementType.TRIANGLE.value:
+                calculate_length = lambda element_nodes: -1.0
+                calculate_area = calculate_area_triangle
+                calculate_volume = lambda element_nodes: -1.0
+            case ElementType.QUADRILATERAL.value:
+                calculate_length = lambda element_nodes: -1.0
+                calculate_area = calculate_area_quadrilateral
+                calculate_volume = lambda element_nodes: -1.0
+            case _:
+                # TODO: implement here for other element types (3D)...
+                raise NotImplementedError(
+                    "Not implemented shape factors yet for 3D elements"
+                )
+        for element in self.elements:
+            element_nodes = element.get_nodes(nodes_handler)
+            element.length = calculate_length(element_nodes)
+            element.area = calculate_area(element_nodes)
+            element.volume = calculate_volume(element_nodes)
 
     def update_local_time_itervals(self, nodes_handler, safety_factor, reynolds_number):
         """
@@ -278,45 +268,45 @@ class ElementsContainer(object):
         This is used in context of CBS to calculate local time interval to be used
         for an element when the simulator runs steady state case.
         """
-        geometry_calculator = GeometryCalculator(self.element_type)
-        calculate_specific_size = geometry_calculator.get_specific_size_function()
-
-        if (
-            self.element_type == ElementType.TRIANGLE.value
-            or self.element_type == ElementType.QUADRILATERAL.value
-        ):
-            velocities = nodes_handler.calculate_velocity_moduli()
-            for element in self.elements:
-                element_nodes = element.get_nodes(nodes_handler)
-                h = calculate_specific_size(element.area, element_nodes)
-                element.dt = safety_factor * np.min(
+        match self.element_type:
+            case ElementType.TRIANGLE.value:
+                calculate_specific_size = calculate_specific_size_triangle
+                get_element_dimension = lambda element: element.area
+            case _:
+                # TODO: implement here for other element types (1D and 3D)...
+                raise NotImplementedError(
+                    "Not implemented shape factors yet for 1D and 3D elements"
+                )
+        velocities = nodes_handler.calculate_velocity_moduli()
+        for element in self.elements:
+            element_nodes = element.get_nodes(nodes_handler)
+            h = calculate_specific_size(get_element_dimension(element), element_nodes)
+            max_velocity = max(velocities[element.node_ids])
+            # this is done to avoid division by zero error
+            if np.isclose(max_velocity, 0.0):
+                dt = (reynolds_number / 2.0) * h * h
+            else:
+                dt = min(
                     [
                         (reynolds_number / 2.0) * h * h,
-                        h / np.max(velocities[element.node_ids]),
+                        h / max(velocities[element.node_ids]),
                     ]
                 )
-        else:
-            # TODO: implement here for other element types (1D and 3D)...
-            raise NotImplementedError(
-                "Not implemented shape factors yet for 1D and 3D elements"
-            )
+            element.dt = safety_factor * dt
 
     def update_shape_factors(self, nodes_handler):
         """Calculate the shape factors (AKA element derivatives)"""
-        geometry_calculator = GeometryCalculator(self.element_type)
-        calculate_shape_factor = geometry_calculator.get_shape_factors_function()
-
-        if (
-            self.element_type == ElementType.TRIANGLE.value
-            or self.element_type == ElementType.QUADRILATERAL.value
-        ):
-            for element in self.elements:
-                element_nodes = element.get_nodes(nodes_handler)
-                element.b, element.c = calculate_shape_factor(
-                    element.area, element_nodes
+        match self.element_type:
+            case ElementType.TRIANGLE.value:
+                calculate_shape_factor = calculate_shape_factors_triangle
+                get_element_dimension = lambda element: element.area
+            case _:
+                # TODO: implement here for other element types (1D and 3D)...
+                raise NotImplementedError(
+                    "Not implemented shape factors yet for 1D and 3D elements"
                 )
-        else:
-            # TODO: implement here for other element types (1D and 3D)...
-            raise NotImplementedError(
-                "Not implemented shape factors yet for 1D and 3D elements"
+        for element in self.elements:
+            element_nodes = element.get_nodes(nodes_handler)
+            element.b, element.c = calculate_shape_factor(
+                get_element_dimension(element), element_nodes
             )

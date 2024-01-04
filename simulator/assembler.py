@@ -94,7 +94,7 @@ class Assembler:
             )
             _assemble_element_container_lhs(
                 assembling_function,
-                mesh.nodes,
+                mesh.nodes_handler,
                 element_container.elements,
                 simulation_parameters,
                 global_matrix_values,
@@ -106,7 +106,7 @@ class Assembler:
         )
         return sp.sparse.csr_array(
             (values, (indices_row, indices_column)),
-            shape=(mesh.nodes.total_nodes, mesh.nodes.total_nodes),
+            shape=(mesh.nodes_handler.total_nodes, mesh.nodes_handler.total_nodes),
         )
 
     def assemble_rhs(
@@ -126,7 +126,7 @@ class Assembler:
             equation_name
         )
         global_array_values = np.zeros(
-            (mesh.nodes.total_nodes, total_variables), dtype=np.float64
+            (mesh.nodes_handler.total_nodes, total_variables), dtype=np.float64
         )
         # assemble each container depending on the registered element type
         for element_container in mesh.get_element_containers():
@@ -135,7 +135,7 @@ class Assembler:
             )
             _assembling_element_container_rhs(
                 assembling_function,
-                mesh.nodes,
+                mesh.nodes_handler,
                 element_container.elements,
                 simulation_parameters,
                 global_array_values,

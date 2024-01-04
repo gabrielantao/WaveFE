@@ -31,9 +31,9 @@ def test_calculate_step1(
     )
     temperature = np.zeros(basic_initial_variables["npoin"])
 
-    mock_mesh.nodes.update_variables("u_1", vel[:, 0])
-    mock_mesh.nodes.update_variables("u_2", vel[:, 1])
-    # mock_mesh.nodes.update_variables("t", temperature)  # not used here
+    mock_mesh.nodes_handler.update_variables("u_1", vel[:, 0])
+    mock_mesh.nodes_handler.update_variables("u_2", vel[:, 1])
+    # mock_mesh.nodes_handler.update_variables("t", temperature)  # not used here
     # update element local timesteps
     for element_id in range(
         mock_mesh.element_containers[ElementType.TRIANGLE.value].total_elements
@@ -82,10 +82,10 @@ def test_calculate_step2(
         shared_datadir / "old_results" / "vint_clean" / "vint_00002.csv",
         delimiter=",",
     )
-    mock_mesh.nodes.update_variables_old("u_1", vel_old[:, 0])
-    mock_mesh.nodes.update_variables_old("u_2", vel_old[:, 1])
-    mock_mesh.nodes.update_variables("u_1", vel_intermediate[:, 0])
-    mock_mesh.nodes.update_variables("u_2", vel_intermediate[:, 1])
+    mock_mesh.nodes_handler.update_variables_old("u_1", vel_old[:, 0])
+    mock_mesh.nodes_handler.update_variables_old("u_2", vel_old[:, 1])
+    mock_mesh.nodes_handler.update_variables("u_1", vel_intermediate[:, 0])
+    mock_mesh.nodes_handler.update_variables("u_2", vel_intermediate[:, 1])
     new_numba_assembled = assembler.assemble_rhs("step 2", mock_mesh)
 
     # TODO: remove this call here after include a regression
@@ -124,10 +124,10 @@ def test_calculate_step3(
         shared_datadir / "old_results" / "dt_clean" / "dt_00002.csv",
         delimiter=",",
     )
-    mock_mesh.nodes.update_variables_old("u_1", vel_old[:, 0])
-    mock_mesh.nodes.update_variables_old("u_2", vel_old[:, 1])
-    mock_mesh.nodes.update_variables_old("p", pressure_old)
-    mock_mesh.nodes.update_variables("p", pressure)
+    mock_mesh.nodes_handler.update_variables_old("u_1", vel_old[:, 0])
+    mock_mesh.nodes_handler.update_variables_old("u_2", vel_old[:, 1])
+    mock_mesh.nodes_handler.update_variables_old("p", pressure_old)
+    mock_mesh.nodes_handler.update_variables("p", pressure)
     # update element local timesteps
     for element_id in range(
         mock_mesh.element_containers[ElementType.TRIANGLE.value].total_elements

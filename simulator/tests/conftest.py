@@ -146,13 +146,14 @@ def nodes_handler(coordinate_matrix):
 
 @pytest.fixture
 def basic_matrix_vum(shared_datadir):
-    # remeber that sizes are optional here
+    # remember that sizes are optional here
     dNkdx = np.loadtxt(
         shared_datadir / "dNkdx.csv",
         delimiter=",",
         dtype=np.float64,
     )
 
+    # the double of the element area
     detJ = np.loadtxt(
         shared_datadir / "detJ.csv",
         delimiter=",",
@@ -171,6 +172,7 @@ def basic_matrix_vum(shared_datadir):
         dtype=np.float64,
     )
 
+    # element specific size
     alen_e = np.loadtxt(
         shared_datadir / "alen_e.csv",
         delimiter=",",
@@ -301,7 +303,7 @@ def mock_mesh(
 ):
     # TODO: remember to load rigth values for b and c calculated for this mesh
     mesh = Mesh(shared_datadir / "mesh.msh")
-    mesh.nodes = nodes_handler
+    mesh.nodes_handler = nodes_handler
     mesh.element_containers = {ElementType.TRIANGLE.value: element_triangles}
     for element_id in range(
         mesh.element_containers[ElementType.TRIANGLE.value].total_elements

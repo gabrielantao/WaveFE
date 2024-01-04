@@ -2,7 +2,7 @@ import numpy as np
 from numba import njit, typed
 from numba.experimental import jitclass
 
-from simulator.element import ElementType
+from simulator.element_enums import ElementType
 
 
 @njit
@@ -67,17 +67,17 @@ def calculate_shape_factors_triangle(element_area, nodes):
     """Caclulate shape factors (AKA derivative values) for the triangle"""
     b = np.array(
         [
-            nodes[1].positions[1] - nodes[2].positions[1],
-            nodes[2].positions[1] - nodes[0].positions[1],
-            nodes[0].positions[1] - nodes[1].positions[1],
+            nodes[1].position[1] - nodes[2].position[1],
+            nodes[2].position[1] - nodes[0].position[1],
+            nodes[0].position[1] - nodes[1].position[1],
         ],
         dtype=np.float64,
     )
     c = np.array(
         [
-            nodes[2].positions[0] - nodes[1].positions[0],
-            nodes[0].positions[0] - nodes[2].positions[0],
-            nodes[1].positions[0] - nodes[0].positions[0],
+            nodes[2].position[0] - nodes[1].position[0],
+            nodes[0].position[0] - nodes[2].position[0],
+            nodes[1].position[0] - nodes[0].position[0],
         ],
         dtype=np.float64,
     )
@@ -85,48 +85,3 @@ def calculate_shape_factors_triangle(element_area, nodes):
 
 
 # TODO: implement shape factor calculation functions for other element types here...
-
-
-@jitclass()
-class GeometryCalculator(object):
-    """
-    This classes returns the right functions to be used depending on each element type
-    to calculate geometry parameters.
-    """
-
-    element_type: int
-
-    def __init__(self, element_type):
-        self.element_type = element_type
-
-    def get_geometry_function(self):
-        """Return the function to be used to calculate length, area or volume"""
-        match self.element_type:
-            case ElementType.SEGMENT.value:
-                return calculate_length_segment
-            case ElementType.TRIANGLE.value:
-                return calculate_area_triangle
-            case ElementType.QUADRILATERAL.value:
-                return calculate_area_quadrilateral
-
-    def get_specific_size_function(self):
-        """Return the function to be used to calculate specific size parameter"""
-        match self.element_type:
-            # TODO: register the specific size segment functions here...
-            # case ElementType.SEGMENT.value:
-            #     return calculate_specific_size_segment
-            case ElementType.TRIANGLE.value:
-                return calculate_specific_size_triangle
-            # case ElementType.QUADRILATERAL.value:
-            #     return calculate_specific_size_quadrilateral
-
-    def get_shape_factors_function(self):
-        """Return the function to be used to calculate shape factors"""
-        match self.element_type:
-            # TODO: register the shape factors functions here...
-            # case ElementType.SEGMENT.value:
-            #     return calculate_specific_size_segment
-            case ElementType.TRIANGLE.value:
-                return calculate_shape_factors_triangle
-            # case ElementType.QUADRILATERAL.value:
-            #     return calculate_specific_size_quadrilateral
