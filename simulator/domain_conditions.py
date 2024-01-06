@@ -50,7 +50,7 @@ class DomainConditions:
         # TODO: do a logical validation here to ensure :
         # - all group names are valid names
         # - all variables are valid variable names (just alert if not)
-        # - valid condition type number
+        # - valid condition type number (raise by now if is not first type not implemented yet)
         # - alert duplicated conditions and pop from imported data
         # - break if there are two conditions with same (named group + variable + condition type)
         # message ambiguous or duplicated
@@ -119,3 +119,53 @@ class DomainConditions:
                     self.boundary_conditions[
                         (variable_name, condition_type)
                     ].values.append(value)
+
+    def get_equation_with_boundary_condition(self, lhs, rhs, variable):
+        """Return the sides of equation with boundary conditions applied"""
+        lhs_boundary_applied = lhs.copy()
+        rhs_boundary_applpied = rhs.copy()
+        offset_vector = self._calculate_rhs_offset_values(
+            lhs_boundary_applied, variable
+        )
+        self._apply_rhs_boundary_conditions(
+            rhs_boundary_applpied, variable, offset_vector
+        )
+        self._apply_lhs_boundary_condition(lhs_boundary_applied, variable)
+        return lhs_boundary_applied, rhs_boundary_applpied
+
+    def _apply_lhs_boundary_condition(self, lhs, variable: str):
+        """Apply boundary conditions to the LHS matrix"""
+        for index in self.boundary_conditions[
+            (variable, ConditionType.FIRST.value)
+        ].indices:
+            lhs[:, index] = 0.0
+            lhs[index, :] = 0.0
+            lhs[index, index] = 1.0
+        lhs.eliminate_zeros()
+        # TODO: check how to apply condition for the other type here
+
+    def _apply_rhs_boundary_conditions(self, rhs, variable: str, offset_vector) -> None:
+        """
+        Apply boundary conditions to the RHS vector
+        NOTE: this function expect a one-dimension vector for RHS
+        """
+        boundary_conditions = self.boundary_conditions[(variable, condition_type)]
+        rhs += offset_vector
+        rhs[boundary_conditions.indices] = boundary_conditions.values
+
+    def _calculate_rhs_offset_values(self, lhs, variable: str):
+        """Calculate the vector to be added to rhs vector due boundary condition application"""
+        boundary_conditions = self.boundary_conditions[
+            (variable, ConditionType.FIRST.value)
+        ]
+        offset = np.zeros(lhs.shape[0], dtype=np.float64)
+        # accumulate column vectors in sparse matrix with boundary indices
+        for column_id, value in zip(
+            boundary_conditions.indices, boundary_conditions.values
+        ):
+            offset -= lhs[:, column_id] * value
+        # TODO: apply conditions of second type here ...
+        # ensure zeros in offset vector in positions where boundary are applied
+        # this is needed to not mess values when other t
+        offset[boundary_conditions.indices] = 0.0
+        return offset

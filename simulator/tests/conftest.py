@@ -135,12 +135,12 @@ def boundary_matrix(shared_datadir):
 @pytest.fixture
 def nodes_handler(coordinate_matrix):
     nodes_handler = NodesHandler(2, coordinate_matrix)
-    nodes_handler.update_variables("u_1", np.zeros(2601))
-    nodes_handler.update_variables("u_2", np.zeros(2601))
-    nodes_handler.update_variables("p", np.zeros(2601))
-    nodes_handler.update_variables_old("u_1", np.zeros(2601))
-    nodes_handler.update_variables_old("u_2", np.zeros(2601))
-    nodes_handler.update_variables_old("p", np.zeros(2601))
+    nodes_handler.update_variable_values("u_1", np.zeros(2601))
+    nodes_handler.update_variable_values("u_2", np.zeros(2601))
+    nodes_handler.update_variable_values("p", np.zeros(2601))
+    nodes_handler.update_variable_old_values("u_1", np.zeros(2601))
+    nodes_handler.update_variable_old_values("u_2", np.zeros(2601))
+    nodes_handler.update_variable_old_values("p", np.zeros(2601))
     return nodes_handler
 
 

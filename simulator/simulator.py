@@ -4,7 +4,6 @@ import toml
 
 from application.constants import SIMULATION_FILENAME, DOMAIN_CONDITIONS_FILENAME
 from simulator.mesh import Mesh
-from simulator.assembler import Assembler
 from simulator.domain_conditions import DomainConditions
 from simulator.models.models_register import AVAILABLE_MODELS
 
@@ -98,11 +97,8 @@ class Simulator:
 
     def setup(self):
         """Setup all is needed to build a simulator"""
-        # create an empty assembler
-        self.assembler = Assembler()
         # import and setup the model
-        self.model = AVAILABLE_MODELS[self.simulation_data["simulation"]["model"]]
-        self.model.setup_assembler(self.assembler)
+        self.model = AVAILABLE_MODELS[self.simulation_data["simulation"]["model"]]()
         # create the mesh
         self.mesh = Mesh(
             self.simulation_path / self.simulation_data["mesh"]["filename"],
@@ -125,10 +121,10 @@ class Simulator:
         """Main function to run simulator based on assembling functions configured for the model"""
         simulation_parameters = self.get_model_parameters()
         step_limit_reached = True
-        converged = False
         for step_number in range(self.simulation_data["simulation"]["step_limit"]):
-            self.model.run_iteration(
+            iteraction_report = self.model.run_iteration(
                 self.mesh, self.domain_conditions, simulation_parameters
             )
-            # TODO: check convergence
+            # TODO: check if step limit was reached
             # TODO: write results to the hdf here
+            # TODO: log the report message

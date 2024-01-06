@@ -66,7 +66,7 @@ class Assembler:
         """
         self.lhs_total_variables_assembled[equation_name] = total_variables_assembled
 
-    def get_registered_equation_total_variables_assembled(self, equation_name):
+    def get_total_variables_assembled(self, equation_name):
         """
         Get the of variables assembled in LHS assembling for a given equation.
         """
@@ -122,9 +122,7 @@ class Assembler:
         e.g. step 1 and step 3 can assemble all velocity directions
         """
         # dictionary to be used to hold data for variable name and array with values for LHS
-        total_variables = self.get_registered_equation_total_variables_assembled(
-            equation_name
-        )
+        total_variables = self.get_total_variables_assembled(equation_name)
         global_array_values = np.zeros(
             (mesh.nodes_handler.total_nodes, total_variables), dtype=np.float64
         )

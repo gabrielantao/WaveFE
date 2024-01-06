@@ -27,9 +27,9 @@ def test_nodes_handler(nodes_handler):
     )
     # variables
     nodes_handler.update_variables("u_1", np.ones(2601))
-    assert nodes_handler.get_variables("u_1")[200] == 1.0
+    assert nodes_handler.get_variable("u_1")[200] == 1.0
     nodes_handler.update_variables_old("u_2", np.ones(2601))
-    assert nodes_handler.get_variables_old("u_2")[200] == 1.0
+    assert nodes_handler.get_variable_old("u_2")[200] == 1.0
 
 
 def test_element(nodes_handler):

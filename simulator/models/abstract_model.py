@@ -1,5 +1,6 @@
 from abc import ABC, abstractmethod
 from simulator.assembler import Assembler
+from simulator.models.report_result import SolverStatusMessage, SolverReport
 
 
 class AbstractCBSModel(ABC):
@@ -9,9 +10,8 @@ class AbstractCBSModel(ABC):
     The user of this method should register all
     """
 
-    def __init__(self):
-        # TODO: it should assert the velocities and pressure variables as u_1, u_2, u_3 and p
-        pass
+    def __init__(self, parameters: dict[str, Any]):
+        self._setup(parameters)
 
     @abstractmethod
     def get_default_initial_values(self, dimensions):
@@ -19,7 +19,7 @@ class AbstractCBSModel(ABC):
         pass
 
     @abstractmethod
-    def setup_assembler(self, assembler: Assembler):
+    def _setup(self):
         """
         This function register functions and the number of solved variables for each equation
         of this model
@@ -35,3 +35,14 @@ class AbstractCBSModel(ABC):
         This method should not save results (only logs and debuging data)
         """
         pass
+
+    def get_iteration_solver_report(self, exit_status) -> SolverReport:
+        """Return the iteration status and the message to show the user"""
+        if exit_status == 0:
+            return SolverReport(success=True, message=SolverStatusMessage.SUCCESS)
+        elif exit_status > 0:
+            return SolverReport(
+                success=False, message=SolverStatusMessage.SOLVER_MAX_ITER_REACHED
+            )
+        elif exit_status < 0:
+            return SolverReport(success=False, message=SolverStatusMessage.ILEGAL_INPUT)

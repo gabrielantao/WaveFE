@@ -71,8 +71,8 @@ class NodesHandler(object):
             [self.nodes[node_id].position for node_id in range(self.total_nodes)]
         )
 
-    def get_variables(self, variable_name):
-        """Return the variables values for all nodes"""
+    def get_variable_values(self, variable_name):
+        """Return the variable values for all nodes"""
         return typed.List(
             [
                 self.nodes[node_id].variables[variable_name]
@@ -80,8 +80,8 @@ class NodesHandler(object):
             ]
         )
 
-    def get_variables_old(self, variable_name):
-        """Return the variables old values given a node id"""
+    def get_variable_old_values(self, variable_name):
+        """Return the variable old values given a node id"""
         return typed.List(
             [
                 self.nodes[node_id].variables_old[variable_name]
@@ -116,15 +116,22 @@ class NodesHandler(object):
         for node_id in range(self.total_nodes):
             self.nodes[node_id].position = new_positions[node_id, :]
 
-    def update_variables(self, variable_name, new_values):
-        """Update the values of a variables for all nodes"""
+    def update_variable_values(self, variable_name, new_values):
+        """Update the values of a variable for all nodes"""
         for node_id in range(self.total_nodes):
             self.nodes[node_id].variables[variable_name] = new_values[node_id]
 
-    def update_variables_old(self, variable_name, new_values):
+    def update_variable_old_values(self, variable_name, new_values):
         """Update the values of a variables_old for all nodes"""
         for node_id in range(self.total_nodes):
             self.nodes[node_id].variables_old[variable_name] = new_values[node_id]
+
+    def update_variables_old(self, variables_names):
+        """Update the values of variables with the value of current variables"""
+        for variable_name in variables_names:
+            self.update_variable_old_values(
+                variable_name, self.get_variable_values(variable_name)
+            )
 
     def calculate_velocity_moduli(self):
         """Calculate for all nodes the velocity moduli"""
