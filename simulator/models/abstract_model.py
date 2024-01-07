@@ -1,6 +1,9 @@
 from abc import ABC, abstractmethod
+from pathlib import Path
+
 from simulator.assembler import Assembler
 from simulator.models.report_result import SolverStatusMessage, SolverReport
+from simulator.models.report_result import IterationReport, IterationStatusMessage
 
 
 class AbstractCBSModel(ABC):
@@ -10,8 +13,8 @@ class AbstractCBSModel(ABC):
     The user of this method should register all
     """
 
-    def __init__(self, parameters: dict[str, Any]):
-        self._setup(parameters)
+    def __init__(self):
+        pass
 
     @abstractmethod
     def get_default_initial_values(self, dimensions):
@@ -19,7 +22,7 @@ class AbstractCBSModel(ABC):
         pass
 
     @abstractmethod
-    def _setup(self):
+    def setup(self) -> None:
         """
         This function register functions and the number of solved variables for each equation
         of this model
@@ -27,7 +30,7 @@ class AbstractCBSModel(ABC):
         pass
 
     @abstractmethod
-    def run_iteration(self, mesh, domain_conditions, simulation_parameters):
+    def run_iteration(self, mesh, domain_conditions, parameters) -> None:
         """
         This function runs a single iteration for the model.
         The class that implements this CBS model should define all steps to solve interest variables
@@ -46,3 +49,20 @@ class AbstractCBSModel(ABC):
             )
         elif exit_status < 0:
             return SolverReport(success=False, message=SolverStatusMessage.ILEGAL_INPUT)
+
+    def check_convergence(
+        self, nodes_handler, simulation_parameters
+    ) -> IterationReport:
+        """Do the calculations to check if the current step converged"""
+        relative_tolerance = simulation_parameters["simulation"]["tolerance_relative"]
+        absolute_tolerance = simulation_parameters["simulation"]["tolerance_absolute"]
+        for variable in self.VARIABLES:
+            converged = np.allclose(
+                nodes_handler.get_variable_values(variable),
+                nodes_handler.get_variable_old_values(variable),
+                rtol=relative_tolerance[variable],
+                atol=absolute_tolerance[variable],
+            )
+            if not converged:
+                return IterationReport(False, False, IterationStatusMessage.NORMAL)
+        return IterationReport(True, True, IterationStatusMessage.CONVERGED)

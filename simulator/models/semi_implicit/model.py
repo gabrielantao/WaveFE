@@ -1,4 +1,6 @@
 from typing import Any
+from pathlib import Path
+import logging
 from scipy import sparse
 
 from simulator.models.abstract_model import AbstractCBSModel
@@ -23,12 +25,16 @@ class CBSSemiImplicit(AbstractCBSModel):
     VARIABLES = ["u_1", "u_2", "u_3", "p"]
     DEFAULT_INITIAL_VALUES = {"u_1": 0.0, "u_2": 0.0, "u_3": 0.0, "p": 0.0001}
 
-    def __init__(self, parameters: dict[str, Any]):
-        super().__init__(parameters)
-        # TODO: it should assert the velocities and pressure variables as u_1, u_2, u_3 and p
+    def __init__(self):
+        pass
 
-    def _setup(self, parameters):
+    def setup(self, logger, simulation_parameters: dict[str, Any]):
         """Setup functions used for assembling process"""
+
+        # setup the logger
+        self.logger = logger
+        self.logger.info(f"Doing the model setup.")
+
         # setup an assembler instance for this model
         self.assembler = Assembler()
 
@@ -36,10 +42,10 @@ class CBSSemiImplicit(AbstractCBSModel):
         ### CREATE EQUATION OF STEP 1 ###
         #################################
         equation_1 = ModelEquation(
-            "step 1", [f"u_{i + 1}" for i in range(self.parameters["dimension"])]
+            "step 1",
+            [f"u_{i + 1}" for i in range(simulation_parameters["mesh"]["dimension"])],
         )
-        # register how many variables is solved in equation 1
-        # dimension represents how many velocity direction will be solved
+        # register how many variables is solved in equation 1 (velocity directions)
         self.assembler.register_total_variables_assembled(
             equation_1.label, equation_1.total_solved_variables
         )
@@ -95,10 +101,10 @@ class CBSSemiImplicit(AbstractCBSModel):
         ### CREATE EQUATION OF STEP 3 ###
         #################################
         equation_3 = ModelEquation(
-            "step 3", [f"u_{i + 1}" for i in range(self.parameters["dimension"])]
+            "step 3",
+            [f"u_{i + 1}" for i in range(simulation_parameters["mesh"]["dimension"])],
         )
-        # register how many variables is solved in equation 3
-        # dimension represents how many velocity direction will be solved
+        # register how many variables is solved in equation 3 (velocity directions)
         self.assembler.register_total_variables_assembled(
             equation_3.label, equation_3.total_solved_variables
         )
@@ -125,9 +131,14 @@ class CBSSemiImplicit(AbstractCBSModel):
             ElementType.TRIANGLE.value,
             assemble_element_rhs_step_3,
         )
+        # TODO: should assert here if all were registered right (LHS, RHS and total variables)
 
         # create the list of equations
         self.equations = [equation_1, equation_2, equation_3]
+        self.logger.info(
+            f"Registered equations ({len(self.equations)}): "
+            + ", ".join([equation.label for equation in self.equations])
+        )
 
     def get_variables(self):
         """Get the list of model variables"""
@@ -157,54 +168,20 @@ class CBSSemiImplicit(AbstractCBSModel):
         # setup old variables values with current values of the variables
         mesh.nodes_handler.update_variables_old(self.VARIABLES)
 
-        ### CBS solve step 1 (intermediate velocities) ###
-        result, exit_status = equation_1.get_solution(
-            mesh, self.assembler, domain_conditions, simulation_parameters
-        )
-        for variable in equation_1.solved_variables:
-            solver_report = self.get_iteration_solver_report(exit_status[variable])
-            if not solver_report.success:
-                return IterationReport(
-                    False,
-                    True,
-                    f"Issue detected for variable: {variable}\n"
-                    + solver_report.status_message.value,
-                )
-            mesh.nodes_handler.update_variable_values(variable, result[variable])
-
-        ### CBS solve step 2 (pressures) ###
-        result, exit_status = equation_2.get_solution(
-            mesh, self.assembler, domain_conditions, simulation_parameters
-        )
-        solver_report = self.get_iteration_solver_report(exit_status[variable])
-        if not solver_report.success:
-            return IterationReport(
-                False,
-                True,
-                f"Issue detected for variable: {variable}\n"
-                + solver_report.status_message.value,
+        # solve the sequence of registered equations for each variable
+        for equation in self.equations:
+            result, exit_status = equation.calculate_solution(
+                mesh, self.assembler, domain_conditions, simulation_parameters
             )
-        mesh.nodes_handler.update_variable_values(variable, result[variable])
-
-        ### CBS solve step 3 (real velocities) ###
-        result, exit_status = equation_3.get_solution(
-            mesh, self.assembler, domain_conditions, simulation_parameters
-        )
-        for variable in equation_3.solved_variables:
-            solver_report = self.get_iteration_solver_report(exit_status[variable])
-            if not solver_report.success:
-                return IterationReport(
-                    False,
-                    True,
-                    f"Issue detected for variable: {variable}\n"
-                    + solver_report.status_message.value,
-                )
-            mesh.nodes_handler.update_variable_values(variable, result[variable])
-
-        # TODO: check convergence and check if its diverging (if so, then break simulation)
-
-        return self.check_convergence()
-
-        def check_convergence(self) -> IterationReport:
-            """Do the calculations to check if the current step converged"""
-            pass
+            # this could be done in parallel
+            for variable in equation.solved_variables:
+                solver_report = self.get_iteration_solver_report(exit_status[variable])
+                if not solver_report.success:
+                    return IterationReport(
+                        False,
+                        True,
+                        f"Issue detected for variable: {variable}\n"
+                        + solver_report.status_message.value,
+                    )
+                mesh.nodes_handler.update_variable_values(variable, result[variable])
+        return self.check_convergence(mesh.nodes_handler, simulation_parameters)

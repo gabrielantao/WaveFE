@@ -17,7 +17,6 @@ class ModelEquation:
     def apply_conditions(self, domain_conditions, variable_name) -> None:
         """Apply the the boundary conditions for assembled LHS and RHS"""
         # TODO: only apply this condition for LHS if something changed in the mesh values will improve performance
-
         (
             self.lhs_condition_applied,
             self.rhs_condition_applied,
@@ -27,14 +26,26 @@ class ModelEquation:
             variable_name,
         )
 
-    def solve(self, variable_name, simulation_parameters):
+    def solve(
+        self,
+        nodes_handler,
+        simulation_parameters,
+        variable_name,
+    ):
         """Solve the equation using the parameters defined"""
-        # starting guess for the solution with variables of current time
-        x0 = mesh.nodes_handler.get_variable_values(variable_name)
-        # TODO: put the maxiter and tolerances here from parameters values
-        return sparse.linalg.cg(lhs_condition_applied, rhs_condition_applied, x0)
+        # TODO: name and the preconditioner here
+        return sparse.linalg.cg(
+            lhs_condition_applied,
+            rhs_condition_applied,
+            x0=nodes_handler.get_variable_values(variable_name),
+            tol=simulation_parameters["solver"]["tolerance_relative"],
+            maxiter=simulation_parameters["solver"]["steps_limit"],
+            # atol=simulation_parameters["solver"]["tolerance_absolute"],
+        )
 
-    def get_solution(self, mesh, assembler, domain_conditions, simulation_parameters):
+    def calculate_solution(
+        self, mesh, assembler, domain_conditions, simulation_parameters
+    ):
         """Compute a solution for the current asssembled equation"""
         result = {}
         exit_status = {}
@@ -42,7 +53,9 @@ class ModelEquation:
         for variable_name in self.total_solved_variables:
             self.assemble(mesh, assembler, simulation_parameters)
             self.apply_conditions(domain_conditions, variable_name)
-            result, exit_code = self.solve(variable_name, simulation_parameters)
+            result, exit_code = self.solve(
+                mesh.nodes_handler, simulation_parameters, variable_name
+            )
             result[variable_name] = result
             exit_status[variable_name] = exit_code
         return result, exit_status
