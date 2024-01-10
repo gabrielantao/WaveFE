@@ -38,11 +38,14 @@ class Assembler:
         Register a function to be used to assembling elements of type element_type for the equation named equation_name
         See get_assembling_function_name to know how the functions are named.
         """
-        self.assembling_functions_register[
-            self.get_assembling_function_name(
-                equation_name, equation_side, element_type
+        function_name = self.get_assembling_function_name(
+            equation_name, equation_side.value, element_type.value
+        )
+        if function_name in self.assembling_functions_register:
+            raise ValueError(
+                f"There is duplicated registered functions for\nequation: {equation_name}\nelement type: {element_type}\n "
             )
-        ] = assembling_function
+        self.assembling_functions_register[function_name] = assembling_function
 
     def get_registered_function(self, equation_name, equation_side, element_type):
         """This function try to retrive the assembling function for a equation and element type passed as argument"""
@@ -72,8 +75,10 @@ class Assembler:
         """
         if equation_name in self.lhs_total_variables_assembled:
             return self.lhs_total_variables_assembled[equation_name]
+        error_message = f"assemble equation: {equation_name}\nside of the equation: {equation_side}\nelement of type: {element_type}\n"
         raise NotImplementedError(
-            f"There is no registered value for total variables assembled in LHS for the equation {equation_name}"
+            "There is no registered value for total variables assembled in LHS for\n"
+            + error_message
         )
 
     def assemble_lhs(

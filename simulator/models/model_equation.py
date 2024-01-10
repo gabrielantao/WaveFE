@@ -1,12 +1,51 @@
+from simulator.assembler import Assembler, EquationSide
+from simulator.element import ElementType
+
+
 class ModelEquation:
-    def __init__(self, equation_name, solved_variables):
+    EQUATION_NAMES = []
+
+    def __init__(self, equation_name, solved_variables, assembled_elements, assembler):
+        # check if there are duplicated names for the equations
+        if equation_name in EQUATION_NAMES:
+            raise ValueError(
+                f"Equation name {equation_name} is duplicated, check the setup method for this current model to fix this."
+            )
+        self.EQUATION_NAMES.append(equation_name)
         self.label = equation_name
         self.solved_variables = solved_variables
+        # register how many variables is solved in the equation
+        assembler.register_total_variables_assembled(
+            equation_name, self.total_solved_variables
+        )
+        # register the elemental assembler functions for LHS and RHS of the equation
+        for element_registry in assembled_elements:
+            assembler.register_function(
+                equation_name,
+                EquationSide.LHS,
+                element_registry["element_type"],
+                element_registry["lhs"],
+            )
+            assembler.register_function(
+                equation_name,
+                EquationSide.RHS,
+                element_registry["element_type"],
+                element_registry["rhs"],
+            )
 
     @property
     def total_solved_variables(self):
         """Get the total number of solved variables for this equation"""
         return len(self.solved_variables)
+
+    def register_assembled_element(self, element_type: ElementType, lhs, rhs) -> None:
+        # register function for left-hand side of equation 2
+        assembler.register_function(
+            equation_name,
+            EquationSide.LHS.value,
+            element_type.value,
+            assemble_mass_lumped_lhs,
+        )
 
     def assemble(self, mesh, assembler, simulation_parameters) -> None:
         """Set the assembled LHS and RHS of the model equation"""

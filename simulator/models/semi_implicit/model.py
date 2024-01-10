@@ -38,100 +38,69 @@ class CBSSemiImplicit(AbstractCBSModel):
         # setup an assembler instance for this model
         self.assembler = Assembler()
 
+        # check if it should use lumped mass to solve the problem
+        use_lumped_mass = not simulation_parameters["simulation"]["transient"]
+
         #################################
         ### CREATE EQUATION OF STEP 1 ###
         #################################
+        variables_1 = [
+            f"u_{i + 1}" for i in range(simulation_parameters["mesh"]["dimension"])
+        ]
+        assembled_elements_1 = [
+            {
+                "element_type": ElementType.TRIANGLE,
+                "lhs": assemble_mass_lumped_lhs
+                if use_lumped_mass
+                else assemble_mass_lhs,
+                "rhs": assemble_element_rhs_step_1,
+            },
+            # TODO: register other elements assembled here...
+        ]
         equation_1 = ModelEquation(
             "step 1",
-            [f"u_{i + 1}" for i in range(simulation_parameters["mesh"]["dimension"])],
-        )
-        # register how many variables is solved in equation 1 (velocity directions)
-        self.assembler.register_total_variables_assembled(
-            equation_1.label, equation_1.total_solved_variables
-        )
-        # register function for left-hand side of equation 1
-        # TODO: think better here, put an if to decide which step 1 LHS should be registered
-        # if parameters['lumped']:
-        #     self.assembler.register_function(
-        #         "step 1 mass_transient",
-        #         EquationSide.LHS.value,
-        #         ElementType.TRIANGLE.value,
-        #         assemble_mass_lhs,
-        #     )
-        # for right-hand side of equation 1 (lumped mass matrix)
-        self.assembler.register_function(
-            equation_1.label,
-            EquationSide.LHS.value,
-            ElementType.TRIANGLE.value,
-            assemble_mass_lumped_lhs,
-        )
-        # for right-hand side of equation 1
-        self.assembler.register_function(
-            equation_1.label,
-            EquationSide.RHS.value,
-            ElementType.TRIANGLE.value,
-            assemble_element_rhs_step_1,
+            variables_1,
+            assembled_elements_1,
+            self.assembler,
         )
 
         #################################
         ### CREATE EQUATION OF STEP 2 ###
         #################################
-        equation_2 = ModelEquation("step 2", "p")
-        # register how many variables is solved in equation 2
-        # step 2 only have pressure variable to be solved
-        self.assembler.register_total_variables_assembled(
-            equation_2.label, equation_2.total_solved_variables
-        )
-        # register function for left-hand side of equation 2
-        self.assembler.register_function(
-            equation_2.label,
-            EquationSide.LHS.value,
-            ElementType.TRIANGLE.value,
-            assemble_stiffness_lhs,
-        )
-        # register function for right-hand side of equation 2
-        self.assembler.register_function(
-            equation_2.label,
-            EquationSide.RHS.value,
-            ElementType.TRIANGLE.value,
-            assemble_element_rhs_step_2,
+        assembled_elements_2 = [
+            {
+                "element_type": ElementType.TRIANGLE,
+                "lhs": assemble_stiffness_lhs,
+                "rhs": assemble_element_rhs_step_2,
+            },
+            # TODO: register other elements assembled here...
+        ]
+        equation_2 = ModelEquation(
+            "step 2", ["p"], assembled_elements_2, self.assembler
         )
 
         #################################
         ### CREATE EQUATION OF STEP 3 ###
         #################################
+        variables_3 = [
+            f"u_{i + 1}" for i in range(simulation_parameters["mesh"]["dimension"])
+        ]
+        assembled_elements_3 = [
+            {
+                "element_type": ElementType.TRIANGLE,
+                "lhs": assemble_mass_lumped_lhs
+                if use_lumped_mass
+                else assemble_mass_lhs,
+                "rhs": assemble_element_rhs_step_3,
+            },
+            # TODO: register other elements assembled here...
+        ]
         equation_3 = ModelEquation(
             "step 3",
-            [f"u_{i + 1}" for i in range(simulation_parameters["mesh"]["dimension"])],
+            variables_3,
+            assembled_elements_3,
+            self.assembler,
         )
-        # register how many variables is solved in equation 3 (velocity directions)
-        self.assembler.register_total_variables_assembled(
-            equation_3.label, equation_3.total_solved_variables
-        )
-        # dimension represents how many velocity direction will be solved
-        # register function for left-hand side of equation 3
-        # TODO: think better here, put an if to decide which step 1 LHS should be registered
-        # if parameters['lumped']:
-        #     self.assembler.register_function(
-        #         "step 3 mass_transient",
-        #         EquationSide.LHS.value,
-        #         ElementType.TRIANGLE.value,
-        #         assemble_mass_lhs,
-        #     )
-        # for right-hand side of equation 3 (lumped mass matrix)
-        self.assembler.register_function(
-            equation_3.label,
-            EquationSide.LHS.value,
-            ElementType.TRIANGLE.value,
-            assemble_mass_lumped_lhs,
-        )
-        self.assembler.register_function(
-            equation_3.label,
-            EquationSide.RHS.value,
-            ElementType.TRIANGLE.value,
-            assemble_element_rhs_step_3,
-        )
-        # TODO: should assert here if all were registered right (LHS, RHS and total variables)
 
         # create the list of equations
         self.equations = [equation_1, equation_2, equation_3]
@@ -180,7 +149,7 @@ class CBSSemiImplicit(AbstractCBSModel):
                     return IterationReport(
                         False,
                         True,
-                        f"Issue detected for variable: {variable}\n"
+                        f"An issue detected in equation {equation.label} for variable {variable}\n"
                         + solver_report.status_message.value,
                     )
                 mesh.nodes_handler.update_variable_values(variable, result[variable])

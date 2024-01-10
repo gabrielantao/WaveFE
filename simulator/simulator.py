@@ -153,7 +153,9 @@ class Simulator:
 
         # run the simulation main loop
         for step_number in range(step_limit):
-            self.logger.info(f"Solving time step: {step_number}/{step_limit}")
+            self.logger.info(
+                f"Solving time step {step_number} of {step_limit} (max)..."
+            )
             must_save_current_result = (
                 step_number % simulation_parameters["output"]["frequency"] == 0
             )
@@ -173,5 +175,9 @@ class Simulator:
                     self.write_result(simulation_parameters)
                 break
             # TODO: should check here if the result is diverging for some amount of time steps
+            #       calculate the difference between current and old variable values
+            # TODO: print dynamic log in terminal for the evolution of vars difference and log it in the file as well
         if step_number == step_limit:
-            self.logger.error(f"Maximum time step {step_limit} was reached.")
+            self.logger.error(
+                f"Maximum time step {step_limit} was reached without convergence."
+            )
