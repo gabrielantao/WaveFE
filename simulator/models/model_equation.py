@@ -32,43 +32,23 @@ class ModelEquation:
                 element_registry["element_type"],
                 element_registry["rhs"],
             )
+        # attributes to hold last assembled LHS andRHS
+        self.lhs_assembled = None
+        self.rhs_assembled = None
+        # attributes assembled+boudary applied LHS
+        self.lhs_condition_applied = {}
 
     @property
     def total_solved_variables(self):
         """Get the total number of solved variables for this equation"""
         return len(self.solved_variables)
 
-    def register_assembled_element(self, element_type: ElementType, lhs, rhs) -> None:
-        # register function for left-hand side of equation 2
-        assembler.register_function(
-            equation_name,
-            EquationSide.LHS.value,
-            element_type.value,
-            assemble_mass_lumped_lhs,
-        )
-
-    def assemble(self, mesh, assembler, simulation_parameters) -> None:
-        """Set the assembled LHS and RHS of the model equation"""
-        # TODO: only reasemble for LHS if something changed in the mesh values will improve performance
-        self.lhs = assembler.assemble_lhs(self.label, mesh, simulation_parameters)
-        self.rhs = assembler.assemble_rhs(self.label, mesh, simulation_parameters)
-
-    def apply_conditions(self, domain_conditions, variable_name) -> None:
-        """Apply the the boundary conditions for assembled LHS and RHS"""
-        # TODO: only apply this condition for LHS if something changed in the mesh values will improve performance
-        (
-            self.lhs_condition_applied,
-            self.rhs_condition_applied,
-        ) = domain_conditions.get_equation_with_boundary_condition(
-            self.lhs,
-            self.rhs[:, i],
-            variable_name,
-        )
-
     def solve(
         self,
         nodes_handler,
         simulation_parameters,
+        lhs_condition_applied,
+        rhs_condition_applied,
         variable_name,
     ):
         """Solve the equation using the parameters defined"""
@@ -83,17 +63,50 @@ class ModelEquation:
         )
 
     def calculate_solution(
-        self, mesh, assembler, domain_conditions, simulation_parameters
+        self,
+        mesh,
+        assembler,
+        domain_conditions,
+        simulation_parameters,
+        must_update_lhs=True,
+        must_update_rhs=True,
     ):
         """Compute a solution for the current asssembled equation"""
         result = {}
         exit_status = {}
+        # assemble and apply boundary conditions for LHS if needed
+        if must_update_lhs:
+            self.lhs_assembled = assembler.assemble_lhs(
+                self.label, mesh, simulation_parameters
+            )
+        # apply boundary conditions for RHS if needed
+        if must_update_rhs:
+            self.rhs_assembled = assembler.assemble_rhs(
+                self.label, mesh, simulation_parameters
+            )
         # TODO: this could be done in parallel
-        for variable_name in self.total_solved_variables:
-            self.assemble(mesh, assembler, simulation_parameters)
-            self.apply_conditions(domain_conditions, variable_name)
+        for variable_name in self.solved_variables:
+            variable_id = self.solved_variables.index(variable_name)
+            if must_update_lhs:
+                self.lhs_condition_applied[
+                    variable_name
+                ] = domain_conditions.get_lhs_with_boundary_condition(
+                    self.lhs_assembled, variable_name
+                )
+            if must_update_rhs:
+                rhs_condition_applied = (
+                    domain_conditions.get_rhs_with_boundary_condition(
+                        self.lhs_assembled,
+                        self.rhs_assembled[:, variable_id],
+                        variable_name,
+                    )
+                )
             result, exit_code = self.solve(
-                mesh.nodes_handler, simulation_parameters, variable_name
+                mesh.nodes_handler,
+                simulation_parameters,
+                self.lhs_condition_applied[variable_name],
+                rhs_condition_applied,
+                variable_name,
             )
             result[variable_name] = result
             exit_status[variable_name] = exit_code

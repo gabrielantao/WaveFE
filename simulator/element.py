@@ -49,12 +49,16 @@ class NodesHandler(object):
 
     dimensions: int
     nodes: List[Node]
+    moved: bool
 
     def __init__(self, dimensions, positions):
         self.dimensions = dimensions
         self.nodes = typed.List(
             [Node(position) for position in positions[:, :dimensions]]
         )
+        # indicate if the mesh moved, its default value is True to force first calculation
+        # of parameters that depends on the mesh parameters (e.g. LHS matrix)
+        self.moved = True
 
     @property
     def total_nodes(self):
@@ -146,6 +150,11 @@ class NodesHandler(object):
         return np.sqrt(
             velocity_1 * velocity_1 + velocity_2 * velocity_2 + velocity_3 * velocity_3
         )
+
+    def move_nodes(self) -> moved:
+        # TODO: implement movement of the mesh based in some function of movement for
+        #       the specific groups that must move.
+        self.moved = False
 
 
 @jitclass(

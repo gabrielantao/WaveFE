@@ -120,38 +120,29 @@ class DomainConditions:
                         (variable_name, condition_type)
                     ].values.append(value)
 
-    def get_equation_with_boundary_condition(self, lhs, rhs, variable):
-        """Return the sides of equation with boundary conditions applied"""
+    def get_lhs_with_boundary_condition(self, lhs, variable):
+        """Return the LHS of equation with boundary conditions applied"""
         lhs_boundary_applied = lhs.copy()
-        rhs_boundary_applpied = rhs.copy()
-        offset_vector = self._calculate_rhs_offset_values(
-            lhs_boundary_applied, variable
-        )
-        self._apply_rhs_boundary_conditions(
-            rhs_boundary_applpied, variable, offset_vector
-        )
-        self._apply_lhs_boundary_condition(lhs_boundary_applied, variable)
-        return lhs_boundary_applied, rhs_boundary_applpied
-
-    def _apply_lhs_boundary_condition(self, lhs, variable: str):
-        """Apply boundary conditions to the LHS matrix"""
         for index in self.boundary_conditions[
             (variable, ConditionType.FIRST.value)
         ].indices:
-            lhs[:, index] = 0.0
-            lhs[index, :] = 0.0
-            lhs[index, index] = 1.0
-        lhs.eliminate_zeros()
+            lhs_boundary_applied[:, index] = 0.0
+            lhs_boundary_applied[index, :] = 0.0
+            lhs_boundary_applied[index, index] = 1.0
+        lhs_boundary_applied.eliminate_zeros()
         # TODO: check how to apply condition for the other type here
+        return lhs_boundary_applied
 
-    def _apply_rhs_boundary_conditions(self, rhs, variable: str, offset_vector) -> None:
+    def get_rhs_with_boundary_condition(self, lhs, rhs, variable):
         """
-        Apply boundary conditions to the RHS vector
+        Return the RHS of equation with boundary conditions applied
         NOTE: this function expect a one-dimension vector for RHS
         """
         boundary_conditions = self.boundary_conditions[(variable, condition_type)]
-        rhs += offset_vector
-        rhs[boundary_conditions.indices] = boundary_conditions.values
+        offset_vector = self._calculate_rhs_offset_values(lhs, variable)
+        rhs_boundary_applied = rhs + offset_vector
+        rhs_boundary_applied[boundary_conditions.indices] = boundary_conditions.values
+        return rhs_boundary_applied
 
     def _calculate_rhs_offset_values(self, lhs, variable: str):
         """Calculate the vector to be added to rhs vector due boundary condition application"""

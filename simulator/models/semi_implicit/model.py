@@ -136,11 +136,15 @@ class CBSSemiImplicit(AbstractCBSModel):
 
         # setup old variables values with current values of the variables
         mesh.nodes_handler.update_variables_old(self.VARIABLES)
-
+        must_update_lhs = mesh.nodes_handler.moved
         # solve the sequence of registered equations for each variable
         for equation in self.equations:
             result, exit_status = equation.calculate_solution(
-                mesh, self.assembler, domain_conditions, simulation_parameters
+                mesh,
+                self.assembler,
+                domain_conditions,
+                simulation_parameters,
+                must_update_lhs,
             )
             # this could be done in parallel
             for variable in equation.solved_variables:
@@ -153,4 +157,6 @@ class CBSSemiImplicit(AbstractCBSModel):
                         + solver_report.status_message.value,
                     )
                 mesh.nodes_handler.update_variable_values(variable, result[variable])
+
+        mesh.nodes_handler.move_nodes()
         return self.check_convergence(mesh.nodes_handler, simulation_parameters)
