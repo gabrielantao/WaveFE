@@ -127,7 +127,13 @@ class CBSSemiImplicit(AbstractCBSModel):
             case 3:
                 return default_initial_values
 
-    def run_iteration(self, mesh, domain_conditions, simulation_parameters):
+    def run_iteration(
+        self,
+        mesh,
+        output_manager,
+        simulation_parameters,
+        step_number: int,
+    ):
         """Run the three steps of semi-implicit model"""
         # status variables
         success = False
@@ -143,12 +149,15 @@ class CBSSemiImplicit(AbstractCBSModel):
                 mesh,
                 self.assembler,
                 domain_conditions,
+                output_manager,
+                self.logger,
                 simulation_parameters,
                 must_update_lhs,
             )
             # this could be done in parallel
             for variable in equation.solved_variables:
                 solver_report = self.get_iteration_solver_report(exit_status[variable])
+                mesh.nodes_handler.update_variable_values(variable, result[variable])
                 if not solver_report.success:
                     return IterationReport(
                         False,
@@ -156,7 +165,6 @@ class CBSSemiImplicit(AbstractCBSModel):
                         f"An issue detected in equation {equation.label} for variable {variable}\n"
                         + solver_report.status_message.value,
                     )
-                mesh.nodes_handler.update_variable_values(variable, result[variable])
 
         mesh.nodes_handler.move_nodes()
         return self.check_convergence(mesh.nodes_handler, simulation_parameters)

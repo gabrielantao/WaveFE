@@ -6,7 +6,13 @@ import logging
 import toml
 from pathlib import Path
 
-from application.constants import SIMULATION_FILENAME, DOMAIN_CONDITIONS_FILENAME
+from application.constants import (
+    SIMULATION_FILENAME,
+    DOMAIN_CONDITIONS_FILENAME,
+    SIMULATION_LOG_PATH,
+    SIMULATION_RESULT_PATH,
+    SIMULATION_TEMP_PATH,
+)
 from application.validator import (
     validate_input_file,
     InputFileType,
@@ -20,23 +26,18 @@ class SimulationCase:
     def __init__(self, folder: Path):
         """folder is an absolute path"""
         # ensure absolute path for folder
-        self.folder = folder.resolve()
-        self.cache_folder = folder / Path("cache")
-        self.figure_folder = folder / Path("figure")
-        self.mesh_folder = folder / Path("mesh")
-        self.reference_folder = folder / Path("reference")
-        self.result_folder = folder / Path("result")
-        self.last_result_folder = Path("result")
-        self.create_cache_folder()
-        # read and run validations
+        self.case_folder = folder.resolve()
+        self.cache_folder = self.case_folder / SIMULATION_CACHE_PATH
+        # run validations and load data from input files
         self.simulation_data = validate_input_file(
-            self.folder / SIMULATION_FILENAME,
+            self.case_folder / SIMULATION_FILENAME,
             InputFileType.SIMULATION,
         )
         self.conditions_data = validate_input_file(
             folder / DOMAIN_CONDITIONS_FILENAME,
             InputFileType.DOMAIN_CONDITIONS,
         )
+        self.create_cache_folder()
         # get input file checksum
         self.input_files_checksum = {}
         with open(folder / SIMULATION_FILENAME, "rb") as f:
@@ -48,10 +49,11 @@ class SimulationCase:
 
     def create_cache_folder(self):
         """Create folders to be used as cache for the simulation case"""
-        self.cache_log_folder = self.cache_folder / Path("log")
-        self.cache_temp_folder = self.cache_folder / Path("temp")
-        self.cache_result_folder = self.cache_folder / Path("result")
-        self.cache_folder.mkdir(exist_ok=True)
+        (self.case_folder / SIMULATION_CACHE_PATH).mkdir(exist_ok=True)
+        self.cache_log_folder = self.case_folder / SIMULATION_LOG_PATH
+        self.cache_temp_folder = self.case_folder / SIMULATION_TEMP_PATH
+        self.cache_result_folder = self.case_folder / SIMULATION_RESULT_PATH
+        # create the paths if they don't exist
         self.cache_log_folder.mkdir(parents=True, exist_ok=True)
         self.cache_temp_folder.mkdir(parents=True, exist_ok=True)
         self.cache_result_folder.mkdir(parents=True, exist_ok=True)
@@ -71,17 +73,18 @@ class SimulationCase:
     #         return result
 
     def copy_input_files_to_cache(self):
-        """Copy the simulation and domain conditions file to the cache folder"""
+        """Copy the simulation, domain conditions and the mesh file to the cache temp folder"""
         logging.info("copying simulation file to cache in %s", self.cache_folder)
         shutil.copy(
-            self.folder / SIMULATION_FILENAME, self.cache_folder / SIMULATION_FILENAME
+            self.case_folder / SIMULATION_FILENAME,
+            self.cache_folder / SIMULATION_FILENAME,
         )
         shutil.copy(
-            self.folder / DOMAIN_CONDITIONS_FILENAME,
+            self.case_folder / DOMAIN_CONDITIONS_FILENAME,
             self.cache_folder / DOMAIN_CONDITIONS_FILENAME,
         )
         shutil.copy(
-            self.folder / self.simulation_data["mesh"]["filename"],
+            self.case_folder / self.simulation_data["mesh"]["filename"],
             self.cache_folder / self.simulation_data["mesh"]["filename"],
         )
 
@@ -109,7 +112,10 @@ class SimulationCase:
             }
             with open(cache_info_filepath, "w", encoding="utf-8") as f:
                 toml.dump(cache_info, f)
-        logging.info("no parameters have changed for this simulation since last run")
+        else:
+            logging.info(
+                "no parameters have changed for this simulation since last run"
+            )
 
     def clean_cache(self) -> None:
         """Remove cache folder and its cached content"""
@@ -118,7 +124,7 @@ class SimulationCase:
 
     def clone(self, destiny_folder: Path):
         """Clone case folder to destiny folder and return the cloned case"""
-        shutil.copytree(self.folder, destiny_folder, dirs_exist_ok=True)
+        shutil.copytree(self.case_folder, destiny_folder, dirs_exist_ok=True)
         return SimulationCase(destiny_folder)
 
     def run(self) -> None:
@@ -128,9 +134,9 @@ class SimulationCase:
         simulator = Simulator(self.cache_folder)
         simulator.run()
         # copy cached result folder to case_path/results/datetime
-        self.last_result_folder = self.result_folder / Path(
-            datetime.now().strftime("%Y_%m_%d %H_%M_%S")
+        self.last_result_folder = (
+            self.case_folder
+            / Path("results")
+            / Path(datetime.now().strftime("%Y_%m_%d %H_%M_%S"))
         )
-        shutil.copytree(
-            self.cache_result_folder, self.last_result_folder, dirs_exist_ok=True
-        )
+        shutil.copytree(self.cache_folder, self.last_result_folder, dirs_exist_ok=True)

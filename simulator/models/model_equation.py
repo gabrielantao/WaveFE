@@ -35,8 +35,9 @@ class ModelEquation:
         # attributes to hold last assembled LHS andRHS
         self.lhs_assembled = None
         self.rhs_assembled = None
-        # attributes assembled+boudary applied LHS
+        # attributes assembled+boundary applied LHS
         self.lhs_condition_applied = {}
+        self.lhs_preconditioners = {}
 
     @property
     def total_solved_variables(self):
@@ -52,6 +53,9 @@ class ModelEquation:
         variable_name,
     ):
         """Solve the equation using the parameters defined"""
+        logger.info(
+            f"Solving the equation {self.label} for variable {variable_name}..."
+        )
         # TODO: name and the preconditioner here
         return sparse.linalg.cg(
             lhs_condition_applied,
@@ -67,6 +71,8 @@ class ModelEquation:
         mesh,
         assembler,
         domain_conditions,
+        output_manager,
+        logger,
         simulation_parameters,
         must_update_lhs=True,
         must_update_rhs=True,
@@ -76,24 +82,32 @@ class ModelEquation:
         exit_status = {}
         # assemble and apply boundary conditions for LHS if needed
         if must_update_lhs:
+            logger.info("Updating LHS...")
             self.lhs_assembled = assembler.assemble_lhs(
                 self.label, mesh, simulation_parameters
             )
+
         # apply boundary conditions for RHS if needed
         if must_update_rhs:
+            logger.info("Updating RHS...")
             self.rhs_assembled = assembler.assemble_rhs(
                 self.label, mesh, simulation_parameters
             )
+        output_manager.write_debug("solver/lhs_assembled", lhs_assembled)
+        output_manager.write_debug("solver/rhs_assembled", rhs_assembled)
         # TODO: this could be done in parallel
         for variable_name in self.solved_variables:
             variable_id = self.solved_variables.index(variable_name)
             if must_update_lhs:
+                logger.info("Applying conditions to LHS...")
                 self.lhs_condition_applied[
                     variable_name
                 ] = domain_conditions.get_lhs_with_boundary_condition(
                     self.lhs_assembled, variable_name
                 )
+                # TODO: update the preconditioner here
             if must_update_rhs:
+                logger.info("Applying conditions to RHS...")
                 rhs_condition_applied = (
                     domain_conditions.get_rhs_with_boundary_condition(
                         self.lhs_assembled,
@@ -101,6 +115,13 @@ class ModelEquation:
                         variable_name,
                     )
                 )
+            output_manager.write_debug(
+                f"solver/{variable_name}/lhs_condition_applied",
+                self.lhs_condition_applied[variable_name],
+            )
+            output_manager.write_debug(
+                f"solver/{variable_name}/rhs_condition_applied", rhs_assembled
+            )
             result, exit_code = self.solve(
                 mesh.nodes_handler,
                 simulation_parameters,

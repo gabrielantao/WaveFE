@@ -20,12 +20,17 @@ PATH_TEST_UNIT = PATH_TEST_SIMULATOR / Path("test_unit")
 PATH_LEGACY_BUILD = PATH_LEGACY / Path("build")
 PATH_LEGACY_CASES = PATH_LEGACY / Path("cases")
 
+# validators version for each *.toml input file
+CONDITIONS_TOML_VERSION = 1
+SIMULATION_TOML_VERSION = 1
+VALIDATION_TOML_VERSION = 1
 
 # default name for some files
 DOMAIN_CONDITIONS_FILENAME = "conditions.toml"
 SIMULATION_FILENAME = "simulation.toml"
 
-# validators version for each *.toml input file
-CONDITIONS_TOML_VERSION = 1
-SIMULATION_TOML_VERSION = 1
-VALIDATION_TOML_VERSION = 1
+# paths for the simulator
+SIMULATION_CACHE_PATH = Path("cache")
+SIMULATION_LOG_PATH = SIMULATION_CACHE_PATH / Path("log")
+SIMULATION_RESULT_PATH = SIMULATION_CACHE_PATH / Path("result")
+SIMULATION_TEMP_PATH = SIMULATION_CACHE_PATH / Path("temp")

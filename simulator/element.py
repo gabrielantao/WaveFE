@@ -152,9 +152,9 @@ class NodesHandler(object):
         )
 
     def move_nodes(self) -> moved:
+        self.moved = False
         # TODO: implement movement of the mesh based in some function of movement for
         #       the specific groups that must move.
-        self.moved = False
 
 
 @jitclass(

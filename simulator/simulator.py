@@ -2,10 +2,17 @@ from pathlib import Path
 import logging
 import toml
 
-from application.constants import SIMULATION_FILENAME, DOMAIN_CONDITIONS_FILENAME
+from application.constants import (
+    SIMULATION_FILENAME,
+    DOMAIN_CONDITIONS_FILENAME,
+    SIMULATION_LOG_PATH,
+    SIMULATION_RESULT_PATH,
+    SIMULATION_TEMP_PATH,
+)
 from simulator.mesh import Mesh
 from simulator.domain_conditions import DomainConditions
 from simulator.models.models_register import AVAILABLE_MODELS
+from simulator.output import SimulatorOutputWriter
 
 
 class Simulator:
@@ -25,11 +32,15 @@ class Simulator:
         self.logging_level = logging.INFO
         self.logger = logging.getLogger("simulator")
         self.logger.addHandler(
-            logging.FileHandler(simulation_path / f"simulation.log", mode="w")
+            logging.FileHandler(
+                simulation_path / SIMULATION_LOG_PATH / f"simulation.log", mode="w"
+            )
         )
         self.logger.setLevel(self.logging_level)
+        self.logger.info("Starting simulator...")
         self.validate_simulation_data()
         self.setup(simulation_path)
+        # just log the success
         case_alias = self.simulation_data["general"]["alias"]
         case_title = self.simulation_data["general"]["title"]
         logging.info(
@@ -105,19 +116,42 @@ class Simulator:
 
     def setup(self):
         """Setup all is needed to build a simulator"""
+        model_name = self.simulation_data["simulation"]["model"]
+        mesh_filename = self.simulation_data["mesh"]["filename"]
+
+        self.logger.info("Doing the setup for the simulator")
+        self.logger.info(f"set the model: {model_name}")
+        self.logger.info(f"set the mesh: {mesh_filename}")
+
         # import and setup the model
-        self.model = AVAILABLE_MODELS[self.simulation_data["simulation"]["model"]]()
+        self.logger.info(f"setting the model...")
+        self.model = AVAILABLE_MODELS[model_name]()
+
         # create the mesh
+        self.logger.info(f"importing and setting the mesh...")
         self.mesh = Mesh(
-            self.simulation_path / self.simulation_data["mesh"]["filename"],
+            self.simulation_path / mesh_filename,
             self.simulation_data["mesh"]["interpolation_order"],
         )
         # create the domain conditions
+        self.logger.info(f"importing and setting the domain conditions...")
         self.domain_conditions = DomainConditions(
             self.simulation_path / DOMAIN_CONDITIONS_FILENAME,
             self.mesh,
             self.model.get_default_initial_values(self.mesh.nodes_handler.dimensions),
         )
+
+        # set the output manager
+        self.logger.info(f"setting the output manager...")
+        self.output_manager = SimulatorOutputWriter(
+            self.simulation_path,
+            simulation_parameters["general"]["description"],
+            simulation_parameters["output"]["save_result"],
+            simulation_parameters["output"]["save_numeric"],
+            simulation_parameters["output"]["save_debug"],
+        )
+
+        self.logger.info("All simulator setup done!")
 
     def get_model_parameters(self, dimension):
         """
@@ -129,14 +163,6 @@ class Simulator:
         model_parameters["mesh"]["dimension"] = dimension
         return model_parameters
 
-    def write_result(self, simulation_parameters) -> None:
-        # TODO: write results to the hdf here
-        if simulation_parameters["output"]["save_result"]:
-            pass
-        if simulation_parameters["output"]["save_numeric"]:
-            # TODO: save the statistics for the current case (e.g. residual values, min, max, std, mean, etc...)
-            pass
-
     def run(self) -> None:
         """Main function to run simulator based on assembling functions configured for the model"""
         step_limit = self.simulation_data["simulation"]["step_limit"]
@@ -145,12 +171,15 @@ class Simulator:
         # setup model logger and parameters
         model_logger = logging.getLogger("simulation-model")
         model_logger.addHandler(
-            logging.FileHandler(self.simulation_path / f"simulation.log", mode="w")
+            logging.FileHandler(
+                self.simulation_path / SIMULATION_LOG_PATH / f"simulation.log", mode="w"
+            )
         )
         # TODO: add option for the log level in input file
         model_logger.setLevel(self.logging_level)
         self.model.setup(model_logger, simulation_parameters)
 
+        self.logger.info("Start simulator main loop")
         # run the simulation main loop
         for step_number in range(step_limit):
             self.logger.info(
@@ -160,10 +189,14 @@ class Simulator:
                 step_number % simulation_parameters["output"]["frequency"] == 0
             )
             iteraction_report = self.model.run_iteration(
-                self.mesh, self.domain_conditions, simulation_parameters
+                self.mesh,
+                self.domain_conditions,
+                self.output_manager,
+                simulation_parameters,
+                step_number,
             )
             if must_save_current_result:
-                self.write_result(simulation_parameters)
+                self.output_manager.write_result(simulation_parameters)
             if iteraction_report.stop_simulation:
                 if iteraction_report.converged:
                     self.logger.info(iteraction_report.status_message)
@@ -172,7 +205,7 @@ class Simulator:
                 # if the result was not saved for this timestep,
                 # then force the saving to help debuging process
                 if not must_save_current_result:
-                    self.write_result(simulation_parameters)
+                    self.output_manager.write_result(simulation_parameters)
                 break
             # TODO: should check here if the result is diverging for some amount of time steps
             #       calculate the difference between current and old variable values
