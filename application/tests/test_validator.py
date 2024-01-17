@@ -3,7 +3,6 @@ from pathlib import Path
 import pytest
 from pytest_regressions.data_regression import DataRegressionFixture
 
-from application.constants import PATH_CASES
 from application.validator import (
     validate_input_file,
     InputFileType,

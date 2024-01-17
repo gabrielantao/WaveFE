@@ -2,7 +2,7 @@ from pathlib import Path
 from pytest_regressions.file_regression import FileRegressionFixture
 import toml
 
-from application.simulation_case import SimulationCase
+from simulator.simulation_case import SimulationCase
 from simulator.simulator import Simulator
 
 

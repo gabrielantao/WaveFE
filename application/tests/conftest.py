@@ -1,8 +1,7 @@
 from pathlib import Path
 import pytest
 
-from application.simulation_case import SimulationCase
-from application.constants import PATH_MESH, PATH_BACKEND_TEST_DATA
+from simulator.simulation_case import SimulationCase
 
 
 @pytest.fixture

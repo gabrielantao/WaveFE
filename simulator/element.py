@@ -151,7 +151,7 @@ class NodesHandler(object):
             velocity_1 * velocity_1 + velocity_2 * velocity_2 + velocity_3 * velocity_3
         )
 
-    def move_nodes(self) -> moved:
+    def move_nodes(self) -> None:
         self.moved = False
         # TODO: implement movement of the mesh based in some function of movement for
         #       the specific groups that must move.

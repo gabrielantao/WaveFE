@@ -11,7 +11,7 @@ from application.constants import (
 )
 from simulator.mesh import Mesh
 from simulator.domain_conditions import DomainConditions
-from simulator.models.models_register import AVAILABLE_MODELS
+from simulator.cbs_models.models_register import AVAILABLE_MODELS
 from simulator.output import SimulatorOutputWriter
 
 
@@ -31,15 +31,14 @@ class Simulator:
         # TODO: add option for the log level in input file
         self.logging_level = logging.INFO
         self.logger = logging.getLogger("simulator")
-        self.logger.addHandler(
-            logging.FileHandler(
-                simulation_path / SIMULATION_LOG_PATH / f"simulation.log", mode="w"
-            )
+        self.logger_handler = logging.FileHandler(
+            simulation_path / SIMULATION_LOG_PATH / "simulation.log", mode="w"
         )
+        self.logger.addHandler(self.logger_handler)
         self.logger.setLevel(self.logging_level)
         self.logger.info("Starting simulator...")
         self.validate_simulation_data()
-        self.setup(simulation_path)
+        self.setup()
         # just log the success
         case_alias = self.simulation_data["general"]["alias"]
         case_title = self.simulation_data["general"]["title"]
@@ -125,7 +124,7 @@ class Simulator:
 
         # import and setup the model
         self.logger.info(f"setting the model...")
-        self.model = AVAILABLE_MODELS[model_name]()
+        self.model = AVAILABLE_MODELS[model_name]
 
         # create the mesh
         self.logger.info(f"importing and setting the mesh...")
@@ -145,10 +144,10 @@ class Simulator:
         self.logger.info(f"setting the output manager...")
         self.output_manager = SimulatorOutputWriter(
             self.simulation_path,
-            simulation_parameters["general"]["description"],
-            simulation_parameters["output"]["save_result"],
-            simulation_parameters["output"]["save_numeric"],
-            simulation_parameters["output"]["save_debug"],
+            self.simulation_data["general"]["description"],
+            self.simulation_data["output"]["save_result"],
+            self.simulation_data["output"]["save_numeric"],
+            self.simulation_data["output"]["save_debug"],
         )
 
         self.logger.info("All simulator setup done!")
@@ -165,19 +164,10 @@ class Simulator:
 
     def run(self) -> None:
         """Main function to run simulator based on assembling functions configured for the model"""
-        step_limit = self.simulation_data["simulation"]["step_limit"]
+        step_limit = self.simulation_data["simulation"]["steps_limit"]
+        dimension = self.mesh.nodes_handler.dimensions
         simulation_parameters = self.get_model_parameters(dimension)
-
-        # setup model logger and parameters
-        model_logger = logging.getLogger("simulation-model")
-        model_logger.addHandler(
-            logging.FileHandler(
-                self.simulation_path / SIMULATION_LOG_PATH / f"simulation.log", mode="w"
-            )
-        )
-        # TODO: add option for the log level in input file
-        model_logger.setLevel(self.logging_level)
-        self.model.setup(model_logger, simulation_parameters)
+        self.model.setup(self.logger_handler, simulation_parameters)
 
         self.logger.info("Start simulator main loop")
         # run the simulation main loop
