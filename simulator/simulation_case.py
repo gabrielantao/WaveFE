@@ -9,6 +9,7 @@ from pathlib import Path
 from application.constants import (
     SIMULATION_FILENAME,
     DOMAIN_CONDITIONS_FILENAME,
+    SIMULATION_CACHE_PATH,
     SIMULATION_LOG_PATH,
     SIMULATION_RESULT_PATH,
     SIMULATION_TEMP_PATH,
@@ -131,11 +132,11 @@ class SimulationCase:
         """Call simulator to run this case"""
         self.generate_cache_files()
         # run the simulator
-        simulator = Simulator(self.cache_folder)
+        simulator = Simulator(self.case_folder)
         simulator.run()
         # copy cached result folder to case_path/results/datetime
         self.last_result_folder = (
-            self.case_folder
+            self.cache_folder
             / Path("results")
             / Path(datetime.now().strftime("%Y_%m_%d %H_%M_%S"))
         )
