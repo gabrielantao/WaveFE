@@ -3,11 +3,10 @@ from pathlib import Path
 import logging
 from scipy import sparse
 
-from simulator.models.abstract_model import AbstractCBSModel
+from simulator.cbs_models.abstract_model import AbstractCBSModel
 from simulator.assembler import Assembler, EquationSide
-from simulator.assembled_equation import AssembledEquation
 from simulator.element import ElementType
-from simulator.models.semi_implicit.assembing_elements import (
+from simulator.cbs_models.models.semi_implicit.elements_assembling import (
     assemble_mass_lumped_lhs,
     assemble_mass_lhs,
     assemble_stiffness_lhs,
@@ -15,8 +14,8 @@ from simulator.models.semi_implicit.assembing_elements import (
     assemble_element_rhs_step_2,
     assemble_element_rhs_step_3,
 )
-from simulator.models.report_result import IterationReport, IterationStatusMessage
-from simulator.models.model_equation import ModelEquation
+from simulator.cbs_models.report_result import IterationReport, IterationStatusMessage
+from simulator.cbs_models.model_equation import ModelEquation
 
 
 class CBSSemiImplicit(AbstractCBSModel):
@@ -28,12 +27,16 @@ class CBSSemiImplicit(AbstractCBSModel):
     def __init__(self):
         pass
 
-    def setup(self, logger, simulation_parameters: dict[str, Any]):
+    def setup(self, logger_handler, simulation_parameters: dict[str, Any]):
         """Setup functions used for assembling process"""
 
         # setup the logger
-        self.logger = logger
-        self.logger.info(f"Doing the model setup.")
+        self.logger = logging.getLogger("simulation-model")
+        self.logger.addHandler(logger_handler)
+        # TODO: add option for the log level in input file
+        self.logging_level = logging.INFO
+        self.logger.setLevel(self.logging_level)
+        self.logger.info(f"Doing the model setup...")
 
         # setup an assembler instance for this model
         self.assembler = Assembler()
@@ -109,9 +112,9 @@ class CBSSemiImplicit(AbstractCBSModel):
             + ", ".join([equation.label for equation in self.equations])
         )
 
-    def get_variables(self):
+    def get_variables(self, dimensions):
         """Get the list of model variables"""
-        return self.VARIABLES
+        return [f"u_{dimension + 1}" for dimension in range(dimensions)] + ["p"]
 
     def get_default_initial_values(self, dimensions: int):
         """Get the initial values for all variables"""

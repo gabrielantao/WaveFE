@@ -2,8 +2,8 @@ from abc import ABC, abstractmethod
 from pathlib import Path
 
 from simulator.assembler import Assembler
-from simulator.models.report_result import SolverStatusMessage, SolverReport
-from simulator.models.report_result import IterationReport, IterationStatusMessage
+from simulator.cbs_models.report_result import SolverStatusMessage, SolverReport
+from simulator.cbs_models.report_result import IterationReport, IterationStatusMessage
 
 
 class AbstractCBSModel(ABC):
