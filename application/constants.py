@@ -5,6 +5,7 @@ PATH_WAVE_ROOT = Path(__file__).resolve().parents[1]
 PATH_APPLICATION = PATH_WAVE_ROOT / Path("application")
 PATH_SIMULATOR = PATH_WAVE_ROOT / Path("simulator")
 PATH_CBS_MODELS = PATH_SIMULATOR / Path("cbs_models")
+PATH_SCRIPTS = PATH_WAVE_ROOT / Path("scripts")
 
 # validators version for each *.toml input file
 CONDITIONS_TOML_VERSION = 1

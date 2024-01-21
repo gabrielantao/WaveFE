@@ -14,7 +14,8 @@ class AbstractCBSModel(ABC):
     """
 
     def __init__(self):
-        pass
+        self.VARIABLES = []
+        self.DEFAULT_INITIAL_VALUES = {}
 
     @abstractmethod
     def get_default_initial_values(self, dimensions):
@@ -38,6 +39,12 @@ class AbstractCBSModel(ABC):
         This method should not save results (only logs and debuging data)
         """
         pass
+
+    def apply_initial_default_values(self, nodes_handler):
+        """Apply the initial default values for the current model"""
+        for node in nodes_handler.nodes:
+            for variable_name, value in self.DEFAULT_INITIAL_VALUES.items():
+                node.variables[variable_name] = value
 
     def get_iteration_solver_report(self, exit_status) -> SolverReport:
         """Return the iteration status and the message to show the user"""

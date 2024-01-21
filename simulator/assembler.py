@@ -85,7 +85,7 @@ class Assembler:
         self,
         equation_name,
         mesh,
-        simulation_parameters=typed.Dict.empty(types.unicode_type, types.float64),
+        parameters=typed.Dict.empty(types.unicode_type, types.float64),
     ):
         """Do the LHS assembling process for a equation named equation_name all elements in the element_containers from the mesh"""
         # dictionary to be used to hold data for indices and values of dictionary
@@ -101,7 +101,7 @@ class Assembler:
                 assembling_function,
                 mesh.nodes_handler,
                 element_container.elements,
-                simulation_parameters,
+                parameters,
                 global_matrix_values,
             )
         # convert the assembled data of the matrix to the array of indices and values
@@ -118,7 +118,7 @@ class Assembler:
         self,
         equation_name,
         mesh,
-        simulation_parameters=typed.Dict.empty(types.unicode_type, types.float64),
+        parameters=typed.Dict.empty(types.unicode_type, types.float64),
     ):
         """
         Do the RHS assembling process for a equation named equation_name all elements in the element_containers from the mesh
@@ -140,7 +140,7 @@ class Assembler:
                 assembling_function,
                 mesh.nodes_handler,
                 element_container.elements,
-                simulation_parameters,
+                parameters,
                 global_array_values,
             )
         return global_array_values
@@ -151,14 +151,14 @@ def _assemble_element_container_lhs(
     assembling_elemental_function,
     nodes,
     elements,
-    simulation_parameters,
+    parameters,
     global_matrix_values,
 ):
     """
     This assembles all elements in a global matrix (vector) RHS
     assembling_elemental_function: the function used to assemble elements
     elements: are the elements to be assembled
-    simulation_parameters: are values that can be passed to the assembled elements
+    parameters: are values that can be passed to the assembled elements
     global_matrix_values: is a dictionary that holds indices and values of assembled matrix
     """
     for element in elements:
@@ -166,7 +166,7 @@ def _assemble_element_container_lhs(
         assembled_elemental = assembling_elemental_function(
             element,
             element.get_nodes(nodes),
-            simulation_parameters,
+            parameters,
         )
         # assemble elemental matrix to the global matrix dict
         # TODO: could be optimized to not assemble off-diag values for mass lumped matrix
@@ -209,13 +209,13 @@ def _assembling_element_container_rhs(
     assembling_elemental_function,
     nodes,
     elements,
-    simulation_parameters,
+    parameters,
     global_matrix_values,
 ):
     """
     This assembles all elements in a global matrix (vector) LHS.
     elements: are the elements to be assembled
-    simulation_parameters: are values that can be passed to the assembled elements
+    parameters: are values that can be passed to the assembled elements
     global_matrix_values: is a array that holds indices and values of assembled matrix
     """
     for element in elements:
@@ -223,7 +223,7 @@ def _assembling_element_container_rhs(
         # for the current equation
         element_nodes = element.get_nodes(nodes)
         assembled_elemental = assembling_elemental_function(
-            element, element_nodes, simulation_parameters
+            element, element_nodes, parameters
         )
         total_assembled_variables = len(assembled_elemental)
         # assemble elemental matrix to the global arrays dict

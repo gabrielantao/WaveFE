@@ -21,11 +21,9 @@ from simulator.cbs_models.model_equation import ModelEquation
 class CBSSemiImplicit(AbstractCBSModel):
     """A CBS semi-implicit basic model"""
 
-    VARIABLES = ["u_1", "u_2", "u_3", "p"]
-    DEFAULT_INITIAL_VALUES = {"u_1": 0.0, "u_2": 0.0, "u_3": 0.0, "p": 0.0001}
-
     def __init__(self):
-        pass
+        self.VARIABLES = ["u_1", "u_2", "u_3", "p"]
+        self.DEFAULT_INITIAL_VALUES = {"u_1": 0.0, "u_2": 0.0, "u_3": 0.0, "p": 0.0001}
 
     def setup(self, logger_handler, simulation_parameters: dict[str, Any]):
         """Setup functions used for assembling process"""
@@ -133,6 +131,7 @@ class CBSSemiImplicit(AbstractCBSModel):
     def run_iteration(
         self,
         mesh,
+        domain_conditions,
         output_manager,
         simulation_parameters,
         step_number: int,
@@ -141,13 +140,16 @@ class CBSSemiImplicit(AbstractCBSModel):
         # status variables
         success = False
         stop_simulation = False
-        status_message = StatusMessage.NORMAL
+        status_message = IterationStatusMessage.NORMAL
 
-        # setup old variables values with current values of the variables
-        mesh.nodes_handler.update_variables_old(self.VARIABLES)
-        must_update_lhs = mesh.nodes_handler.moved
+        must_update_lhs = mesh.nodes_handler.nodes_moved
+        dimensions = mesh.nodes_handler.dimensions
+        self.logger.info("update old variable values with current value")
+        mesh.nodes_handler.update_variables_old(self.get_variables(dimensions))
         # solve the sequence of registered equations for each variable
         for equation in self.equations:
+            self.logger.info(f"solving equation {equation.label}...")
+
             result, exit_status = equation.calculate_solution(
                 mesh,
                 self.assembler,

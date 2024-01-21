@@ -1,5 +1,6 @@
 from simulator.assembler import Assembler, EquationSide
 from simulator.element import ElementType
+from numba import typed, types
 
 
 class ModelEquation:
@@ -7,7 +8,7 @@ class ModelEquation:
 
     def __init__(self, equation_name, solved_variables, assembled_elements, assembler):
         # check if there are duplicated names for the equations
-        if equation_name in EQUATION_NAMES:
+        if equation_name in self.EQUATION_NAMES:
             raise ValueError(
                 f"Equation name {equation_name} is duplicated, check the setup method for this current model to fix this."
             )
@@ -80,21 +81,23 @@ class ModelEquation:
         """Compute a solution for the current asssembled equation"""
         result = {}
         exit_status = {}
+        # get only simulation related parameters from input file data
+        parameters = typed.Dict.empty(types.unicode_type, types.float64)
+        for parameter_name, value in simulation_parameters["parameter"].items():
+            parameters[parameter_name] = value
+
         # assemble and apply boundary conditions for LHS if needed
         if must_update_lhs:
             logger.info("Updating LHS...")
-            self.lhs_assembled = assembler.assemble_lhs(
-                self.label, mesh, simulation_parameters
-            )
+            self.lhs_assembled = assembler.assemble_lhs(self.label, mesh, parameters)
 
         # apply boundary conditions for RHS if needed
         if must_update_rhs:
             logger.info("Updating RHS...")
-            self.rhs_assembled = assembler.assemble_rhs(
-                self.label, mesh, simulation_parameters
-            )
-        output_manager.write_debug("solver/lhs_assembled", lhs_assembled)
-        output_manager.write_debug("solver/rhs_assembled", rhs_assembled)
+            self.rhs_assembled = assembler.assemble_rhs(self.label, mesh, parameters)
+
+        output_manager.write_debug("solver/lhs_assembled", self.lhs_assembled)
+        output_manager.write_debug("solver/rhs_assembled", self.rhs_assembled)
         # TODO: this could be done in parallel
         for variable_name in self.solved_variables:
             variable_id = self.solved_variables.index(variable_name)
@@ -108,6 +111,7 @@ class ModelEquation:
                 # TODO: update the preconditioner here
             if must_update_rhs:
                 logger.info("Applying conditions to RHS...")
+                # TODO: fix here and beyond
                 rhs_condition_applied = (
                     domain_conditions.get_rhs_with_boundary_condition(
                         self.lhs_assembled,

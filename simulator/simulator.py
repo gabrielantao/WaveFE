@@ -164,17 +164,24 @@ class Simulator:
 
     def run(self) -> None:
         """Main function to run simulator based on assembling functions configured for the model"""
+        self.logger.info("Start simulation")
         step_limit = self.simulation_data["simulation"]["steps_limit"]
         dimension = self.mesh.nodes_handler.dimensions
+        self.logger.info("get simulation parameters")
         simulation_parameters = self.get_model_parameters(dimension)
+        self.logger.info("setup the model")
         self.model.setup(self.logger_handler, simulation_parameters)
+        self.logger.info("apply initial conditions")
+        self.model.apply_initial_default_values(self.mesh.nodes_handler)
+        self.domain_conditions.apply_initial_conditions(self.mesh.nodes_handler)
 
-        self.logger.info("Start simulator main loop")
+        self.logger.info("start simulator main loop...")
         # run the simulation main loop
         for step_number in range(step_limit):
             self.logger.info(
                 f"Solving time step {step_number} of {step_limit} (max)..."
             )
+
             must_save_current_result = (
                 step_number % simulation_parameters["output"]["frequency"] == 0
             )

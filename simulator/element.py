@@ -25,7 +25,11 @@ from simulator.element_enums import GroupType, ElementType
     }
 )
 class Node(object):
-    """This class works as a struct to hold node data"""
+    """
+    This class works as a struct to hold node data
+
+    named_group: These groups can be used for example to easly setup boundary conditions.
+    """
 
     def __init__(self, position):
         # node groups
@@ -49,7 +53,7 @@ class NodesHandler(object):
 
     dimensions: int
     nodes: List[Node]
-    moved: bool
+    nodes_moved: bool
 
     def __init__(self, dimensions, positions):
         self.dimensions = dimensions
@@ -58,7 +62,7 @@ class NodesHandler(object):
         )
         # indicate if the mesh moved, its default value is True to force first calculation
         # of parameters that depends on the mesh parameters (e.g. LHS matrix)
-        self.moved = True
+        self.nodes_moved = True
 
     @property
     def total_nodes(self):
@@ -152,7 +156,7 @@ class NodesHandler(object):
         )
 
     def move_nodes(self) -> None:
-        self.moved = False
+        self.nodes_moved = False
         # TODO: implement movement of the mesh based in some function of movement for
         #       the specific groups that must move.
 

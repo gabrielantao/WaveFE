@@ -43,22 +43,7 @@ class DomainConditions:
         with open(conditions_filepath, "rb") as f:
             self.conditions_data = tomllib.load(f)
         self.validate_conditions_data()
-        self.setup_default_initial_conditions(default_initial_values)
-        self.setup_user_defined_conditions(mesh)
-
-    def validate_conditions_data(self):
-        # TODO: do a logical validation here to ensure :
-        # - all group names are valid names
-        # - all variables are valid variable names (just alert if not)
-        # - valid condition type number (raise by now if is not first type not implemented yet)
-        # - alert duplicated conditions and pop from imported data
-        # - break if there are two conditions with same (named group + variable + condition type)
-        # message ambiguous or duplicated
-        pass
-
-    def setup_default_initial_conditions(self, default_initial_values):
-        # TODO: it should load the default initial conditions set for this model
-        # as a dict inside the class for this model
+        # create the conditions
         self.initial_conditions = {
             (
                 condition_data["variable_name"],
@@ -73,8 +58,21 @@ class DomainConditions:
             ): Conditions([], [])
             for condition_data in self.conditions_data["boundary"]
         }
+        self._setup_user_defined_conditions(mesh)
 
-    def setup_user_defined_conditions(self, mesh):
+    def validate_conditions_data(self):
+        # TODO: do a logical validation here to ensure :
+        # - all group names are valid names
+        # - all variables are valid variable names (just alert if not)
+        # - valid condition type number (raise by now if is not first type not implemented yet)
+        # - alert duplicated conditions and pop from imported data
+        # - break if there are two conditions with same (named group + variable + condition type)
+        #   message ambiguous or duplicated
+        # - for now only allow first type condition (value conition) for initial values
+        #   change this for validation process
+        pass
+
+    def _setup_user_defined_conditions(self, mesh):
         """
         Setup the set of indices and values for each variable and condition type configured
         in the condition files loaded.
@@ -92,7 +90,8 @@ class DomainConditions:
                     )
                 if node_in_group:
                     variable_name = condition_data["variable_name"]
-                    condition_type = condition_data["condition_type"]
+                    # only apply first condition type as initial values
+                    condition_type = ConditionType.FIRST.value
                     value = condition_data["value"]
                     self.initial_conditions[
                         (variable_name, condition_type)
@@ -119,6 +118,20 @@ class DomainConditions:
                     self.boundary_conditions[
                         (variable_name, condition_type)
                     ].values.append(value)
+
+    def apply_initial_conditions(self, nodes_handler):
+        """Apply user defined initial values for the variables"""
+        # apply initial condition values for the nodes
+        for variable_condition_type, condition in self.initial_conditions.items():
+            variable_name, _ = variable_condition_type
+            for index, value in zip(condition.indices, condition.values):
+                nodes_handler.nodes[index].variables[variable_name] = value
+        # apply boundary values (first type condition type) for the nodes
+        for variable_condition_type, condition in self.boundary_conditions.items():
+            variable_name, condition_type = variable_condition_type
+            if condition_type == ConditionType.FIRST.value:
+                for index, value in zip(condition.indices, condition.values):
+                    nodes_handler.nodes[index].variables[variable_name] = value
 
     def get_lhs_with_boundary_condition(self, lhs, variable):
         """Return the LHS of equation with boundary conditions applied"""

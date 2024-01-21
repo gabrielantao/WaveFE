@@ -2,6 +2,8 @@ from typing import Any
 from pathlib import Path
 import numpy.typing as npt
 import h5py
+from scipy import sparse as sp
+import numpy as np
 
 from simulator.constants import (
     RESULT_FILE_CURRENT_VERSION,
@@ -101,4 +103,16 @@ class SimulatorOutputWriter:
 
     def write_debug(self, path: str, value):
         if self.must_save_debug:
-            self.debug_file[f"t_{self.step_number}/" + path.strip("/")] = value
+            if isinstance(value, sp._csr.csr_array):
+                major_dim, minor_dim = value.shape
+                minor_indices = value.indices
+                major_indices = np.empty(len(minor_indices), dtype=value.indices.dtype)
+                sp._sparsetools.expandptr(major_dim, value.indptr, major_indices)
+                self.debug_file[
+                    f"t_{self.step_number}/" + path.strip("/") + "/indices"
+                ] = np.array([[i, j] for i, j in zip(major_indices, minor_indices)])
+                self.debug_file[
+                    f"t_{self.step_number}/" + path.strip("/") + "/values"
+                ] = value.data
+            else:
+                self.debug_file[f"t_{self.step_number}/" + path.strip("/")] = value
