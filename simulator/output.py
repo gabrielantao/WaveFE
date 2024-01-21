@@ -4,7 +4,7 @@ import numpy.typing as npt
 import h5py
 from scipy import sparse as sp
 import numpy as np
-
+from application.constants import SIMULATION_RESULT_PATH
 from simulator.constants import (
     RESULT_FILE_CURRENT_VERSION,
     NUMERIC_FILE_CURRENT_VERSION,
@@ -50,7 +50,8 @@ class SimulatorOutputWriter:
         """Create the file handler for results data"""
         if self.must_save_result:
             self.result_file = h5py.File(
-                self.simulation_path / self.RESULT_FILENAME, "w"
+                self.simulation_path / SIMULATION_RESULT_PATH / self.RESULT_FILENAME,
+                "w",
             )
             # holds mesh data like nodal positions and element groups, connectivity, etc.
             self.result_file.create_group("mesh")
@@ -69,7 +70,8 @@ class SimulatorOutputWriter:
         """
         if self.must_save_numeric:
             self.numeric_file = h5py.File(
-                self.simulation_path / self.NUMERIC_FILENAME, "w"
+                self.simulation_path / SIMULATION_RESULT_PATH / self.NUMERIC_FILENAME,
+                "w",
             )
             # write general data
             self.numeric_file["version"] = RESULT_FILE_CURRENT_VERSION
@@ -81,7 +83,9 @@ class SimulatorOutputWriter:
         The models are free to decide how to organize their debug output
         """
         if self.must_save_debug:
-            self.debug_file = h5py.File(self.simulation_path / self.DEBUG_FILENAME, "w")
+            self.debug_file = h5py.File(
+                self.simulation_path / SIMULATION_RESULT_PATH / self.DEBUG_FILENAME, "w"
+            )
             # write general data
             self.debug_file["version"] = RESULT_FILE_CURRENT_VERSION
             self.debug_file["description"] = description
