@@ -1,6 +1,9 @@
+from numba import typed, types
+from scipy import sparse
+
 from simulator.assembler import Assembler, EquationSide
 from simulator.element import ElementType
-from numba import typed, types
+from simulator.cbs_models.report_result import SolverStatusMessage, SolverReport
 
 
 class ModelEquation:
@@ -54,9 +57,6 @@ class ModelEquation:
         variable_name,
     ):
         """Solve the equation using the parameters defined"""
-        logger.info(
-            f"Solving the equation {self.label} for variable {variable_name}..."
-        )
         # TODO: name and the preconditioner here
         return sparse.linalg.cg(
             lhs_condition_applied,
@@ -66,6 +66,22 @@ class ModelEquation:
             maxiter=simulation_parameters["solver"]["steps_limit"],
             # atol=simulation_parameters["solver"]["tolerance_absolute"],
         )
+
+    def get_iteration_solver_report(self, exit_status) -> SolverReport:
+        """Return the iteration status and the message to show the user"""
+        if exit_status == 0:
+            return SolverReport(
+                success=True, status_message=SolverStatusMessage.SUCCESS
+            )
+        elif exit_status > 0:
+            return SolverReport(
+                success=False,
+                status_message=SolverStatusMessage.SOLVER_MAX_ITER_REACHED,
+            )
+        elif exit_status < 0:
+            return SolverReport(
+                success=False, status_message=SolverStatusMessage.ILEGAL_INPUT
+            )
 
     def calculate_solution(
         self,
@@ -79,7 +95,7 @@ class ModelEquation:
         must_update_rhs=True,
     ):
         """Compute a solution for the current asssembled equation"""
-        result = {}
+        output_results = {}
         exit_status = {}
         # get only simulation related parameters from input file data
         parameters = typed.Dict.empty(types.unicode_type, types.float64)
@@ -88,21 +104,21 @@ class ModelEquation:
 
         # assemble and apply boundary conditions for LHS if needed
         if must_update_lhs:
-            logger.info("Updating LHS...")
+            logger.info("updating LHS")
             self.lhs_assembled = assembler.assemble_lhs(self.label, mesh, parameters)
 
         # apply boundary conditions for RHS if needed
         if must_update_rhs:
-            logger.info("Updating RHS...")
+            logger.info("updating RHS")
             self.rhs_assembled = assembler.assemble_rhs(self.label, mesh, parameters)
 
-        output_manager.write_debug("solver/lhs_assembled", self.lhs_assembled)
-        output_manager.write_debug("solver/rhs_assembled", self.rhs_assembled)
+        output_manager.write_debug(f"{self.label}/lhs_assembled", self.lhs_assembled)
+        output_manager.write_debug(f"{self.label}/rhs_assembled", self.rhs_assembled)
         # TODO: this could be done in parallel
         for variable_name in self.solved_variables:
             variable_id = self.solved_variables.index(variable_name)
             if must_update_lhs:
-                logger.info("Applying conditions to LHS...")
+                logger.info("applying conditions to LHS")
                 self.lhs_condition_applied[
                     variable_name
                 ] = domain_conditions.get_lhs_with_boundary_condition(
@@ -110,7 +126,7 @@ class ModelEquation:
                 )
                 # TODO: update the preconditioner here
             if must_update_rhs:
-                logger.info("Applying conditions to RHS...")
+                logger.info("applying conditions to RHS")
                 # TODO: fix here and beyond
                 rhs_condition_applied = (
                     domain_conditions.get_rhs_with_boundary_condition(
@@ -120,19 +136,25 @@ class ModelEquation:
                     )
                 )
             output_manager.write_debug(
-                f"solver/{variable_name}/lhs_condition_applied",
+                f"{self.label}/{variable_name}/lhs_condition_applied",
                 self.lhs_condition_applied[variable_name],
             )
             output_manager.write_debug(
-                f"solver/{variable_name}/rhs_condition_applied", rhs_assembled
+                f"{self.label}/{variable_name}/rhs_condition_applied",
+                rhs_condition_applied,
             )
-            result, exit_code = self.solve(
+
+            # solve the current equation
+            logger.info(
+                f"solving the equation {self.label} for variable {variable_name}..."
+            )
+            current_result, exit_code = self.solve(
                 mesh.nodes_handler,
                 simulation_parameters,
                 self.lhs_condition_applied[variable_name],
                 rhs_condition_applied,
                 variable_name,
             )
-            result[variable_name] = result
-            exit_status[variable_name] = exit_code
-        return result, exit_status
+            output_results[variable_name] = current_result
+            exit_status[variable_name] = self.get_iteration_solver_report(exit_code)
+        return output_results, exit_status

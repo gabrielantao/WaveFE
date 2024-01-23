@@ -16,6 +16,7 @@ from simulator.cbs_models.models.semi_implicit.elements_assembling import (
 )
 from simulator.cbs_models.report_result import IterationReport, IterationStatusMessage
 from simulator.cbs_models.model_equation import ModelEquation
+from simulator.convergence_checker import check_convergence
 
 
 class CBSSemiImplicit(AbstractCBSModel):
@@ -37,10 +38,13 @@ class CBSSemiImplicit(AbstractCBSModel):
         self.logger.info(f"Doing the model setup...")
 
         # setup an assembler instance for this model
+        self.logger.info(f"doing setup of assembler setup")
         self.assembler = Assembler()
 
         # check if it should use lumped mass to solve the problem
         use_lumped_mass = not simulation_parameters["simulation"]["transient"]
+
+        self.logger.info(f"doing setup of assembling equations")
 
         #################################
         ### CREATE EQUATION OF STEP 1 ###
@@ -144,8 +148,10 @@ class CBSSemiImplicit(AbstractCBSModel):
 
         must_update_lhs = mesh.nodes_handler.nodes_moved
         dimensions = mesh.nodes_handler.dimensions
+        variables_names = self.get_variables(dimensions)
+
         self.logger.info("update old variable values with current value")
-        mesh.nodes_handler.update_variables_old(self.get_variables(dimensions))
+        mesh.nodes_handler.update_variables_old(variables_names)
         # solve the sequence of registered equations for each variable
         for equation in self.equations:
             self.logger.info(f"solving equation {equation.label}...")
@@ -161,7 +167,7 @@ class CBSSemiImplicit(AbstractCBSModel):
             )
             # this could be done in parallel
             for variable in equation.solved_variables:
-                solver_report = self.get_iteration_solver_report(exit_status[variable])
+                solver_report = exit_status[variable]
                 mesh.nodes_handler.update_variable_values(variable, result[variable])
                 if not solver_report.success:
                     return IterationReport(
@@ -172,4 +178,6 @@ class CBSSemiImplicit(AbstractCBSModel):
                     )
 
         mesh.nodes_handler.move_nodes()
-        return self.check_convergence(mesh.nodes_handler, simulation_parameters)
+        return check_convergence(
+            mesh.nodes_handler, variables_names, simulation_parameters
+        )

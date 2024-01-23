@@ -3,6 +3,7 @@ from dataclasses import dataclass
 from enum import Enum, auto
 
 import tomllib
+import numpy as np
 from simulator.mesh import Mesh
 
 
@@ -151,10 +152,14 @@ class DomainConditions:
         Return the RHS of equation with boundary conditions applied
         NOTE: this function expect a one-dimension vector for RHS
         """
-        boundary_conditions = self.boundary_conditions[(variable, condition_type)]
+        # first condition application
+        boundary_conditions = self.boundary_conditions[
+            (variable, ConditionType.FIRST.value)
+        ]
         offset_vector = self._calculate_rhs_offset_values(lhs, variable)
         rhs_boundary_applied = rhs + offset_vector
         rhs_boundary_applied[boundary_conditions.indices] = boundary_conditions.values
+        # TODO: do the calculations for the other condition_types
         return rhs_boundary_applied
 
     def _calculate_rhs_offset_values(self, lhs, variable: str):
@@ -162,14 +167,15 @@ class DomainConditions:
         boundary_conditions = self.boundary_conditions[
             (variable, ConditionType.FIRST.value)
         ]
-        offset = np.zeros(lhs.shape[0], dtype=np.float64)
+        total_rows = lhs.shape[0]
+        offset = np.zeros((total_rows, 1), dtype=np.float64)
         # accumulate column vectors in sparse matrix with boundary indices
         for column_id, value in zip(
             boundary_conditions.indices, boundary_conditions.values
         ):
-            offset -= lhs[:, column_id] * value
+            offset -= lhs[:, [column_id]] * value
         # TODO: apply conditions of second type here ...
         # ensure zeros in offset vector in positions where boundary are applied
         # this is needed to not mess values when other t
         offset[boundary_conditions.indices] = 0.0
-        return offset
+        return offset.reshape(total_rows)

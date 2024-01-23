@@ -1,9 +1,8 @@
 from abc import ABC, abstractmethod
 from pathlib import Path
+import numpy as np
 
 from simulator.assembler import Assembler
-from simulator.cbs_models.report_result import SolverStatusMessage, SolverReport
-from simulator.cbs_models.report_result import IterationReport, IterationStatusMessage
 
 
 class AbstractCBSModel(ABC):
@@ -45,31 +44,3 @@ class AbstractCBSModel(ABC):
         for node in nodes_handler.nodes:
             for variable_name, value in self.DEFAULT_INITIAL_VALUES.items():
                 node.variables[variable_name] = value
-
-    def get_iteration_solver_report(self, exit_status) -> SolverReport:
-        """Return the iteration status and the message to show the user"""
-        if exit_status == 0:
-            return SolverReport(success=True, message=SolverStatusMessage.SUCCESS)
-        elif exit_status > 0:
-            return SolverReport(
-                success=False, message=SolverStatusMessage.SOLVER_MAX_ITER_REACHED
-            )
-        elif exit_status < 0:
-            return SolverReport(success=False, message=SolverStatusMessage.ILEGAL_INPUT)
-
-    def check_convergence(
-        self, nodes_handler, simulation_parameters
-    ) -> IterationReport:
-        """Do the calculations to check if the current step converged"""
-        relative_tolerance = simulation_parameters["simulation"]["tolerance_relative"]
-        absolute_tolerance = simulation_parameters["simulation"]["tolerance_absolute"]
-        for variable in self.VARIABLES:
-            converged = np.allclose(
-                nodes_handler.get_variable_values(variable),
-                nodes_handler.get_variable_old_values(variable),
-                rtol=relative_tolerance[variable],
-                atol=absolute_tolerance[variable],
-            )
-            if not converged:
-                return IterationReport(False, False, IterationStatusMessage.NORMAL)
-        return IterationReport(True, True, IterationStatusMessage.CONVERGED)
