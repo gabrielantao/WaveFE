@@ -193,7 +193,12 @@ class Simulator:
                 step_number,
             )
             if must_save_current_result:
-                self.output_manager.write_result(simulation_parameters)
+                self.output_manager.write_result(
+                    step_number,
+                    self.mesh.nodes_handler.get_current_variables_values(
+                        self.model.get_variable_names(dimension)
+                    ),
+                )
             if iteraction_report.stop_simulation:
                 if iteraction_report.converged:
                     self.logger.info(iteraction_report.status_message)
@@ -202,7 +207,12 @@ class Simulator:
                 # if the result was not saved for this timestep,
                 # then force the saving to help debuging process
                 if not must_save_current_result:
-                    self.output_manager.write_result(simulation_parameters)
+                    self.output_manager.write_result(
+                        step_number,
+                        mesh.nodes_handler.get_current_variables_values(
+                            self.model.get_variable_names(dimension)
+                        ),
+                    )
                 break
             # TODO: should check here if the result is diverging for some amount of time steps
             #       calculate the difference between current and old variable values

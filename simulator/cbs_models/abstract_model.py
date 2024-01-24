@@ -17,6 +17,11 @@ class AbstractCBSModel(ABC):
         self.DEFAULT_INITIAL_VALUES = {}
 
     @abstractmethod
+    def get_variable_names():
+        """Return the variable names for this model"""
+        pass
+
+    @abstractmethod
     def get_default_initial_values(self, dimensions):
         """This return the initial values that must used for the variables"""
         pass

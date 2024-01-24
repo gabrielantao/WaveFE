@@ -32,13 +32,16 @@ class Node(object):
     """
 
     def __init__(self, position):
-        # node groups
+        # groups data
         self.geometrical_group = 0
         self.physical_group = 0
         self.named_group = 0
+        # kinematics data
         self.position = position
         # TODO: include node velocity and acceleration here...
-        # it maps the name of the variable to number of the column it belongs to
+        # variables data
+        # it maps the name of the variable to its value in this node
+        # in the current (variables) and last (variables_old) timestep
         self.variables = typed.Dict.empty(
             key_type=types.unicode_type, value_type=types.float64
         )
@@ -87,6 +90,18 @@ class NodesHandler(object):
                 for node_id in range(self.total_nodes)
             ]
         )
+
+    def get_current_variables_values(self, variables_names):
+        """Return the variable values for all nodes, for all variables"""
+        variables_values = typed.Dict.empty(
+            key_type=types.unicode_type, value_type=types.float64[:]
+        )
+        for variable_name in variables_names:
+            values = np.empty(self.total_nodes, dtype=np.float64)
+            for node_index in range(self.total_nodes):
+                values[node_index] = self.nodes[node_index].variables[variable_name]
+            variables_values[variable_name] = values
+        return variables_values
 
     def get_variable_old_values(self, variable_name):
         """Return the variable old values given a node id"""

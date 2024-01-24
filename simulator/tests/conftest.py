@@ -242,52 +242,52 @@ def assembler():
     # register functions for left-hand side of solved equations
     assembler.register_function(
         "step 1 mass_lumped",
-        EquationSide.LHS.value,
-        ElementType.TRIANGLE.value,
+        EquationSide.LHS,
+        ElementType.TRIANGLE,
         assemble_mass_lumped_lhs,
     )
     assembler.register_function(
         "step 1 mass_transient",
-        EquationSide.LHS.value,
-        ElementType.TRIANGLE.value,
+        EquationSide.LHS,
+        ElementType.TRIANGLE,
         assemble_mass_lhs,
     )
     assembler.register_function(
         "step 2 stiffness",
-        EquationSide.LHS.value,
-        ElementType.TRIANGLE.value,
+        EquationSide.LHS,
+        ElementType.TRIANGLE,
         assemble_stiffness_lhs,
     )
     assembler.register_function(
         "step 3 mass_lumped",
-        EquationSide.LHS.value,
-        ElementType.TRIANGLE.value,
+        EquationSide.LHS,
+        ElementType.TRIANGLE,
         assemble_mass_lumped_lhs,
     )
     assembler.register_function(
         "step 3 mass_transient",
-        EquationSide.LHS.value,
-        ElementType.TRIANGLE.value,
+        EquationSide.LHS,
+        ElementType.TRIANGLE,
         assemble_mass_lhs,
     )
     # register functions to be used to assemble the elements
     # for right-side of each equation solved by the model
     assembler.register_function(
         "step 1",
-        EquationSide.RHS.value,
-        ElementType.TRIANGLE.value,
+        EquationSide.RHS,
+        ElementType.TRIANGLE,
         assemble_element_rhs_step_1,
     )
     assembler.register_function(
         "step 2",
-        EquationSide.RHS.value,
-        ElementType.TRIANGLE.value,
+        EquationSide.RHS,
+        ElementType.TRIANGLE,
         assemble_element_rhs_step_2,
     )
     assembler.register_function(
         "step 3",
-        EquationSide.RHS.value,
-        ElementType.TRIANGLE.value,
+        EquationSide.RHS,
+        ElementType.TRIANGLE,
         assemble_element_rhs_step_3,
     )
     # register how many variables is solved by each equation

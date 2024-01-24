@@ -2,6 +2,7 @@ from typing import Any
 from pathlib import Path
 import logging
 from scipy import sparse
+import numpy as np
 
 from simulator.cbs_models.abstract_model import AbstractCBSModel
 from simulator.assembler import Assembler, EquationSide
@@ -114,7 +115,7 @@ class CBSSemiImplicit(AbstractCBSModel):
             + ", ".join([equation.label for equation in self.equations])
         )
 
-    def get_variables(self, dimensions):
+    def get_variable_names(self, dimensions):
         """Get the list of model variables"""
         return [f"u_{dimension + 1}" for dimension in range(dimensions)] + ["p"]
 
@@ -139,7 +140,7 @@ class CBSSemiImplicit(AbstractCBSModel):
         output_manager,
         simulation_parameters,
         step_number: int,
-    ):
+    ) -> IterationReport:
         """Run the three steps of semi-implicit model"""
         # status variables
         success = False
@@ -148,7 +149,50 @@ class CBSSemiImplicit(AbstractCBSModel):
 
         must_update_lhs = mesh.nodes_handler.nodes_moved
         dimensions = mesh.nodes_handler.dimensions
-        variables_names = self.get_variables(dimensions)
+        variables_names = self.get_variable_names(dimensions)
+
+        # update elements internal data
+        if mesh.nodes_handler.nodes_moved:
+            self.logger.info(
+                "update the element parameters, geometry, delta time and shape factors"
+            )
+            for element_container in mesh.get_element_containers():
+                element_container.update_geometry_parameters(mesh.nodes_handler)
+                element_container.update_local_time_itervals(
+                    mesh.nodes_handler,
+                    simulation_parameters["simulation"]["safety_dt_factor"],
+                    simulation_parameters["parameter"]["Re"],
+                )
+                element_container.update_shape_factors(mesh.nodes_handler)
+                # output element properties to debug
+                output_manager.write_debug(
+                    f"elements_data/{element_container.element_type}/b",
+                    np.array([element.b for element in element_container.elements]),
+                )
+                output_manager.write_debug(
+                    f"elements_data/{element_container.element_type}/c",
+                    np.array([element.c for element in element_container.elements]),
+                )
+                output_manager.write_debug(
+                    f"elements_data/{element_container.element_type}/dt",
+                    np.array([element.dt for element in element_container.elements]),
+                )
+                output_manager.write_debug(
+                    f"elements_data/{element_container.element_type}/length",
+                    np.array(
+                        [element.length for element in element_container.elements]
+                    ),
+                )
+                output_manager.write_debug(
+                    f"elements_data/{element_container.element_type}/area",
+                    np.array([element.area for element in element_container.elements]),
+                )
+                output_manager.write_debug(
+                    f"elements_data/{element_container.element_type}/volume",
+                    np.array(
+                        [element.volume for element in element_container.elements]
+                    ),
+                )
 
         self.logger.info("update old variable values with current value")
         mesh.nodes_handler.update_variables_old(variables_names)

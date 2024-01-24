@@ -127,7 +127,6 @@ class ModelEquation:
                 # TODO: update the preconditioner here
             if must_update_rhs:
                 logger.info("applying conditions to RHS")
-                # TODO: fix here and beyond
                 rhs_condition_applied = (
                     domain_conditions.get_rhs_with_boundary_condition(
                         self.lhs_assembled,

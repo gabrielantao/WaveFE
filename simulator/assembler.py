@@ -109,10 +109,12 @@ class Assembler:
         indices_row, indices_column, values = _get_indices_values_sparse_matrix(
             global_matrix_values
         )
-        return sp.sparse.csr_array(
+        lhs = sp.sparse.csr_array(
             (values, (indices_row, indices_column)),
             shape=(mesh.nodes_handler.total_nodes, mesh.nodes_handler.total_nodes),
         )
+        lhs.eliminate_zeros()
+        return lhs
 
     def assemble_rhs(
         self,
