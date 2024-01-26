@@ -38,7 +38,7 @@ name = "Conjugate Gradient"
 preconditioner = "Jacobi"
 steps_limit = 10000
 tolerance_absolute = 0.0
-tolerance_relative = 0.1
+tolerance_relative = 1e-8
 
 [output]
 frequency = 100

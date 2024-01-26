@@ -90,11 +90,14 @@ class SimulatorOutputWriter:
             self.debug_file["version"] = RESULT_FILE_CURRENT_VERSION
             self.debug_file["description"] = description
 
-    def write_result(self, step_number: int, data: dict[str, npt.ArrayLike]) -> None:
-        """Write results data to the hdf5"""
+    def update_step_number(self, step_number):
+        """Update the current step number"""
         self.step_number = step_number
+
+    def write_result(self, data: dict[str, npt.ArrayLike]) -> None:
+        """Write results data to the hdf5"""
         if self.must_save_result:
-            path = f"result/t_{step_number}"
+            path = f"result/t_{self.step_number}"
             for variable_name, values in data.items():
                 self.result_file[f"{path}/{variable_name}"] = values
 

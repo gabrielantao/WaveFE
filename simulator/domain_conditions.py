@@ -134,11 +134,11 @@ class DomainConditions:
                 for index, value in zip(condition.indices, condition.values):
                     nodes_handler.nodes[index].variables[variable_name] = value
 
-    def get_lhs_with_boundary_condition(self, lhs, variable):
+    def get_lhs_with_boundary_condition(self, lhs, variable_name):
         """Return the LHS of equation with boundary conditions applied"""
         lhs_boundary_applied = lhs.copy()
         for index in self.boundary_conditions[
-            (variable, ConditionType.FIRST.value)
+            (variable_name, ConditionType.FIRST.value)
         ].indices:
             lhs_boundary_applied[:, index] = 0.0
             lhs_boundary_applied[index, :] = 0.0
@@ -147,25 +147,25 @@ class DomainConditions:
         # TODO: check how to apply condition for the other type here
         return lhs_boundary_applied
 
-    def get_rhs_with_boundary_condition(self, lhs, rhs, variable):
+    def get_rhs_with_boundary_condition(self, lhs, rhs, variable_name):
         """
         Return the RHS of equation with boundary conditions applied
         NOTE: this function expect a one-dimension vector for RHS
         """
         # first condition application
         boundary_conditions = self.boundary_conditions[
-            (variable, ConditionType.FIRST.value)
+            (variable_name, ConditionType.FIRST.value)
         ]
-        offset_vector = self._calculate_rhs_offset_values(lhs, variable)
+        offset_vector = self._calculate_rhs_offset_values(lhs, variable_name)
         rhs_boundary_applied = rhs + offset_vector
         rhs_boundary_applied[boundary_conditions.indices] = boundary_conditions.values
         # TODO: do the calculations for the other condition_types
         return rhs_boundary_applied
 
-    def _calculate_rhs_offset_values(self, lhs, variable: str):
+    def _calculate_rhs_offset_values(self, lhs, variable_name: str):
         """Calculate the vector to be added to rhs vector due boundary condition application"""
         boundary_conditions = self.boundary_conditions[
-            (variable, ConditionType.FIRST.value)
+            (variable_name, ConditionType.FIRST.value)
         ]
         total_rows = lhs.shape[0]
         offset = np.zeros((total_rows, 1), dtype=np.float64)
@@ -179,3 +179,9 @@ class DomainConditions:
         # this is needed to not mess values when other t
         offset[boundary_conditions.indices] = 0.0
         return offset.reshape(total_rows)
+
+    def apply_first_type_condition(self, variable_name, variable_values):
+        boundary_conditions = self.boundary_conditions[
+            (variable_name, ConditionType.FIRST.value)
+        ]
+        variable_values[boundary_conditions.indices] = boundary_conditions.values

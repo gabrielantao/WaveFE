@@ -181,7 +181,7 @@ class Simulator:
             self.logger.info(
                 f"Solving time step {step_number} of {step_limit} (max)..."
             )
-
+            self.output_manager.update_step_number(step_number)
             must_save_current_result = (
                 step_number % simulation_parameters["output"]["frequency"] == 0
             )
@@ -194,7 +194,6 @@ class Simulator:
             )
             if must_save_current_result:
                 self.output_manager.write_result(
-                    step_number,
                     self.mesh.nodes_handler.get_current_variables_values(
                         self.model.get_variable_names(dimension)
                     ),
@@ -208,12 +207,12 @@ class Simulator:
                 # then force the saving to help debuging process
                 if not must_save_current_result:
                     self.output_manager.write_result(
-                        step_number,
                         mesh.nodes_handler.get_current_variables_values(
                             self.model.get_variable_names(dimension)
                         ),
                     )
                 break
+
             # TODO: should check here if the result is diverging for some amount of time steps
             #       calculate the difference between current and old variable values
             # TODO: print dynamic log in terminal for the evolution of vars difference and log it in the file as well
