@@ -1,0 +1,25 @@
+[project]
+name = "wave"
+version = "0.1.0"
+description = "Characteristic-Based Split (CBS) simulator"
+authors = ["Gabriel Antão <gabrielantao@poli.ufrj.br>"]
+channels = ["conda-forge"]
+platforms = ["linux-64"]
+
+[tasks]
+#setvars = "export PKG_CONFIG_PATH=./.pixi/env/"
+#setvarsa = "export PKG_CONFIG_PATH=./.pixi/env/"
+
+[dependencies]
+petsc = ">=3.20.3,<3.21"
+gfortran = ">=13.2.0,<13.3"
+waf = ">=2.0.26,<2.1"
+pytest = ">=8.0.0,<8.1"
+numpy = ">=1.26.4,<1.27"
+pytest-regressions = ">=2.5.0,<2.6"
+h5py = ">=3.10.0,<3.11"
+matplotlib = ">=3.8.2,<3.9"
+gmsh = ">=4.12.2,<4.13"
+meshio = ">=5.3.5,<5.4"
+pydantic = ">=2.6.1,<2.7"
+python = ">=3.12.1,<3.13"
