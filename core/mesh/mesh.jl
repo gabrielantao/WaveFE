@@ -1,5 +1,6 @@
-# TODO: this should be a module (???)
+module Mesh
 
+# the abstract types used in this module...
 
 """A generic single element"""
 abstract type Element end 
@@ -13,6 +14,7 @@ depending on the dimension of the mesh
 """
 abstract type ElementsSet end
 
+include("../../common.jl")
 
 # include files for the elements and containers 
 include("./geometry.jl")
@@ -20,6 +22,13 @@ include("./elements/nodes.jl")
 include("./elements/segments.jl")
 include("./elements/triangles.jl")
 include("./elements/quadrilaterals.jl")
+
+
+@enum InterpolationOrder begin
+    ORDER_ONE = 1
+    ORDER_TWO = 2
+    ORDER_THREE = 3
+end
 
 
 @enum Dimension begin
@@ -52,12 +61,14 @@ mutable struct Mesh
     dimension::Dimension
     nodes::NodesContainer
     elements::ElementsSet
+    interpolation_order::InterpolationOrder
 end
 
 
 """Import a mesh from files in cache path."""
 function load_mesh(input_data, simulation_parameters)
     nodes = load_nodes(input_data)
+    # get the dimension of the mesh
     if input_data["mesh"]["dimension"] == 1 
         dimension = UNIDIMENSIONAL
         elements = UniDimensionalElements(
@@ -73,11 +84,20 @@ function load_mesh(input_data, simulation_parameters)
         dimension = TRIDIMENSIONAL
         # TODO: implement here the tridimensional elements
     end
+    # get the interpolation order for the mesh
+    if simulation_parameters["mesh"]["interpolation_order"] == 1
+        interpolation_order = ORDER_ONE
+    elseif simulation_parameters["mesh"]["interpolation_order"] == 2
+        interpolation_order = ORDER_TWO
+    elseif simulation_parameters["mesh"]["interpolation_order"] == 3
+        interpolation_order = ORDER_THREE
+    end
 
     return Mesh(
         dimension, 
         nodes, 
-        elements
+        elements,
+        interpolation_order
     )
 end
 
@@ -101,9 +121,6 @@ function update_elements!(
     unknowns_handler::UnknownsHandler,
     model_parameters::ModelParameters
     )
-     # logger.info(
-        #     "update the element parameters, geometry, delta time and shape factors"
-        # )
     for element_container in get_containers(mesh)
         update_properties!(
             element_container, 
@@ -113,3 +130,6 @@ function update_elements!(
         ) 
     end
 end
+
+
+end #module

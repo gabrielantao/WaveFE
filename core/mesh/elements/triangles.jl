@@ -111,7 +111,8 @@ function update_local_time_interval!(
     Re::Float64,
     safety_factor::Float64
 )    
-    velocities = calculate_velocity_moduli(unknowns_handler)
+    # get the velocities moduli
+    velocities = sqrt.(unknowns_handler.values["u_1"] .^2 + unknowns_handler.values["u_2"] .^2)
     for element in elements_container
         h = calculate_specific_sizes(element, nodes_container)
         max_velocity = maximum(velocities[element.connectivity])

@@ -81,7 +81,8 @@ function get_positions_z(nodes::NodesContainer, nodes_ids::Vector{Int32})
     return [nodes.series[node_id].position[3] for node_id in nodes_ids]
 end
 
-function move(nodes::ContainerNodes)
+
+function move!(nodes::ContainerNodes)
     nodes.moved = False
     # TODO: implement movement of the mesh based in some function of movement for
     #       the specific groups that must move.
