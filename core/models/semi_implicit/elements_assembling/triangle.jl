@@ -36,18 +36,18 @@ It depends on velocity so it's updated every time step
 ref: Nithiarasu eq 7.153 pag 208
 """
 function calculate_momentum_convection(element::Triangle, parameters::Dict{String, Float64})  
-        b = element.b
-        c = element.c
-        # u_1 and u_2 are velocity in x and y direction, 
-        # each position of vector is for one node in element 
-        # u_1 = [u_1i, u_1j, u_1k, ...]
-        # u_2 = [u_2i, u_2j, u_2k, ...]
-        u_1 = element.old_values["u_1"]
-        u_2 = element.old_values["u_2"]
-        u_1_sum = sum(u_1)
-        u_2_sum = sum(u_2)
-        # ((2.0 * area) * (1 / 24.0)) .* ((u_1_sum .+ u_1) * b' + (u_2_sum .+ u_2) * c') 
-        return (element.area / 12.0) .* ((u_1_sum .+ u_1) * b' + (u_2_sum .+ u_2) * c') 
+    b = element.b
+    c = element.c
+    # u_1 and u_2 are velocity in x and y direction, 
+    # each position of vector is for one node in element 
+    # u_1 = [u_1i, u_1j, u_1k, ...]
+    # u_2 = [u_2i, u_2j, u_2k, ...]
+    u_1 = element.old_values["u_1"]
+    u_2 = element.old_values["u_2"]
+    u_1_sum = sum(u_1)
+    u_2_sum = sum(u_2)
+    # ((2.0 * area) * (1 / 24.0)) .* ((u_1_sum .+ u_1) * b' + (u_2_sum .+ u_2) * c') 
+    return (element.area / 12.0) .* ((u_1_sum .+ u_1) * b' + (u_2_sum .+ u_2) * c') 
 end
 
 

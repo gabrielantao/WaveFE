@@ -1,14 +1,11 @@
 module Wave
 
+# TODO: check if these packages are really needed here...
+#using Statistics
+#using Dates
+#using ResumableFunctions
+#using ProgressMeter
 using TOML
-using Statistics
-using Dates
-using SparseArrays
-using LinearAlgebra
-using ResumableFunctions
-using ProgressMeter
-using Preconditioners
-using IterativeSolvers
 using HDF5
 using ArgParse
 
@@ -37,18 +34,13 @@ function run_simulator()
     parsed_args = parse_commandline()
     folder = parsed_args["folder"]
 
-    # setup simulation structures
+    # input all the relevant data to build the model 
+    input_data = h5open(joinpath(folder, "cache", "input.hdf5"), "r")
     simulation_parameters = TOML.parsefile(joinpath(folder, "cache", "simulation.toml"))
 
-    # file with input relevant data to build Simulator struct
-    input_data = h5open(joinpath(folder, "cache", "input.hdf5"), "r")
-
-    model = get_model(input_data, simulation_parameters)
-    mesh = load_mesh(input_data, simulation_parameters)
-    domain_conditions = load_domain_conditions(input_data, simulation_parameters)
+    # get the model based in the simulation model defined in input file
+    model = build_model(input_data, simulation_parameters)
     
-    # TODO: load parameters to the right structs, e.g. tolerances to the checker and solver
-
     # TODO: create output manager here
     # create output handler
     output_manager = create_output_manager(
@@ -59,83 +51,30 @@ function run_simulator()
         simulation_info["output"]["save_debug"]
     )
 
-    # run the main loop
-    main_loop(
-        model,
-        mesh,
-        domain_conditions,
-        output_manager,
-        simulation_parameters
-    )
-end
-
-
-function main_loop(
-    model,
-    mesh,
-    domain_conditions,
-    output_manager,
-    simulation_parameters,
-    
-)
-    # TODO: fix this function ....
 
     total_step_limits = simulation_parameters["simulation"]["steps_limit"]
-    # progress = ProgressUnknown("running... ", spinner=true, color = :white)
-    # # values that come from cache info and simulation file
-    # parameters = Dict{String, Float64}(simulation_info["parameter"])
-    # safety_factor = simulation_info["simulation"]["safety_dt_factor"]
-    # simulation_method = simulation_info["simulation"]["method"]
-    # steps_limit = simulation_info["simulation"]["steps_limit"]
-    # tolerance_absolute = Dict{String, Float64}(
-    #     simulation_info["simulation"]["tolerance_absolute"]
-    # )
-    # tolerance_relative = Dict{String, Float64}(
-    #     simulation_info["simulation"]["tolerance_relative"]
-    # )
-
-    # timestep_counter = 1
+    # progress = ProgressUnknown("running... ", spinner=true, color = :white)  
     # elapsed_time = @elapsed begin 
-    #     # Run main loop 
-    #     for timestep_counter in range(1, steps_limit) 
-    #         ProgressMeter.next!(progress)
+    
+    # Run main loop 
+    for timestep_counter in range(1, total_step_limits) 
+        # ProgressMeter.next!(progress)
+        
+        run_iteration(model)
+        # stop simulation loop if converged
+        if all(values(model.unknowns_handler.converged))
+            # TODO: output values here
+            break
+        end
+        # TODO: output values here
+    end
 
-    #         # update all mesh properties
-    #         update(mesh, parameters, safety_factor)
-            
-    #         # calculate one cbs step
-    #         calculate_cbs_step(solver, mesh, simulation_method, parameters)
-
-    #         # update convergence status
-    #         convergence = check_variables_convergence(
-    #             mesh.nodes, 
-    #             tolerance_absolute,
-    #             tolerance_relative
-    #         )
-            
-    #         # write results to output file and convergence
-    #         write_result_data(output, mesh.nodes, timestep_counter)
-    #         write_convergence_data(output, convergence, timestep_counter)
-
-    #         # stop simulation loop if converged
-    #         if all([converge for converge in values(convergence)])  
-    #             break
-    #         end 
-
-    #         # copy last result to a buffer in nodes (old_values)
-    #         update_old_values(mesh.nodes)
-
-    #         # reset simulation flags
-    #         mesh.changed = false           
-    #     end
     #     ProgressMeter.finish!(progress)
     # end # elapsed time macro
-    # write_additional_result_data(
-    #     output, 
-    #     Dict{String, Any}("elapsed_time" => elapsed_time)
-    # )
-    # close_files(output)
+    # TODO: write elapsed time and total steps elapsed
+    # TODO: close the output file
 end
+
 
 ##############################
 ### RUN THE WAVE SIMULATOR ###

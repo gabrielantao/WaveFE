@@ -1,6 +1,17 @@
 module ModuleSemiImplicit
 
+using LinearAlgebra
+using SparseArrays
+using Preconditioners
+using IterativeSolvers
+
+# implementation for the mesh and domain conditions
+# to be used by this model
 include("../../common.jl")
+include("../../mesh/mesh.jl")
+include("../../domain_conditions.jl")
+
+# include assembling functions
 include("./elements_assembling/segment.jl")
 include("./elements_assembling/triangle.jl")
 include("./elements_assembling/quadrilateral.jl")
@@ -22,15 +33,18 @@ TODO: include description here ....
 """
 struct ModelSemiImplicit
     name::String
+    mesh::Mesh
+    domain_conditions::DomainConditions
     unknowns_handler::Vector{String}
     equations::Vector{ModelEquation}
-    # additional parameters for the current model
     additional_parameters::ModelSemiImplicitParameters
 
-    function SemiImplicit(input_data, simulation_parameters)
+    function ModelSemiImplicit(input_data, simulation_parameters)
         unkowns_handler = load_unkowns_handler(input_data, simulation_parameters)
-        # TODO: configure here the equations...
-        
+        mesh = load_mesh(input_data, simulation_parameters)
+        domain_conditions = load_domain_conditions(input_data)
+
+        # configure the additional parameters
         transient = simulation_parameters["simulation"]["transient"]
         use_lumped_mass = !transient
         safety_dt_factor = simulation_parameters["simulation"]["safety_dt_factor"]
@@ -41,8 +55,28 @@ struct ModelSemiImplicit
             adimensionals
         )
 
+        # TODO: configure here the equations...
+        solver = load_solver(simulation_parameters)
+        mass_lhs_diagonal = use_lumped_mass
+        # TODO: implement here...
+        # step 1 equation
+        # assembler = Assembler(
+        #     mass_lhs_diagonal, 
+        #     mass_lhs_diagonal
+        # )
+        #assemble_indices!(assembler, mesh)
+        # equation_1 = ModelEquation(
+        #     "step 1",
+        #     ["u_$i" for i in Int(mesh.dimension)]
+        #     assembler,
+        #     solver,
+        # )
+
+
         new(
             "CBS Semi-implicit", 
+            mesh,
+            domain_conditions,
             unkowns_handler, 
             equations,
             additional_parameters
@@ -51,11 +85,8 @@ struct ModelSemiImplicit
 end
 
 
-function run_iteration(
-    model::ModelSemiImplicit,
-    mesh::Mesh,
-    domain_conditions::DomainConditions
-)
+"""Run one iteration for this model"""
+function run_iteration(model::ModelSemiImplicit)
     # check if it must update the LHS matrix only if the mesh has moved its nodes
     must_update_lhs = mesh.nodes.moved
  

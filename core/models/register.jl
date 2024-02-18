@@ -3,7 +3,7 @@ using ModuleSemiImplicit
 
 
 """Get a registered model implemented in the directory models"""
-function get_model(input_data, simulation_parameters)
+function build_model(input_data, simulation_parameters)
     model_name = simulation_parameters["simulation"]["model"]
     if model_name == "CBS Semi-Implicit"
         return ModelSemiImplicit(input_data, simulation_parameters)

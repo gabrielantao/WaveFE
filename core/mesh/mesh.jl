@@ -1,7 +1,4 @@
-module Mesh
-
 # the abstract types used in this module...
-
 """A generic single element"""
 abstract type Element end 
 
@@ -13,8 +10,6 @@ A generic element container that groups containers
 depending on the dimension of the mesh
 """
 abstract type ElementsSet end
-
-include("../../common.jl")
 
 # include files for the elements and containers 
 include("./geometry.jl")
@@ -70,27 +65,27 @@ function load_mesh(input_data, simulation_parameters)
     nodes = load_nodes(input_data)
     # get the dimension of the mesh
     if input_data["mesh"]["dimension"] == 1 
-        dimension = UNIDIMENSIONAL
+        dimension = UNIDIMENSIONAL::Dimension
         elements = UniDimensionalElements(
             load_segments(input_data)
         )
     elseif input_data["mesh"]["dimension"] == 2
-        dimension = BIDIMENSIONAL
+        dimension = BIDIMENSIONAL::Dimension
         elements = BiDimensionalElements(
             load_triangles(input_data), 
             load_quadrilaterals(input_data)
         )
     elseif input_data["mesh"]["dimension"] == 3
-        dimension = TRIDIMENSIONAL
+        dimension = TRIDIMENSIONAL::Dimension
         # TODO: implement here the tridimensional elements
     end
     # get the interpolation order for the mesh
     if simulation_parameters["mesh"]["interpolation_order"] == 1
-        interpolation_order = ORDER_ONE
+        interpolation_order = ORDER_ONE::InterpolationOrder
     elseif simulation_parameters["mesh"]["interpolation_order"] == 2
-        interpolation_order = ORDER_TWO
+        interpolation_order = ORDER_TWO::InterpolationOrder
     elseif simulation_parameters["mesh"]["interpolation_order"] == 3
-        interpolation_order = ORDER_THREE
+        interpolation_order = ORDER_THREE::InterpolationOrder
     end
 
     return Mesh(
@@ -104,11 +99,11 @@ end
 
 """Function to return reference to the elements containers used for the mesh"""
 function get_containers(mesh::Mesh)
-    if mesh.dimension == UNIDIMENSIONAL
+    if mesh.dimension == UNIDIMENSIONAL::Dimension
         return [mesh.elements.segments]
-    elseif mesh.dimension == BIDIMENSIONAL
+    elseif mesh.dimension == BIDIMENSIONAL::Dimension
         return [mesh.elements.triangles, mesh.elements.quadrilaterals]
-    elseif mesh.dimension  == TRIDIMENSIONAL
+    elseif mesh.dimension  == TRIDIMENSIONAL::Dimension
         throw("Not supported for tridimensional elements yet.")
     end
 end
@@ -130,6 +125,3 @@ function update_elements!(
         ) 
     end
 end
-
-
-end #module

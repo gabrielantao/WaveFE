@@ -4,9 +4,10 @@ mutable struct UnknownsHandler
     values::Dict{String, Vector{Float64}}
     # last time step values of unknowns 
     old_values::Dict{String, Vector{Float64}}
-    convergence::Dict{String, Bool}
+    converged::Dict{String, Bool}
     convergence_tolerance_relative::Dict{String, Float64}
     convergence_tolerance_absolute::Dict{String, Float64}
+    # TODO: register a variable here with the only variables that must be checked 
 end
 
 
@@ -37,7 +38,7 @@ end
 """Check values for convergence of unknowns"""
 function check_unknowns_convergence!(unknowns_handler::UnknownsHandler)
     for unknown in unknowns_handler.variables
-        unknowns_handler.convergence[unknown] = all(
+        unknowns_handler.converged[unknown] = all(
             isapprox.(
                 unknowns_handler.values[unknown], 
                 unknowns_handler.old_values[unknown], 

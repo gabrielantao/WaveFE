@@ -5,7 +5,7 @@ Second type condtions specifies the values of the derivative applied at the boun
 @enum ConditionType begin
     FIRST = 1
     SECOND = 2
-     # TODO: maybe implement in the future the other conditions (Cauchy and Robin) with combination of these two others
+    # TODO: maybe implement in the future the other conditions (Cauchy and Robin) with combination of these two others
 end
 
 
@@ -22,31 +22,19 @@ struct DomainConditions
 end
 
 
-"""Load data for boundary conditions needed to a solver"""
-function load(solver::Solver, folder::String, total_nodes::Int32, variables::Vector{String})
-    boundary_values = Matrix{Float64}(undef, total_nodes, length(variables))
-    read!(joinpath(folder, "boundary_values.dat"), boundary_values)
-    for (index, variable) in enumerate(variables)
-        solver.boundary_values[variable] = Boundary(
-            findall(value -> !isnan(value), boundary_values[:, index]),
-            filter(value -> !isnan(value), boundary_values[:, index]),
-        )
+"""Load data for domain conditions needed to the simulation"""
+function load_domain_conditions(input_data)
+    indices = Dict{Tuple{String, ConditionType}, Vector{Int32}}()
+    values = Dict{Tuple{String, ConditionType}, Vector{Float64}}()
+    for unknown in keys(input_data["domain_conditions"]["first_type"])
+        indices[(unknown, FIRST::ConditionType)] = input_data["domain_conditions"]["first_type"][unknown]["indices"]
+        values[(unknown, FIRST::ConditionType)] = input_data["domain_conditions"]["first_type"][unknown]["values"]
     end
-end
-
-
-# TODO: boundary should have another similar function to update second type conditions
-# summing values to an rhs vector
-"""Update vector added to rhs vector due Dirichlet boundary condition application"""
-function get_rhs_offset(boundary::Boundary, lhs::SparseMatrixCSC{Float64, Int32})
-    offset = zeros(size(lhs, 2))
-    # accumulate column vectors in sparse matrix with boundary indices
-    for (column_id, value) in zip(boundary.indices, boundary.values)
-        offset -= collect(lhs[:, column_id]) * value
-    end
-    # ensure zeros in offset vector in positions where boundary are applied
-    offset[boundary.indices] .= 0.0
-    return offset
+    # TODO: Load second type conditions here
+    return DomainConditions(
+        indices,
+        values
+    )
 end
 
 
@@ -56,11 +44,11 @@ function apply_domain_conditions_lhs!(
     unknown::String,
     lhs::SparseMatrixCSC{Float64, Int32},
 )
-     #logger.info("applying conditions to LHS")
-            # output_manager.write_debug(
-        #     f"{self.label}/{unknown}/lhs_condition_applied",
-        #     self.lhs_condition_applied[unknown],
-        # )
+    #logger.info("applying conditions to LHS")
+    # output_manager.write_debug(
+    #     f"{self.label}/{unknown}/lhs_condition_applied",
+    #     self.lhs_condition_applied[unknown],
+    # )
     for index in domain_conditions.indices[(unknown, FIRST::ConditionType)]
         lhs[:, index] .= 0.0
         lhs[index, :] .= 0.0
@@ -79,9 +67,9 @@ function apply_domain_conditions_rhs!(
 )
     #logger.info("applying conditions to RHS")
     # output_manager.write_debug(
-        #     f"{self.label}/{unknown}/rhs_condition_applied",
-        #     rhs_condition_applied,
-        # )
+    #     f"{self.label}/{unknown}/rhs_condition_applied",
+    #     rhs_condition_applied,
+    # )
     # first condition application
     indices = domain_conditions.indices[
         (unknown, ConditionType.FIRST.value)

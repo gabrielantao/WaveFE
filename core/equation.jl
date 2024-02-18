@@ -4,7 +4,6 @@ mutable struct ModelEquation
     # the list of unknowns solved in this equation (e.g. velocity in x and y directions)
     solved_unknowns::Vector{String}
     # the assembler for this equation
-    # TODO: the sparse LHS assembled matrix for this equation is preallocated when the equation is created
     assembler::Assembler
     # the solver  for this equation
     solver::Solver
@@ -12,6 +11,22 @@ mutable struct ModelEquation
     lhs::Dict{String, SparseMatrixCSC{Float64, Int32}}
     # RHS matrix to be solved for each unknown, the key is the unknown label
     rhs::Dict{String, Vector{Float64}}
+
+    function ModelEquation(
+        label::String, 
+        solved_unknowns::Vector{String}, 
+        assembler::Assembler, 
+        solver::Solver
+    )
+        new(
+            label, 
+            solved_unknowns, 
+            assembler, 
+            solver, 
+            Dict{String, SparseMatrixCSC{Float64, Int32}}(),
+            Dict{String, Vector{Float64}}()
+        )
+    end
 end
 
 
@@ -31,11 +46,11 @@ function solve!(
     must_update_rhs::Bool=true,
 )
     if must_update_lhs
-        assemble_lhs(equation.assembler, mesh, parameters)
-        assemble_rhs(equation.assembler, mesh, parameters)
+        assembled_lhs = assemble_lhs(equation.assembler, mesh, parameters)
+        assembled_rhs =  assemble_rhs(equation.assembler, mesh, parameters)
     else
         if must_update_rhs
-            assemble_rhs(equation.assembler, mesh, parameters)
+            assembled_rhs = assemble_rhs(equation.assembler, mesh, parameters)
         end    
     end
     
@@ -47,12 +62,12 @@ function solve!(
         if must_update_lhs
             # it uses assembled_lhs as template for all variables so it needs to copy here 
             # update the LHS matrix
-            equation.lhs[unknown] = copy(equation.assembler.lhs)
+            equation.lhs[unknown] = copy(assembled_lhs)
             apply_domain_conditions_lhs!(
                 domain_conditions, unknown, equation.lhs[unknown]
             )
             # update the RHS vector
-            equation.rhs[unknown] = assembler.rhs[unknown]
+            equation.rhs[unknown] = equation.assembler.rhs[unknown]
             apply_domain_conditions_rhs!(
                 domain_conditions, 
                 unknown, 
