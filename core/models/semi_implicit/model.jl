@@ -10,19 +10,18 @@ using IterativeSolvers
 include("../../common.jl")
 include("../../mesh/mesh.jl")
 include("../../domain_conditions.jl")
-
-# include assembling functions
-include("./elements_assembling/segment.jl")
-include("./elements_assembling/triangle.jl")
-include("./elements_assembling/quadrilateral.jl")
+include("../../base_equation.jl")
 include("../../unknowns_handler.jl")
+
+# get the assembled equations
+include("./equation_one.jl")
+include("./equation_two.jl")
+include("./equation_three.jl")
 
 
 """Additional parameters from the input file"""
 struct ModelSemiImplicitParameters <: ModelParameters
     transient::Bool
-    use_lumped_mass::Bool
-    safety_dt_factor::Float64
     adimensionals::Dict{String, Float64}
 end
 
@@ -44,34 +43,20 @@ struct ModelSemiImplicit
         mesh = load_mesh(input_data, simulation_parameters)
         domain_conditions = load_domain_conditions(input_data)
 
-        # configure the additional parameters
+        # configure the additional model parameters
         transient = simulation_parameters["simulation"]["transient"]
-        use_lumped_mass = !transient
-        safety_dt_factor = simulation_parameters["simulation"]["safety_dt_factor"]
         adimensionals = simulation_parameters["parameter"]
         additional_parameters = ModelSemiImplicitParameters(
-            use_lumped_mass,
-            safety_dt_factor,
+            transient,
             adimensionals
         )
 
-        # TODO: configure here the equations...
-        solver = load_solver(simulation_parameters)
-        mass_lhs_diagonal = use_lumped_mass
-        # TODO: implement here...
-        # step 1 equation
-        # assembler = Assembler(
-        #     mass_lhs_diagonal, 
-        #     mass_lhs_diagonal
-        # )
-        #assemble_indices!(assembler, mesh)
-        # equation_1 = ModelEquation(
-        #     "step 1",
-        #     ["u_$i" for i in Int(mesh.dimension)]
-        #     assembler,
-        #     solver,
-        # )
-
+        # build the equations used for this model
+        equations = [
+            EquationStepOne(simulation_parameters),
+            EquationStepTwo(simulation_parameters),
+            EquationStepThree(simulation_parameters),
+        ]
 
         new(
             "CBS Semi-implicit", 
