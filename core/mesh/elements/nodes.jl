@@ -82,8 +82,11 @@ function get_positions_z(nodes::NodesContainer, nodes_ids::Vector{Int32})
 end
 
 
-function move!(nodes::ContainerNodes)
+# TODO: in the future this function could be implemented in another 
+# file to define the rule for the movement
+"""Do the movement for the nodes"""
+function move!(nodes::NodesContainer)
     nodes.moved = False
-    # TODO: implement movement of the mesh based in some function of movement for
-    #       the specific groups that must move.
+    # TODO: in the future implement movement of the mesh based in some 
+    #       function of movement for the specific groups that must move.
 end 

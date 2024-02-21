@@ -35,16 +35,31 @@ end
 
 
 # TODO: Implement this function
-function assemble(equation::EquationStepThree, element::Segment)
+function get_element_lhs(equation::EquationStepThree, element::Segment)
 end
 
 
-function assemble(equation::EquationStepThree, element::Triangle)
+function get_element_lhs(equation::EquationStepThree, element::Triangle)
     # return the assembled element
     return []
 end
 
 
 # TODO: Implement this function
-function assemble(equation::EquationStepThree, element::Quadrilateral)
+function get_element_lhs(equation::EquationStepThree, element::Quadrilateral)
+end
+
+
+function get_element_rhs(equation::EquationStepThree, element::Segment)
+end
+
+
+function get_element_rhs(equation::EquationStepThree, element::Triangle)
+    # return the assembled element
+    return []
+end
+
+
+# TODO: Implement this function
+function get_element_rhs(equation::EquationStepThree, element::Quadrilateral)
 end

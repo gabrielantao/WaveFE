@@ -57,6 +57,11 @@ mutable struct Mesh
     nodes::NodesContainer
     elements::ElementsSet
     interpolation_order::InterpolationOrder
+
+    # if the mesh was refreshed (remeshed)
+    # this can trigger the assembler redo:
+    # - the preallocation for the matrices
+    must_refresh::Bool
 end
 
 
@@ -87,12 +92,16 @@ function load_mesh(input_data, simulation_parameters)
     elseif simulation_parameters["mesh"]["interpolation_order"] == 3
         interpolation_order = ORDER_THREE::InterpolationOrder
     end
+    # initially it need to be set to refresh to force the
+    # first calculations that depend on this 
+    must_refresh = true
 
     return Mesh(
         dimension, 
         nodes, 
         elements,
-        interpolation_order
+        interpolation_order,
+        must_refresh
     )
 end
 
@@ -124,4 +133,11 @@ function update_elements!(
             model_parameters
         ) 
     end
+end
+
+
+function update!(mesh::Mesh)
+    # TODO: implement here the logic if in future the mesh must be redone
+    mesh.must_refresh = false
+    move!(mesh.nodes)
 end

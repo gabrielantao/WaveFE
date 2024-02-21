@@ -14,9 +14,9 @@ include("../../base_equation.jl")
 include("../../unknowns_handler.jl")
 
 # get the assembled equations
-include("./equation_one.jl")
-include("./equation_two.jl")
-include("./equation_three.jl")
+include("./equations/equation_one.jl")
+include("./equations/equation_two.jl")
+include("./equations/equation_three.jl")
 
 
 """Additional parameters from the input file"""
@@ -99,8 +99,9 @@ function run_iteration(model::ModelSemiImplicit)
         )
     end
 
+
     # do the movement for the nodes
-    mesh.nodes.move!()
+    update!(mesh)
     
     # TODO: it should check if it is diverging to abort simulation
     check_unknowns_convergence!(model.unknowns_handler)
