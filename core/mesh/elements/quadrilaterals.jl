@@ -18,20 +18,30 @@ end
 """A quadrilaterals element container"""
 mutable struct QuadrilateralsContainer <: ElementsContainer
     total_elements::Int32
+    nodes_per_element::Int32
     elements::Vector{Quadrilateral}
 end
 
 
 """Load data for the quadrilaterals"""
-function load_quadrilaterals(input_data)
+function load_quadrilaterals(input_data, simulation_parameters)
     elements = Vector{Triangle}()
     # start all these values as NaN to make this break if they are not initialized
     b, c, area, Δt = NaN, NaN, NaN, NaN
     for connectivity in eachrow(input_data["mesh"]["quadrilaterals"]["connectivity"])
         append!(elements, Triangle(connectivity, b, c, area, Δt))
     end
+
+    # set the depending on the interpolation order of the elements
+    if simulation_parameters["mesh"]["interpolation_order"] == 1
+        nodes_per_element = 4
+    else
+        throw("Higher order elements not implemented")
+    end
+
     return TrianglesContainer(
-        input_data["mesh"]["quadrilaterals"]["total_elements"]
+        length(elements),
+        nodes_per_element,
         elements
     )
 end

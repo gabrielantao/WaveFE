@@ -54,7 +54,7 @@ end
 
 
 """Solve a variable and save in result vector"""
-function calculate_solution!(
+function solve!(
     solver::Solver,
     unknown::String,
     lhs::SparseMatrixCSC{Float64, Int32},

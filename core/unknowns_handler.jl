@@ -28,7 +28,7 @@ end
 
 
 """Update values for old variables"""
-function refresh_values(unknowns_handler::UnknownsHandler)
+function update!(unknowns_handler::UnknownsHandler)
     for unknown in keys(unknowns_handler.values)
         copy!(unknowns_handler.old_values[unknown], unknowns_handler.values[unknown])
     end

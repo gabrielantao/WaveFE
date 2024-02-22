@@ -72,13 +72,13 @@ function load_mesh(input_data, simulation_parameters)
     if input_data["mesh"]["dimension"] == 1 
         dimension = UNIDIMENSIONAL::Dimension
         elements = UniDimensionalElements(
-            load_segments(input_data)
+            load_segments(input_data, simulation_parameters)
         )
     elseif input_data["mesh"]["dimension"] == 2
         dimension = BIDIMENSIONAL::Dimension
         elements = BiDimensionalElements(
-            load_triangles(input_data), 
-            load_quadrilaterals(input_data)
+            load_triangles(input_data, simulation_parameters), 
+            load_quadrilaterals(input_data, simulation_parameters)
         )
     elseif input_data["mesh"]["dimension"] == 3
         dimension = TRIDIMENSIONAL::Dimension
@@ -107,31 +107,32 @@ end
 
 
 """Function to return reference to the elements containers used for the mesh"""
-function get_containers(mesh::Mesh)
-    if mesh.dimension == UNIDIMENSIONAL::Dimension
-        return [mesh.elements.segments]
-    elseif mesh.dimension == BIDIMENSIONAL::Dimension
-        return [mesh.elements.triangles, mesh.elements.quadrilaterals]
-    elseif mesh.dimension  == TRIDIMENSIONAL::Dimension
-        throw("Not supported for tridimensional elements yet.")
-    end
+function get_containers(mesh_elements::UniDimensionalElements)
+    return [mesh.elements.segments]
+end
+
+
+"""Function to return reference to the elements containers used for the mesh"""
+function get_containers(mesh_elements::BiDimensionalElements)
+    return [mesh.elements.triangles, mesh.elements.quadrilaterals]
 end
 
 
 """Update (move) mesh nodes when a dynamic mesh is used"""
 function update_elements!(
-    mesh::Mesh, 
-    nodes_container::NodesContainer,
+    mesh::Mesh,
     unknowns_handler::UnknownsHandler,
     model_parameters::ModelParameters
-    )
-    for element_container in get_containers(mesh)
-        update_properties!(
-            element_container, 
-            nodes_container,
-            unknowns_handler,
-            model_parameters
-        ) 
+)
+    if mesh.must_refresh || mesh.nodes.moved
+        for element_container in get_containers(mesh.elements)
+            update_properties!(
+                element_container, 
+                mesh.nodes,
+                unknowns_handler,
+                model_parameters
+            ) 
+        end
     end
 end
 

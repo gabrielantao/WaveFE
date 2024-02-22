@@ -18,20 +18,30 @@ end
 """An segment element group"""
 mutable struct SegmentsContainer <: ElementsContainer
     total_elements::Int32
+    nodes_per_element::Int32
     elements::Vector{Triangle}
 end
 
 
 """Load data for the segments"""
-function load_segments(input_data)
+function load_segments(input_data, simulation_parameters)
     elements = Vector{Triangle}()
     # start all these values as NaN to make this break if they are not initialized
     b, c, length, Δt = NaN, NaN, NaN, NaN
     for connectivity in eachrow(input_data["mesh"]["segments"]["connectivity"])
         append!(elements, Segment(connectivity, b, c, length, Δt))
     end
+
+    # set the depending on the interpolation order of the elements
+    if simulation_parameters["mesh"]["interpolation_order"] == 1
+        nodes_per_element = 2
+    else
+        throw("Higher order elements not implemented")
+    end
+
     return SegmentsContainer(
-        input_data["mesh"]["segments"]["total_elements"]
+        length(elements),
+        nodes_per_element,
         elements
     )
 end

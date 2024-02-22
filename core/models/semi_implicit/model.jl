@@ -71,36 +71,61 @@ end
 
 
 """Run one iteration for this model"""
-function run_iteration(model::ModelSemiImplicit)
-    # check if it must update the LHS matrix only if the mesh has moved its nodes
-    must_update_lhs = mesh.nodes.moved
- 
+function run_iteration(model::ModelSemiImplicit) 
     # update elements internal data
-    if mesh.nodes.moved
-        update_elements!(
-            mesh,
-            nodes_container,
-            unknowns_handler,
-            model_parameters
-        )
-    end
+    update_elements!(mesh, unknowns_handler, model_parameters)
     
     # update the unknowns by coping current values to the old values
-    refresh_values!(model.unknowns_handler)
+    update!(model.unknowns_handler)
 
     # solve the sequence of registered equations for each variable
     for equation in model.equations
-        solve!(
-            equation,
-            mesh,
-            model.unknowns_handler,
-            domain_conditions,
-            must_update_lhs
-        )
+        ### ASSEMBLE THE EQUATION ###
+        # for the current equation preallocate the assembled LHS
+        # if mesh is marked as "must refresh" status (e.g. if it was remeshed)
+        if mesh.must_refresh
+            reassign_lhs_indices!(equation.assembler)
+        end
+        if mesh.must_refresh || mesh.nodes.moved
+            assembled_lhs = assemble_global_lhs(equation, mesh)
+        end
+        # for this model always reassemble RHS
+        assembled_rhs = assemble_global_rhs!(equation, mesh)
+
+        # TODO: the domain conditions and solve could be done in parallel for each unknown
+        for unknown in equation.solved_unknowns
+            ### APPLY DOMAIN CONDITIONS ###
+            if mesh.must_refresh || mesh.nodes.moved
+                # it uses assembled_lhs as template for all variables so it needs to copy here 
+                # update the LHS matrix
+                equation.members.lhs[unknown] = copy(assembled_lhs)
+                apply_domain_conditions_lhs!(
+                    model.domain_conditions, unknown, equation.members.lhs[unknown]
+                )
+                # use the new built LHS to update the solver perconditioner
+                update_preconditioner(equation.solver, equation.members.lhs[unknown], unknown)
+            end
+            # for this model always reapply the conditions for reassembled RHS
+            equation.rhs[unknown] = assembled_rhs[unknown]
+            apply_domain_conditions_rhs!(
+                domain_conditions, 
+                unknown, 
+                equation.assembler.lhs, 
+                equation.members.rhs[unknown]
+            )
+
+            ### SOLVE THE EQUATION ###
+            solve!(
+                equation.solver,
+                unknown,
+                equation.members.lhs[unknown],
+                equation.members.rhs[unknown],
+                model.unknowns_handler
+            )
+        end
     end
 
-
-    # do the movement for the nodes
+    # do the updates for the mesh (e.g. movement, remesh, etc.)
     update!(mesh)
     
     # TODO: it should check if it is diverging to abort simulation

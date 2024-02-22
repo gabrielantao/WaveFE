@@ -18,20 +18,30 @@ end
 """A triangle element container"""
 mutable struct TrianglesContainer <: ElementsContainer
     total_elements::Int32
+    nodes_per_element::Int32
     elements::Vector{Triangle}
 end
 
 
 """Load data for the triangles"""
-function load_triangles(input_data)
+function load_triangles(input_data, simulation_parameters)
     elements = Vector{Triangle}()
     # start all these values as NaN to make this break if they are not initialized
     b, c, area, Δt = NaN, NaN, NaN, NaN
     for connectivity in eachrow(input_data["mesh"]["triangles"]["connectivity"])
         append!(elements, Triangle(connectivity, b, c, area, Δt))
     end
+
+    # set the depending on the interpolation order of the elements
+    if simulation_parameters["mesh"]["interpolation_order"] == 1
+        nodes_per_element = 3
+    else
+        throw("Higher order elements not implemented")
+    end
+
     return TrianglesContainer(
-        input_data["mesh"]["triangles"]["total_elements"]
+        length(elements),
+        nodes_per_element,
         elements
     )
 end
