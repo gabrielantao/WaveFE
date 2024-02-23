@@ -5,6 +5,7 @@ using SparseArrays
 using Preconditioners
 using IterativeSolvers
 
+
 # implementation for the mesh and domain conditions
 # to be used by this model
 include("../../common.jl")
@@ -84,13 +85,25 @@ function run_iteration(model::ModelSemiImplicit)
         # for the current equation preallocate the assembled LHS
         # if mesh is marked as "must refresh" status (e.g. if it was remeshed)
         if mesh.must_refresh
-            reassign_lhs_indices!(equation.assembler)
+            update_assembler_indices!(
+                equation.assembler,
+                mesh,
+                model.unknowns_handler
+            )
         end
         if mesh.must_refresh || mesh.nodes.moved
-            assembled_lhs = assemble_global_lhs(equation, mesh)
+            assembled_lhs = assemble_global_lhs(
+                equation.assembler, 
+                mesh,
+                model.unknowns_handler
+            )
         end
         # for this model always reassemble RHS
-        assembled_rhs = assemble_global_rhs!(equation, mesh)
+        assembled_rhs = assemble_global_rhs(
+            equation.assembler, 
+            mesh,
+            model.unknowns_handler
+        )
 
         # TODO: the domain conditions and solve could be done in parallel for each unknown
         for unknown in equation.solved_unknowns

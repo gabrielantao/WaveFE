@@ -108,13 +108,13 @@ end
 
 """Function to return reference to the elements containers used for the mesh"""
 function get_containers(mesh_elements::UniDimensionalElements)
-    return [mesh.elements.segments]
+    return [mesh_elements.segments]
 end
 
 
 """Function to return reference to the elements containers used for the mesh"""
 function get_containers(mesh_elements::BiDimensionalElements)
-    return [mesh.elements.triangles, mesh.elements.quadrilaterals]
+    return [mesh_elements.triangles, mesh_elements.quadrilaterals]
 end
 
 

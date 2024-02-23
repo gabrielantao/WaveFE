@@ -10,9 +10,7 @@ struct EquationStepTwo <: Equation
         # TODO: this should be in a section model in the input file
         #use_lumped_mass = !simulation_parameters["simulation"]["transient"]
         safety_dt_factor = simulation_parameters["simulation"]["safety_dt_factor"]
-        lhs_diagonal = false
-        lhs_symetric = true
-        assembler = Assembler(lhs_diagonal, lhs_symetric)
+        assembler = Assembler(SYMMETRIC)
         solver = load_solver(simulation_parameters)
         members = EquationMembers()
 
