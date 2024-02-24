@@ -82,6 +82,10 @@ function get_positions_z(nodes::NodesContainer, nodes_ids::Vector{Int64})
 end
 
 
+function get_domain_condition_groups(nodes::NodesContainer)
+    return [node.domain_condition_groupfor node in nodes.series]
+end
+
 # TODO [implement mesh movement]
 # in the future this function could be implemented in another 
 # file to define the rule for the movement

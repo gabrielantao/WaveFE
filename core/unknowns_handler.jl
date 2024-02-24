@@ -12,21 +12,34 @@ mutable struct UnknownsHandler
 end
 
 
-"""Load data for the unkonwns handler from the input files"""
-function load_unkowns_handler(input_data, simulation_parameters)
-    # TODO: check if is represented as vectors here 
-    values = input_data["unknowns"]
-    # TODO: check here if it should update this 
-    old_values = input_data["unknowns"]
+"""Load data for initial conditions needed to the simulation"""
+function load_unknowns_handler(
+    all_solved_unknowns, domain_condition_groups, domain_conditions_data
+)
+    values = Dict{Tuple{String, ConditionType}, Vector{Int64}}()
+    old_values = Dict{Tuple{String, ConditionType}, Vector{Float64}}()
+    # get boundary conditions
+    for condition_data in domain_conditions_data["initial"]
+        if condition_data["unknown_name"] in all_solved_unknowns
+            group_number = condition_data["group_number"]
+            unknown = condition_data["unknown"]
+            value = condition_data["value"]
+            curent_group_indices = findall(
+                domain_condition_group -> domain_condition_group == group_number, 
+                domain_condition_groups
+            )
+            values[curent_group_indices] .= value
+            old_values[curent_group_indices] .= value
+        end
+    end
     return UnknownsHandler(
         values,
         old_values,
-        Dict{String, Bool}(),
+        Dict(unknown => false for unknown in all_solved_unknowns),
         simulation_parameters["simulation"]["tolerance_relative"],
         simulation_parameters["simulation"]["tolerance_absolute"]
     )
 end
-
 
 """Get the values of the unknowns for the nodes"""
 function get_values(

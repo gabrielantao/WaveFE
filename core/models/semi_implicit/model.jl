@@ -26,6 +26,9 @@ struct ModelSemiImplicitParameters <: ModelParameters
     adimensionals::Dict{String, Float64}
 end
 
+const MODEL_NAME_SEMI_IMPLICIT = "CBS Semi-Implicit"
+const MODEL_SEMI_IMPLICIT_ALL_VARIABLES = ["u_1", "u_2", "u_3", "p"]
+
 
 """
 Semi-implicit model
@@ -35,37 +38,50 @@ struct ModelSemiImplicit
     name::String
     mesh::Mesh
     domain_conditions::DomainConditions
-    unknowns_handler::Vector{String}
     equations::Vector{ModelEquation}
+    unknowns_handler::Vector{String}
     additional_parameters::ModelSemiImplicitParameters
 
-    function ModelSemiImplicit(input_data, simulation_parameters)
-        unkowns_handler = load_unkowns_handler(input_data, simulation_parameters)
-        mesh = load_mesh(input_data, simulation_parameters)
-        domain_conditions = load_domain_conditions(input_data)
+    function ModelSemiImplicit(input_data, simulation_data, domain_conditions_data)
+        mesh = load_mesh(input_data, simulation_data)
+        domain_conditions = load_domain_conditions(
+            get_domain_condition_groups(mesh.nodes),
+            domain_conditions_data
+        )
 
         # configure the additional model parameters
-        transient = simulation_parameters["simulation"]["transient"]
-        adimensionals = simulation_parameters["parameter"]
+        transient = simulation_data["simulation"]["transient"]
+        adimensionals = simulation_data["parameter"]
         additional_parameters = ModelSemiImplicitParameters(
             transient,
             adimensionals
         )
 
-        # build the equations used for this model
+        # define the unknowns for this model
         # velocities solved in the equation one and three depend on mesh dimension
+        unknonws_velocities = ["u_$i" for i in range(1, Int(mesh.dimension))]
+        unknonws_pressure = ["p"]
+        all_solved_unknowns = [velocities; pressure]
+
+        # build the equations used for this model
         equations = [
-            EquationStepOne(
-                ["u_$i" for i in Int(mesh.dimension)], simulation_parameters
-            ),
-            EquationStepTwo(["p"], simulation_parameters),
-            EquationStepThree(
-                ["u_$i" for i in Int(mesh.dimension)], simulation_parameters
-            ),
+            EquationStepOne(unknonws_velocities, simulation_data),
+            EquationStepTwo(unknonws_pressure, simulation_data),
+            EquationStepThree(unknonws_velocities, simulation_data),
         ]
 
+        # setup initial values for the unknowns
+        unkowns_handler = load_unknowns_handler(
+            all_solved_unknowns, 
+            get_domain_condition_groups(mesh.nodes),
+            domain_conditions_data
+        )
+        setup_boundary_values(
+            domain_conditions, unkowns_handler
+        )
+
         new(
-            "CBS Semi-implicit", 
+            MODEL_NAME_SEMI_IMPLICIT, 
             mesh,
             domain_conditions,
             unkowns_handler, 

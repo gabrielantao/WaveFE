@@ -1,9 +1,6 @@
 module Wave
 
-# TODO: check if these packages are really needed here...
-#using Statistics
-#using Dates
-#using ResumableFunctions
+# TODO: check if it's needed here ...
 #using ProgressMeter
 using TOML
 using HDF5
@@ -36,23 +33,27 @@ function run_simulator()
 
     # input all the relevant data to build the model 
     input_data = h5open(joinpath(folder, "cache", "input.hdf5"), "r")
-    simulation_parameters = TOML.parsefile(joinpath(folder, "cache", "simulation.toml"))
+    simulation_data = TOML.parsefile(joinpath(folder, "cache", "simulation.toml"))
+    domain_conditions_data = TOML.parsefile(joinpath(folder, "cache", DOMAIN_CONDITIONS_FILENAME))
+    
+    # do the logical validations for the inputs
+    validate_simulation_data(simulation_data)
+    validate_domain_conditions_data(domain_conditions_data)
 
     # get the model based in the simulation model defined in input file
-    model = build_model(input_data, simulation_parameters)
+    model = build_model(input_data, simulation_data, domain_conditions_data)
     
     # TODO: create output manager here
     # create output handler
-    output_manager = create_output_manager(
-        folder,
-        simulation_info["output"]["frequency"],
-        simulation_info["output"]["save_result"],
-        simulation_info["output"]["save_numeric"],
-        simulation_info["output"]["save_debug"]
-    )
+    # output_manager = create_output_manager(
+    #     folder,
+    #     simulation_info["output"]["frequency"],
+    #     simulation_info["output"]["save_result"],
+    #     simulation_info["output"]["save_numeric"],
+    #     simulation_info["output"]["save_debug"]
+    # )
 
-
-    total_step_limits = simulation_parameters["simulation"]["steps_limit"]
+    total_step_limits = simulation_data["simulation"]["steps_limit"]
     # progress = ProgressUnknown("running... ", spinner=true, color = :white)  
     # elapsed_time = @elapsed begin 
     
@@ -61,6 +62,7 @@ function run_simulator()
         # ProgressMeter.next!(progress)
         
         run_iteration(model)
+
         # stop simulation loop if converged
         if all(values(model.unknowns_handler.converged))
             # TODO: output values here

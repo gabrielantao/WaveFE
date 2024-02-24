@@ -17,32 +17,66 @@ are imported in the simulation
 struct DomainConditions
     # indices and values of nodes that have domain conditions values
     # the keys are the unknown name and condition type
-    indices::Dict{Tuple{String, ConditionType}, Vector{Int32}}
+    indices::Dict{Tuple{String, ConditionType}, Vector{Int64}}
     values::Dict{Tuple{String, ConditionType}, Vector{Float64}}
 end
 
 
 """Load data for domain conditions needed to the simulation"""
-function load_domain_conditions(input_data)
-    indices = Dict{Tuple{String, ConditionType}, Vector{Int32}}()
+function load_domain_conditions(domain_conditions_groups, domain_conditions_data)
+    indices = Dict{Tuple{String, ConditionType}, Vector{Int64}}()
     values = Dict{Tuple{String, ConditionType}, Vector{Float64}}()
-    for unknown in keys(input_data["domain_conditions"]["first_type"])
-        indices[(unknown, FIRST::ConditionType)] = input_data["domain_conditions"]["first_type"][unknown]["indices"]
-        values[(unknown, FIRST::ConditionType)] = input_data["domain_conditions"]["first_type"][unknown]["values"]
+    # get boundary conditions
+    for condition_data in domain_conditions_data["boundary"]
+        group_number = condition_data["group_number"]
+        unknown = condition_data["unknown"]
+        value = condition_data["value"]
+        condition_type = get_condition_type(condition_data["condition_type"])
+        curent_group_indices = findall(
+            domain_condition_group -> domain_condition_group == group_number, 
+            domain_conditions_groups
+        )
+        indices[(unknown, condition_type)] = curent_group_indices
+        values[(unknown, condition_type)] = fill(value, length(curent_group_indices))
     end
-    # TODO: Load second type conditions here
-    return DomainConditions(
-        indices,
-        values
-    )
+    return DomainConditions(indices, values)
 end
+
+
+"""Auxiliary function to convert a type number of condition into the enum values"""
+function get_condition_type(condition_type_number)
+    if condition_type_number == 1
+        return FIRST
+    elseif condition_type_number == 2
+        return SECOND
+    else
+        throw("Not implement group number of type $condition_type_number")
+    end
+end
+
+
+"""Setup initial boundary values for the unknowns"""
+function setup_boundary_values(
+    domain_conditions::DomainConditions,
+    unknowns_handler::UnknownsHandler,
+)
+    for unknown in keys(unknowns_handler.values)
+        if haskey(domain_conditions, (FIRST, unknown))
+            indices = domain_conditions[(FIRST, unknown)].indices
+            values = domain_conditions[(FIRST, unknown)].values
+            unknowns_handler.values[unknown][indices] = values
+            unknowns_handler.old_values[unknown][indices] = values
+        end
+    end
+end
+
 
 
 """Apply boundary conditions to the LHS matrix"""
 function apply_domain_conditions_lhs!(
     domain_conditions::DomainConditions, 
     unknown::String,
-    lhs::SparseMatrixCSC{Float64, Int32},
+    lhs::SparseMatrixCSC{Float64, Int64},
 )
     #logger.info("applying conditions to LHS")
     # output_manager.write_debug(
@@ -62,7 +96,7 @@ end
 function apply_domain_conditions_rhs!(
     domain_conditions::DomainConditions, 
     unknown::String,
-    assembled_lhs::SparseMatrixCSC{Float64, Int32},
+    assembled_lhs::SparseMatrixCSC{Float64, Int64},
     rhs::Vector{Float64},
 )
     #logger.info("applying conditions to RHS")
@@ -92,8 +126,8 @@ To zero a column of the LHS matrix the column values must be multiplied by the k
 value and added to the RHS vector to give a right offset.
 """
 function calculate_rhs_offset_values(
-    assembled_lhs::SparseMatrixCSC{Float64, Int32},
-    indices::Vector{Int32},
+    assembled_lhs::SparseMatrixCSC{Float64, Int64},
+    indices::Vector{Int64},
     values::Vector{Float64}
 )
     # offset vector must be same size of the amount of LHS rows
