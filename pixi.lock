@@ -160,6 +160,30 @@ package:
   size: 2700689
   timestamp: 1706649284348
 - platform: linux-64
+  name: arpack
+  version: 3.8.0
+  category: main
+  manager: conda
+  dependencies:
+  - libblas >=3.9.0,<4.0a0
+  - libgcc-ng >=12
+  - libgfortran-ng
+  - libgfortran5 >=10.4.0
+  - liblapack >=3.9.0,<4.0a0
+  - libstdcxx-ng >=12
+  url: https://conda.anaconda.org/conda-forge/linux-64/arpack-3.8.0-nompi_h0baa96a_101.tar.bz2
+  hash:
+    md5: bad10a5b54a3aa9680c3ac1436b7e35d
+    sha256: b38c3a51472332e4585ed38bddb181468876b61f68fa50c9c6ecb620a3cc1e0b
+  build: nompi_h0baa96a_101
+  arch: x86_64
+  subdir: linux-64
+  build_number: 101
+  license: BSD-3-Clause
+  license_family: BSD
+  size: 219365
+  timestamp: 1663242253645
+- platform: linux-64
   name: attr
   version: 2.5.1
   category: main
@@ -498,6 +522,31 @@ package:
   license_family: BSD
   size: 253156
   timestamp: 1699041681603
+- platform: linux-64
+  name: curl
+  version: 8.5.0
+  category: main
+  manager: conda
+  dependencies:
+  - krb5 >=1.21.2,<1.22.0a0
+  - libcurl 8.5.0 hca28451_0
+  - libgcc-ng >=12
+  - libssh2 >=1.11.0,<2.0a0
+  - libzlib >=1.2.13,<1.3.0a0
+  - openssl >=3.2.0,<4.0a0
+  - zstd >=1.5.5,<1.6.0a0
+  url: https://conda.anaconda.org/conda-forge/linux-64/curl-8.5.0-hca28451_0.conda
+  hash:
+    md5: e5e83fb15e752dbc8f54c4ac7da7d0f1
+    sha256: febf098d6ca901b589d02c58eedcf5cb77d8fa4bfe35a52109f5909980b426db
+  build: hca28451_0
+  arch: x86_64
+  subdir: linux-64
+  build_number: 0
+  license: curl
+  license_family: MIT
+  size: 94895
+  timestamp: 1701860161671
 - platform: linux-64
   name: cycler
   version: 0.12.1
@@ -1111,6 +1160,32 @@ package:
   size: 15832740
   timestamp: 1706819504098
 - platform: linux-64
+  name: git
+  version: 2.43.0
+  category: main
+  manager: conda
+  dependencies:
+  - curl
+  - gettext
+  - libexpat >=2.5.0,<3.0a0
+  - libgcc-ng >=12
+  - libiconv >=1.17,<2.0a0
+  - libzlib >=1.2.13,<1.3.0a0
+  - openssl >=3.2.0,<4.0a0
+  - pcre2 >=10.42,<10.43.0a0
+  - perl 5.*
+  url: https://conda.anaconda.org/conda-forge/linux-64/git-2.43.0-pl5321h7bc287a_0.conda
+  hash:
+    md5: 851970792301b407ba4c35e75e796791
+    sha256: 73a065e160d759e8fb0b169e615955a8fe0c148ed00c7f6ddf076f2e4adfd765
+  build: pl5321h7bc287a_0
+  arch: x86_64
+  subdir: linux-64
+  build_number: 0
+  license: GPL-2.0-or-later and LGPL-2.1-or-later
+  size: 8462907
+  timestamp: 1701101139792
+- platform: linux-64
   name: gl2ps
   version: 1.4.2
   category: main
@@ -1620,6 +1695,47 @@ package:
   license: LicenseRef-Public-Domain OR MIT
   size: 194553
   timestamp: 1640883128046
+- platform: linux-64
+  name: julia
+  version: 1.10.0
+  category: main
+  manager: conda
+  dependencies:
+  - arpack >=3.8.0,<3.9.0a0 nompi_*
+  - curl
+  - git
+  - gmp >=6.3.0,<7.0a0
+  - libgcc-ng >=12
+  - libgfortran-ng
+  - libgfortran5 >=12.3.0
+  - libgit2 >=1.7.1,<1.8.0a0
+  - libnghttp2 >=1.58.0,<2.0a0
+  - libopenlibm4 >=0.8.1,<1.0a0
+  - libssh2 >=1.11.0,<2.0a0
+  - libstdcxx-ng >=12
+  - libunwind >=1.6.2,<1.7.0a0
+  - libutf8proc >=2.8.0,<3.0a0
+  - libzlib >=1.2.13,<1.3.0a0
+  - mbedtls
+  - mpfr >=4.2.1,<5.0a0
+  - openblas-ilp64
+  - openlibm
+  - p7zip
+  - pcre2 >=10.42,<10.43.0a0
+  - suitesparse >=5.10.1,<6.0a0
+  - zlib
+  url: https://conda.anaconda.org/conda-forge/linux-64/julia-1.10.0-h764f291_0.conda
+  hash:
+    md5: 86c6bc71eb189017f54ee5948526da01
+    sha256: b1e6dbffbebff3783c507c246631eadae159f0b48420f84f4124800a76422754
+  build: h764f291_0
+  arch: x86_64
+  subdir: linux-64
+  build_number: 0
+  license: MIT
+  license_family: MIT
+  size: 106009421
+  timestamp: 1707157646197
 - platform: linux-64
   name: jxrlib
   version: '1.1'
@@ -2353,6 +2469,31 @@ package:
   size: 1442769
   timestamp: 1706819209473
 - platform: linux-64
+  name: libgit2
+  version: 1.7.2
+  category: main
+  manager: conda
+  dependencies:
+  - __glibc >=2.17,<3.0.a0
+  - libgcc-ng >=12
+  - libssh2 >=1.11.0,<2.0a0
+  - libstdcxx-ng >=12
+  - libzlib >=1.2.13,<1.3.0a0
+  - openssl >=3.2.1,<4.0a0
+  - pcre2 >=10.42,<10.43.0a0
+  url: https://conda.anaconda.org/conda-forge/linux-64/libgit2-1.7.2-h76de150_0.conda
+  hash:
+    md5: bce998bdc0492ba70cc6b72d3352d0a6
+    sha256: f868e84138d67c3dbe3ad6f272c877b839c3c4affc5b4e82de1ab1bf2df87e83
+  build: h76de150_0
+  arch: x86_64
+  subdir: linux-64
+  build_number: 0
+  license: GPL-2.0-only WITH GCC-exception-2.0
+  license_family: GPL
+  size: 862111
+  timestamp: 1707261141079
+- platform: linux-64
   name: libglib
   version: 2.78.3
   category: main
@@ -2684,6 +2825,47 @@ package:
   license_family: BSD
   size: 5578031
   timestamp: 1704950143521
+- platform: linux-64
+  name: libopenblas-ilp64
+  version: 0.3.26
+  category: main
+  manager: conda
+  dependencies:
+  - libgcc-ng >=12
+  - libgfortran-ng
+  - libgfortran5 >=12.3.0
+  url: https://conda.anaconda.org/conda-forge/linux-64/libopenblas-ilp64-0.3.26-pthreads_h384dd9e_0.conda
+  hash:
+    md5: 4510b0d48d80db41d0614726a5683070
+    sha256: c36d46250d94349dc5da8d9e4a5be3f52338ebd5e4443684c6ec3f11bf0e50c6
+  build: pthreads_h384dd9e_0
+  arch: x86_64
+  subdir: linux-64
+  build_number: 0
+  constrains:
+  - openblas-ilp64 >=0.3.26,<0.3.27.0a0
+  license: BSD-3-Clause
+  license_family: BSD
+  size: 5472845
+  timestamp: 1704950205878
+- platform: linux-64
+  name: libopenlibm4
+  version: 0.8.1
+  category: main
+  manager: conda
+  dependencies:
+  - libgcc-ng >=12
+  url: https://conda.anaconda.org/conda-forge/linux-64/libopenlibm4-0.8.1-hd590300_1.conda
+  hash:
+    md5: e6af610e01d04927a5060c95ce4e0875
+    sha256: d176e3b79e723a4102861c06cdc13d60b08210233c42edd6e49e770aece03b3b
+  build: hd590300_1
+  arch: x86_64
+  subdir: linux-64
+  build_number: 1
+  license: MIT AND ISC AND BSD-2-Clause
+  size: 104768
+  timestamp: 1698855372633
 - platform: linux-64
   name: libopenvino
   version: 2023.3.0
@@ -3313,6 +3495,45 @@ package:
   size: 1433436
   timestamp: 1626955018689
 - platform: linux-64
+  name: libunwind
+  version: 1.6.2
+  category: main
+  manager: conda
+  dependencies:
+  - libgcc-ng >=9.4.0
+  - libstdcxx-ng >=9.4.0
+  url: https://conda.anaconda.org/conda-forge/linux-64/libunwind-1.6.2-h9c3ff4c_0.tar.bz2
+  hash:
+    md5: a730b2badd586580c5752cc73842e068
+    sha256: f2ac872920833960e514ce9efd8f7c08ce66dd870738d73839d1bce1ac497de6
+  build: h9c3ff4c_0
+  arch: x86_64
+  subdir: linux-64
+  build_number: 0
+  license: MIT
+  license_family: MIT
+  size: 75491
+  timestamp: 1638450786937
+- platform: linux-64
+  name: libutf8proc
+  version: 2.8.0
+  category: main
+  manager: conda
+  dependencies:
+  - libgcc-ng >=12
+  url: https://conda.anaconda.org/conda-forge/linux-64/libutf8proc-2.8.0-h166bdaf_0.tar.bz2
+  hash:
+    md5: ede4266dc02e875fe1ea77b25dd43747
+    sha256: 49082ee8d01339b225f7f8c60f32a2a2c05fe3b16f31b554b4fb2c1dea237d1c
+  build: h166bdaf_0
+  arch: x86_64
+  subdir: linux-64
+  build_number: 0
+  license: MIT
+  license_family: MIT
+  size: 101070
+  timestamp: 1667316029302
+- platform: linux-64
   name: libuuid
   version: 2.38.1
   category: main
@@ -3665,6 +3886,26 @@ package:
   license_family: PSF
   size: 7646552
   timestamp: 1700509719981
+- platform: linux-64
+  name: mbedtls
+  version: 3.5.1
+  category: main
+  manager: conda
+  dependencies:
+  - libgcc-ng >=12
+  - libstdcxx-ng >=12
+  url: https://conda.anaconda.org/conda-forge/linux-64/mbedtls-3.5.1-h59595ed_0.conda
+  hash:
+    md5: a7b444a6e008b804b35521895e3440e2
+    sha256: 2ba3cd6c5f3926bd5ec84f1caf8414e7aed695bcd2bf4bcf736aa78584bf2c42
+  build: h59595ed_0
+  arch: x86_64
+  subdir: linux-64
+  build_number: 0
+  license: Apache-2.0
+  license_family: APACHE
+  size: 865310
+  timestamp: 1706018178691
 - platform: linux-64
   name: mdurl
   version: 0.1.2
@@ -4158,6 +4399,25 @@ package:
   size: 4253
   timestamp: 1575483836797
 - platform: linux-64
+  name: openblas-ilp64
+  version: 0.3.26
+  category: main
+  manager: conda
+  dependencies:
+  - libopenblas-ilp64 0.3.26 pthreads_h384dd9e_0
+  url: https://conda.anaconda.org/conda-forge/linux-64/openblas-ilp64-0.3.26-pthreads_h3d04fff_0.conda
+  hash:
+    md5: 7f76d98a5d8bb155d1150d817691f320
+    sha256: 63169ff51dd49b5acf51badf45116bc658e9201031ce47c12d65bfe6f4883bbc
+  build: pthreads_h3d04fff_0
+  arch: x86_64
+  subdir: linux-64
+  build_number: 0
+  license: BSD-3-Clause
+  license_family: BSD
+  size: 5618148
+  timestamp: 1704950230151
+- platform: linux-64
   name: openexr
   version: 3.2.1
   category: main
@@ -4223,6 +4483,25 @@ package:
   size: 356698
   timestamp: 1694708325417
 - platform: linux-64
+  name: openlibm
+  version: 0.8.1
+  category: main
+  manager: conda
+  dependencies:
+  - libgcc-ng >=12
+  - libopenlibm4 0.8.1 hd590300_1
+  url: https://conda.anaconda.org/conda-forge/linux-64/openlibm-0.8.1-hd590300_1.conda
+  hash:
+    md5: 6eba22eb06d69e53d0ca01eef42bc675
+    sha256: 689a90096c3fdd76bd3620bd17a8de2924cf9e1ebe7c0d2d52c6f06eda2ad235
+  build: hd590300_1
+  arch: x86_64
+  subdir: linux-64
+  build_number: 1
+  license: MIT AND ISC AND BSD-2-Clause
+  size: 29204
+  timestamp: 1698855384579
+- platform: linux-64
   name: openssl
   version: 3.2.1
   category: main
@@ -4265,6 +4544,26 @@ package:
   license_family: MIT
   size: 4702497
   timestamp: 1654868759643
+- platform: linux-64
+  name: p7zip
+  version: '16.02'
+  category: main
+  manager: conda
+  dependencies:
+  - libgcc-ng >=9.4.0
+  - libstdcxx-ng >=9.4.0
+  url: https://conda.anaconda.org/conda-forge/linux-64/p7zip-16.02-h9c3ff4c_1001.tar.bz2
+  hash:
+    md5: 941066943c0cac69d5aa52189451aa5f
+    sha256: 01aecc8f648ed0825ecf4c384c2f4759146ef8f2815348efddebf42ec769419c
+  build: h9c3ff4c_1001
+  arch: x86_64
+  subdir: linux-64
+  build_number: 1001
+  license: LGPL-2.0-or-later
+  license_family: LGPL
+  size: 2304688
+  timestamp: 1650994775055
 - platform: linux-64
   name: packaging
   version: '23.2'
@@ -4326,6 +4625,25 @@ package:
   license_family: BSD
   size: 1017235
   timestamp: 1698610864983
+- platform: linux-64
+  name: perl
+  version: 5.32.1
+  category: main
+  manager: conda
+  dependencies:
+  - libgcc-ng >=12
+  - libxcrypt >=4.4.36
+  url: https://conda.anaconda.org/conda-forge/linux-64/perl-5.32.1-7_hd590300_perl5.conda
+  hash:
+    md5: f2cfec9406850991f4e3d960cc9e3321
+    sha256: 9ec32b6936b0e37bcb0ed34f22ec3116e75b3c0964f9f50ecea5f58734ed6ce9
+  build: 7_hd590300_perl5
+  arch: x86_64
+  subdir: linux-64
+  build_number: 7
+  license: GPL-1.0-or-later OR Artistic-1.0-Perl
+  size: 13344463
+  timestamp: 1703310653947
 - platform: linux-64
   name: petsc
   version: 3.20.4
