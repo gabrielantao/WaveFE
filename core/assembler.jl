@@ -73,24 +73,30 @@ end
 
 """Assemble the global matrix for LHS"""
 function assemble_global_lhs(
-    assembler::Assembler, 
+    equation::Equation,
     mesh::Mesh,
-    unknowns_handler::UnknownsHandler
+    unknowns_handler::UnknownsHandler,
+    model_parameters::ModelParameters
 )  
     # preallocate the sparse matrix with zeros
     lhs = sparse(
-        assembler.lhs_indices_i, 
-        assembler.lhs_indices_j, 
-        zeros(length(assembler.lhs_indices_i))
+        equation.assembler.lhs_indices_i, 
+        equation.assembler.lhs_indices_j, 
+        zeros(length(equation.assembler.lhs_indices_i))
     )
     # do the assembling of global matrix for each element container in the mesh
     for element_container in get_containers(mesh.elements)
         index_iterator = get_local_indices_iterator(
-            assembler.lhs_type, 
+            equation.assembler.lhs_type, 
             element_container.nodes_per_element
         )
         for element in element_container
-            assembled_local_lhs = assemble_element_lhs(element, unknowns_handler)
+            assembled_local_lhs = assemble_element_lhs(
+                equation, 
+                element, 
+                unknowns_handler,
+                model_parameters
+            )
             for (i, j) in index_iterator
                 global_i = element.connectivity[i]
                 global_j = element.connectivity[j]
@@ -103,8 +109,8 @@ function assemble_global_lhs(
     # of sparse matrix. This should be reviewed in the future to use other types of
     # sparse that don't waste space (e.g. package SparseMatrixCRC.jl) 
     # for now just copy the values of upper side of matrix to the lower side
-    if assembler.lhs_type == SYMMETRIC
-        for (i, j) in zip(assembler.lhs_indices_i, assembler.lhs_indices_j)
+    if equation.assembler.lhs_type == SYMMETRIC
+        for (i, j) in zip(equation.assembler.lhs_indices_i, equation.assembler.lhs_indices_j)
             if i < j
                 lhs[j, i] = lhs[i, j]
             end
@@ -116,17 +122,26 @@ end
 
 """Assemble RHS vectors for the elements of the mesh"""
 function assemble_global_rhs( 
-    assembled_unknowns::Vector{String},
+    equation::Equation,
     mesh::Mesh,
     unknowns_handler::UnknownsHandler,
+    model_parameters::ModelParameters
 )
     # preallocate the assembled rhs vectors
-    rhs = Dict(unknown => zeros(mesh.nodes.total_nodes) for unknown in assembled_unknowns)
+    # TODO [general performance improvements]
+    ## maybe this should use NamedTuple (or just tuple) instead of dict
+    rhs = Dict(unknown => zeros(mesh.nodes.total_nodes) for unknown in equation.solved_unknowns)
     # do the assembling of global matrix for each element container in the mesh
     for element_container in get_containers(mesh.elements)
         for element in element_container
-            assembled_local_rhs = assemble_element_rhs(element, unknowns_handler)
-            # TODO: review if the best is use a named tuple or something else
+            assembled_local_rhs = assemble_element_rhs(
+                equation,
+                element, 
+                unknowns_handler,
+                model_parameters
+            )
+            # TODO [general performance improvements]
+            ## review if the best is use a named tuple or something else
             for unknown in keys(assembled_local_rhs)
                 for i in range(1, element_container.nodes_per_element)
                     global_i = element.connectivity[i]

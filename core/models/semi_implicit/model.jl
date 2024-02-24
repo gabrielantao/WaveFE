@@ -53,10 +53,15 @@ struct ModelSemiImplicit
         )
 
         # build the equations used for this model
+        # velocities solved in the equation one and three depend on mesh dimension
         equations = [
-            EquationStepOne(simulation_parameters),
-            EquationStepTwo(simulation_parameters),
-            EquationStepThree(simulation_parameters),
+            EquationStepOne(
+                ["u_$i" for i in Int(mesh.dimension)], simulation_parameters
+            ),
+            EquationStepTwo(["p"], simulation_parameters),
+            EquationStepThree(
+                ["u_$i" for i in Int(mesh.dimension)], simulation_parameters
+            ),
         ]
 
         new(
@@ -82,9 +87,9 @@ function run_iteration(model::ModelSemiImplicit)
     # solve the sequence of registered equations for each variable
     for equation in model.equations
         ### ASSEMBLE THE EQUATION ###
-        # for the current equation preallocate the assembled LHS
-        # if mesh is marked as "must refresh" status (e.g. if it was remeshed)
         if mesh.must_refresh
+            # for the current equation preallocate the assembled LHS if
+            # mesh is marked as "must refresh" status (e.g. if it was remeshed)
             update_assembler_indices!(
                 equation.assembler,
                 mesh,
@@ -93,19 +98,22 @@ function run_iteration(model::ModelSemiImplicit)
         end
         if mesh.must_refresh || mesh.nodes.moved
             assembled_lhs = assemble_global_lhs(
-                equation.assembler, 
+                equation, 
                 mesh,
-                model.unknowns_handler
+                model.unknowns_handler,
+                model.additional_parameters
             )
         end
         # for this model always reassemble RHS
         assembled_rhs = assemble_global_rhs(
-            equation.assembler, 
+            equation, 
             mesh,
-            model.unknowns_handler
+            model.unknowns_handler,
+            model.additional_parameters
         )
 
-        # TODO: the domain conditions and solve could be done in parallel for each unknown
+        # TODO [make the solver paralallel] 
+        # the domain conditions and solve could be done in parallel for each unknown
         for unknown in equation.solved_unknowns
             ### APPLY DOMAIN CONDITIONS ###
             if mesh.must_refresh || mesh.nodes.moved
@@ -141,7 +149,8 @@ function run_iteration(model::ModelSemiImplicit)
     # do the updates for the mesh (e.g. movement, remesh, etc.)
     update!(mesh)
     
-    # TODO: it should check if it is diverging to abort simulation
+    # TODO [general performance improvements]
+    ## it should check if it is diverging to abort simulation
     check_unknowns_convergence!(model.unknowns_handler)
 end
 

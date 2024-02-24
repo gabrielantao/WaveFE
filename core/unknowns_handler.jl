@@ -7,7 +7,8 @@ mutable struct UnknownsHandler
     converged::Dict{String, Bool}
     convergence_tolerance_relative::Dict{String, Float64}
     convergence_tolerance_absolute::Dict{String, Float64}
-    # TODO: register a variable here with the only variables that must be checked 
+    # TODO [general performance improvements]
+    ## register a variable here with the only variables that must be checked 
 end
 
 
@@ -24,6 +25,26 @@ function load_unkowns_handler(input_data, simulation_parameters)
         simulation_parameters["simulation"]["tolerance_relative"],
         simulation_parameters["simulation"]["tolerance_absolute"]
     )
+end
+
+
+"""Get the values of the unknowns for the nodes"""
+function get_values(
+    unknowns_handler::UnknownsHandler, 
+    unknown::String,
+    nodes_ids::Vector{Int64}
+)
+    return unknowns_handler.values[unknown][nodes_ids]
+end
+
+
+"""Get the old values of the unknowns for the nodes"""
+function get_old_values(
+    unknowns_handler::UnknownsHandler, 
+    unknown::String,
+    nodes_ids::Vector{Int64}
+)
+    return unknowns_handler.old_values[unknown][nodes_ids]
 end
 
 

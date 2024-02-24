@@ -5,13 +5,13 @@ abstract type Equation end
 """This struct holds the sizes of the equation"""
 mutable struct EquationMembers
     # LHS matrix with domain conditions applied, the key is the unknown label
-    lhs::Dict{String, SparseMatrixCSC{Float64, Int32}}
+    lhs::Dict{String, SparseMatrixCSC{Float64, Int64}}
     # RHS matrix to be solved for each unknown, the key is the unknown label
     rhs::Dict{String, Vector{Float64}}
 
     function EquationMembers()
         new(
-            Dict{String, SparseMatrixCSC{Float64, Int32}}(),
+            Dict{String, sparse([], [], Float64[])}(),
             Dict{String, Vector{Float64}}()
         )
     end
