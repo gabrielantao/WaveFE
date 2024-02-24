@@ -6,14 +6,12 @@ authors = ["Gabriel Antão <gabrielantao@poli.ufrj.br>"]
 channels = ["conda-forge"]
 platforms = ["linux-64"]
 
+[activation]
+scripts = ["setup_env.bash"]
+
 [tasks]
-#setvars = "export PKG_CONFIG_PATH=./.pixi/env/"
-#setvarsa = "export PKG_CONFIG_PATH=./.pixi/env/"
 
 [dependencies]
-#petsc = ">=3.20.3,<3.21"
-#gfortran = ">=13.2.0,<13.3"
-#waf = ">=2.0.26,<2.1"
 pytest = ">=8.0.0,<8.1"
 numpy = ">=1.26.4,<1.27"
 pytest-regressions = ">=2.5.0,<2.6"
