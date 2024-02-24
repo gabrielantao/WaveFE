@@ -1,12 +1,12 @@
 struct Node
     # physical group used internally by the models 
     # (e.g. to set properties for elements)
-    physical_group::Int32
+    physical_group::Int64
     # geometrical group used internally by the models 
     # (e.g. to move group of elements) 
-    geometrical_group::Int32
+    geometrical_group::Int64
     # groups used to defined domain conditions
-    domain_condition_group::Int32
+    domain_condition_group::Int64
     
     # kinematics properties
     position::Vector{Float64}
@@ -17,7 +17,7 @@ end
 
 """This is a container for the nodes in the mesh"""
 mutable struct NodesContainer
-    total_nodes::Int32
+    total_nodes::Int64
     series::Vector{Node}
     moved::Bool
 end
@@ -65,28 +65,27 @@ end
 
 
 """Convinience function to get the list of x positions for node ids"""
-function get_positions_x(nodes::NodesContainer, nodes_ids::Vector{Int32})
+function get_positions_x(nodes::NodesContainer, nodes_ids::Vector{Int64})
     return [nodes.series[node_id].position[1] for node_id in nodes_ids]
 end
 
 
 """Convinience function to get the list of y positions for node ids"""
-function get_positions_y(nodes::NodesContainer, nodes_ids::Vector{Int32})
+function get_positions_y(nodes::NodesContainer, nodes_ids::Vector{Int64})
     return [nodes.series[node_id].position[2] for node_id in nodes_ids]
 end
 
 
 """Convinience function to get the list of z positions for node ids"""
-function get_positions_z(nodes::NodesContainer, nodes_ids::Vector{Int32})
+function get_positions_z(nodes::NodesContainer, nodes_ids::Vector{Int64})
     return [nodes.series[node_id].position[3] for node_id in nodes_ids]
 end
 
 
-# TODO: in the future this function could be implemented in another 
+# TODO [implement mesh movement]
+# in the future this function could be implemented in another 
 # file to define the rule for the movement
 """Do the movement for the nodes"""
 function move!(nodes::NodesContainer)
     nodes.moved = False
-    # TODO: in the future implement movement of the mesh based in some 
-    #       function of movement for the specific groups that must move.
 end 

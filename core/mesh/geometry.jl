@@ -1,5 +1,5 @@
 """Calculate length given the nodes ids of the edge endings"""
-function calculate_length(nodes_ids::Vector{Int32}, nodes::NodesContainer)
+function calculate_length(nodes_ids::Vector{Int64}, nodes::NodesContainer)
     x = get_positions_x(nodes, nodes_ids)
     return abs(x[1] - x[2])
 end
@@ -19,4 +19,6 @@ function calculate_area(element::Triangle, nodes::NodesContainer)
 end
 
 
-# TODO: implement other element geometry calculations 
+# TODO [implement one dimensional elements]
+# TODO [implement two dimensional elements]
+# TODO [implement three dimensional elements]

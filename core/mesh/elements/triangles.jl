@@ -1,6 +1,6 @@
 """An element of type triangle"""
 struct Triangle <: Element
-    connectivity::Vector{Int32}    
+    connectivity::Vector{Int64}    
     # the derivatives
     b::Vector{Float64}
     c::Vector{Float64}
@@ -17,8 +17,8 @@ end
 
 """A triangle element container"""
 mutable struct TrianglesContainer <: ElementsContainer
-    total_elements::Int32
-    nodes_per_element::Int32
+    total_elements::Int64
+    nodes_per_element::Int64
     elements::Vector{Triangle}
 end
 
@@ -97,7 +97,8 @@ function update_areas!(
 end
 
 
-# TODO: check if this coeficients are different depending on interpolation order...
+# TODO [implement higher order elements]
+# check if this coeficients are different depending on interpolation order...
 """Update triangle element shape coeficients."""
 function update_shape_coeficients!(
     elements_container::TrianglesContainer, 
@@ -113,6 +114,7 @@ function update_shape_coeficients!(
 end
 
 
+# TODO [implement higher order elements]
 """Update values of local time step intervals for steady state simulations."""
 function update_local_time_interval!(
     elements_container::TrianglesContainer, 
@@ -131,6 +133,7 @@ function update_local_time_interval!(
 end
 
 
+# TODO [implement higher order elements]
 """
 This updates specific sizes.
 (see Nithiarasu eq 7.128 for a nodal version)

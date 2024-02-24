@@ -46,7 +46,7 @@ mutable struct BiDimensionalElements <: ElementsSet
 end
 
 
-# TODO: implement it here
+# TODO [implement three dimensional elements]
 # mutable struct TriDimensionalElements <: ElementsSet
 # end
 
@@ -82,7 +82,8 @@ function load_mesh(input_data, simulation_parameters)
         )
     elseif input_data["mesh"]["dimension"] == 3
         dimension = TRIDIMENSIONAL::Dimension
-        # TODO: implement here the tridimensional elements
+        # TODO [implement three dimensional elements]
+        throw("Not implemented tridimensional elements")
     end
     # get the interpolation order for the mesh
     if simulation_parameters["mesh"]["interpolation_order"] == 1
@@ -118,6 +119,13 @@ function get_containers(mesh_elements::BiDimensionalElements)
 end
 
 
+# TODO [implement three dimensional elements]
+# """Function to return reference to the elements containers used for the mesh"""
+# function get_containers(mesh_elements::TriDimensionalElements)
+#     return []
+# end
+
+
 """Update (move) mesh nodes when a dynamic mesh is used"""
 function update_elements!(
     mesh::Mesh,
@@ -137,8 +145,9 @@ function update_elements!(
 end
 
 
+# TODO [implement mesh movement]
+"""Update the mesh i.e. remesh if needed and move the nodes"""
 function update!(mesh::Mesh)
-    # TODO: implement here the logic if in future the mesh must be redone
     mesh.must_refresh = false
     move!(mesh.nodes)
 end

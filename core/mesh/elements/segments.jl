@@ -1,6 +1,6 @@
 """An element of type segment"""
 struct Segment <: Element
-    connectivity::Vector{Int32}      
+    connectivity::Vector{Int64}      
     # the derivatives
     b::Vector{Float64}
     c::Vector{Float64}
@@ -17,8 +17,8 @@ end
 
 """An segment element group"""
 mutable struct SegmentsContainer <: ElementsContainer
-    total_elements::Int32
-    nodes_per_element::Int32
+    total_elements::Int64
+    nodes_per_element::Int64
     elements::Vector{Triangle}
 end
 
@@ -47,7 +47,7 @@ function load_segments(input_data, simulation_parameters)
 end
 
 
-# TODO: implement this function
+# TODO [implement one dimensional elements]
 """Update properties when needed"""
 function update_properties(
     elements_container::SegmentsContainer, 
@@ -67,7 +67,7 @@ function update_properties(
 end
 
 
-# TODO: implement this function
+# TODO [implement one dimensional elements]
 """Calculate and update lengths of segments"""
 function update_lengths!(
     elements_container::SegmentsContainer, 
@@ -76,13 +76,15 @@ function update_lengths!(
 end
 
 
-# TODO: implement this function
+# TODO [implement one dimensional elements]
+# TODO [implement higher order elements]
 function update_shape_coeficients!(
     elements_container::SegmentsContainer, nodes_container::NodesContainer
 )
 end
 
-# TODO: implement this function
+# TODO [implement one dimensional elements]
+# TODO [implement higher order elements]
 """Update values of local time step intervals for steady state simulations"""
 function update_local_time_interval!(
     elements_container::SegmentsContainer, 
@@ -93,7 +95,8 @@ function update_local_time_interval!(
 )    
 end
 
-# TODO: implement this function
+# TODO [implement one dimensional elements]
+# TODO [implement higher order elements]
 function calculate_specific_sizes(
     element::Segment, nodes_container::NodesContainer
 )

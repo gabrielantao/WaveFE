@@ -1,6 +1,6 @@
 """An element of type quadrilateral"""
 struct Quadrilateral <: Element
-    connectivity::Vector{Int32}    
+    connectivity::Vector{Int64}    
     # the derivatives
     b::Vector{Float64}
     c::Vector{Float64}
@@ -17,8 +17,8 @@ end
 
 """A quadrilaterals element container"""
 mutable struct QuadrilateralsContainer <: ElementsContainer
-    total_elements::Int32
-    nodes_per_element::Int32
+    total_elements::Int64
+    nodes_per_element::Int64
     elements::Vector{Quadrilateral}
 end
 
@@ -47,7 +47,6 @@ function load_quadrilaterals(input_data, simulation_parameters)
 end
 
 
-# TODO: implement this function
 """Update properties if needed (when mesh coordinates changed)"""
 function update_properties(
     elements_container::QuadrilateralsContainer, 
@@ -67,7 +66,7 @@ function update_properties(
 end
 
 
-# TODO: implement this function
+# TODO [implement two dimensional elements]
 """Calculate and update areas of quadrilaterals"""
 function update_areas!(
     elements_container::QuadrilateralsContainer, nodes_container::NodesContainer
@@ -75,14 +74,16 @@ function update_areas!(
 end
 
 
-# TODO: implement this function
+# TODO [implement two dimensional elements]
+# TODO [implement higher order elements]
 function update_shape_coeficients!(
     elements_container::QuadrilateralsContainer, nodes_container::NodesContainer
 )
 end
 
 
-# TODO: implement this function
+# TODO [implement two dimensional elements]
+# TODO [implement higher order elements]
 """Update values of local time step intervals for steady state simulations"""
 function update_local_time_interval!(
     elements_container::QuadrilateralsContainer, 
@@ -94,7 +95,8 @@ function update_local_time_interval!(
 end
 
 
-# TODO: implement this function
+# TODO [implement two dimensional elements]
+# TODO [implement higher order elements]
 function calculate_specific_sizes(
     element::Quadrilateral, nodes_container::NodesContainer
 )
