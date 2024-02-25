@@ -1,10 +1,10 @@
 from pathlib import Path
 import os
 
-# general paths of the program
-PATH_ROOT = Path(os.environ["PIXI_PACKAGE_ROOT"])
-PATH_APPLICATION = PATH_ROOT / Path(os.environ["WAVE_PATH_APPLICATION"])
-PATH_SIMULATOR = PATH_ROOT / Path(os.environ["WAVE_PATH_SIMULATOR"])
+
+WAVE_PATH_ROOT = Path(__file__).parents[1].resolve()
+WAVE_PATH_APPLICATION = WAVE_PATH_ROOT / Path("application")
+WAVE_PATH_SIMULATOR = WAVE_PATH_ROOT / Path("core")
 
 # validators version for each *.toml input file
 CONDITIONS_TOML_VERSION = 1

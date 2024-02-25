@@ -1,5 +1,5 @@
 import logging
-from application.constants import PATH_APPLICATION
+from application.constants import WAVE_PATH_APPLICATION
 
 
 class ApplicationLogger:
@@ -15,7 +15,7 @@ class ApplicationLogger:
         logging_level = logging.INFO
         self.log = logging.getLogger("application")
         logger_handler = logging.FileHandler(
-            PATH_APPLICATION / "logs" / "application.log", mode="w"
+            WAVE_PATH_APPLICATION / "logs" / "application.log", mode="w"
         )
         self.log.addHandler(logger_handler)
         self.log.setLevel(logging_level)

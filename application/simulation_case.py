@@ -9,7 +9,7 @@ import subprocess
 import os
 
 from application.constants import (
-    PATH_SIMULATOR,
+    WAVE_PATH_SIMULATOR,
     SIMULATION_FILENAME,
     DOMAIN_CONDITIONS_FILENAME,
     SIMULATION_CACHE_PATH,
@@ -129,14 +129,17 @@ class SimulationCase:
                 "pixi",
                 "run",
                 "julia",
-                f"--project={PATH_SIMULATOR}",
+                f"--project={WAVE_PATH_SIMULATOR}",
+                "simulator.jl",
                 str(self.case_folder),
-            ]
+            ],
+            cwd=WAVE_PATH_SIMULATOR,
         )
         # copy cached result folder to case_path/results/datetime
-        self.last_result_folder = (
-            self.case_folder
-            / Path("results")
-            / Path(datetime.now().strftime("%Y_%m_%d %H_%M_%S"))
-        )
-        shutil.copytree(self.cache_folder, self.last_result_folder, dirs_exist_ok=True)
+        # TODO: put this here to save the case
+        # self.last_result_folder = (
+        #     self.case_folder
+        #     / Path("results")
+        #     / Path(datetime.now().strftime("%Y_%m_%d %H_%M_%S"))
+        # )
+        # shutil.copytree(self.cache_folder, self.last_result_folder, dirs_exist_ok=True)
