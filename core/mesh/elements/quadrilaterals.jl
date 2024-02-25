@@ -1,3 +1,7 @@
+# TODO [implement group of elements]
+## for now these groups for elements are not used but they can be useful 
+## to set properties for elements
+
 """An element of type quadrilateral"""
 struct Quadrilateral <: Element
     connectivity::Vector{Int64}    

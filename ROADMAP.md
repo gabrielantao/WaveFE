@@ -10,3 +10,7 @@ There are some features and improvements that could be implemented
 7. review the equation formulations
 8. implement three dimensional elements
 9. general performance improvements
+10. implement validations and input versioning
+11. multiple mesh input formats
+12. implement better debugging tools
+13. implement group of elements

@@ -28,7 +28,7 @@ function load_domain_conditions(domain_conditions_groups, domain_conditions_data
     values = Dict{Tuple{String, ConditionType}, Vector{Float64}}()
     # get boundary conditions
     for condition_data in domain_conditions_data["boundary"]
-        group_number = condition_data["group_number"]
+        group_number = condition_data["group_name"]
         unknown = condition_data["unknown"]
         value = condition_data["value"]
         condition_type = get_condition_type(condition_data["condition_type"])

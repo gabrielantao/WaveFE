@@ -3,8 +3,106 @@ import logging
 import re
 import numpy as np
 import meshio
+from enum import Enum, StrEnum, auto
 
-from simulator.element import ElementType, NodesHandler, ElementsContainer, GroupType
+
+class GroupType(Enum):
+    """
+    Enum to hold data for type of the group
+    physical and geometrical groups are free to use inside the model
+    (e.g. to define boundary to calculate some properties such as drag and lift in surface)
+    named group is used to define boundary conditions
+    """
+
+    GEOMETRICAL = auto()
+    PHYSICAL = auto()
+    NAMED = auto()
+
+
+class ElementType(StrEnum):
+    """All types of element supported for now"""
+
+    NODE = "node"
+    SEGMENT = "segments"
+    TRIANGLE = "triangles"
+    QUADRILATERAL = "quadrilaterals"
+    # TODO [implement three dimensional elements]
+    ## complete this enum when implement other element types
+
+
+class NodesHandler:
+    def __init__(self, dimension, positions):
+        self.total_nodes = positions.shape[0]
+        self.positions = positions[:, 0:dimension]
+        # TODO [implement mesh movement]
+        ## implement here a way to inform the initial velocities and accelerations
+        self.velocities = np.zeros_like(self.positions)
+        self.accelerations = np.zeros_like(self.positions)
+        self.geometrical_group = np.zeros(self.total_nodes, dtype=np.int64)
+        self.physical_group = np.zeros(self.total_nodes, dtype=np.int64)
+        self.domain_condition_groups = np.zeros(self.total_nodes, dtype=np.int64)
+
+    def set_group_numbers(self, group_type, group_numbers, node_ids):
+        """
+        Define group number for some nodes.
+        The rule to define node groups is the current number of node is overridden
+        only by a higher group number.
+        """
+        for group_number, node_id in zip(group_numbers, node_ids):
+            match group_type:
+                case GroupType.GEOMETRICAL.value:
+                    if group_number > self.geometrical_group[node_id]:
+                        self.geometrical_group[node_id] = group_number
+                case GroupType.PHYSICAL.value:
+                    if group_number > self.physical_group[node_id]:
+                        self.physical_group[node_id] = group_number
+                case GroupType.NAMED.value:
+                    if group_number > self.domain_condition_groups[node_id]:
+                        self.domain_condition_groups[node_id] = group_number
+
+
+class ElementsContainer:
+    def __init__(self, element_type, connectivity_matrix):
+        self.element_type = element_type
+        self.total_elements = connectivity_matrix.shape[0]
+        self.connectivity = connectivity_matrix
+
+        # TODO [implement group of elements]
+        ## for now these groups are not used but they can be useful to set properties for elements
+        self.geometrical_group = np.zeros(self.total_elements, dtype=np.int64)
+        self.physical_group = np.zeros(self.total_elements, dtype=np.int64)
+        self.domain_condition_groups = np.zeros(self.total_elements, dtype=np.int64)
+
+    def set_group_numbers(self, group_type, group_numbers, nodes_handler):
+        """
+        Set the number of the groups for the elements and nodes in each element.
+        The rule to define node groups is the current number of node is overridden
+        only by a higher group number.
+        """
+        assert len(group_numbers) == self.total_elements
+
+        for element_id in range(self.total_elements):
+            group_number = group_numbers[element_id]
+            # TODO [implement group of elements]
+            ##  check if it should reset the groups for the nodes
+            ## set group number for nodes of this element
+            ## node_ids = self.elements[element_id].node_ids
+            ## nodes_group_numbers = np.full_like(node_ids, group_number)
+            ## nodes_handler.set_group_numbers(group_type, nodes_group_numbers, node_ids)
+
+            # set the group number for the element
+            match group_type:
+                case GroupType.GEOMETRICAL.value:
+                    if group_number > self.geometrical_group[element_id]:
+                        self.geometrical_group[element_id] = group_number
+                case GroupType.PHYSICAL.value:
+                    # set the group number for the element
+                    if group_number > self.physical_group[element_id]:
+                        self.physical_group[element_id] = group_number
+                case GroupType.NAMED.value:
+                    # set the group number for the element
+                    if group_number > self.domain_condition_groups[element_id]:
+                        self.domain_condition_groups[element_id] = group_number
 
 
 class Mesh:
@@ -42,19 +140,20 @@ class Mesh:
         self.setup_nodes(mesh)
         self.setup_elements(mesh)
         self.setup_groups(mesh)
-        self.setup_named_groups(mesh)
+        self.setup_domain_condition_groups(mesh)
 
     def setup_nodes(self, mesh):
         """Create nodes handler with nodes from mesh file"""
-        # infer dimension of a mesh by checking zeros in points coordinates
+        # infer dimension of a mesh by checking zeros in points positions
         all_zero_dim_2 = all(np.isclose(mesh.points[:, 1], 0.0))
         all_zero_dim_3 = all(np.isclose(mesh.points[:, 2], 0.0))
         if all_zero_dim_2 and all_zero_dim_3:
-            self.nodes_handler = NodesHandler(1, mesh.points)
+            self.dimension = 1
         elif all_zero_dim_3:
-            self.nodes_handler = NodesHandler(2, mesh.points)
+            self.dimension = 2
         else:
-            self.nodes_handler = NodesHandler(3, mesh.points)
+            self.dimension = 3
+        self.nodes_handler = NodesHandler(dimension, mesh.points)
 
     def setup_elements(self, mesh):
         """Create element containers and configure it with data from mesh file"""
@@ -65,10 +164,11 @@ class Mesh:
             # ignore nodes in the element connectivity
             if element_type == ElementType.NODE.value:
                 continue
-            # TODO: check if it works for other imported formats (prefix 'gmsh' can break)
+            # TODO [multiple mesh input formats]
+            ## check if it works for other imported formats (prefix 'gmsh' can break)
             self.element_containers[element_type] = ElementsContainer(
                 element_type,
-                connectivity.astype(np.int32),
+                connectivity,
             )
 
     def setup_groups(self, mesh):
@@ -78,8 +178,10 @@ class Mesh:
         to calcualte properties in some some surface (e.g. drag/lift forces).
         Both element and nodes could be in marked in named groups.
         """
-        # TODO: this function should log each pass of the group setter to debug propurses
-        #       this can be done saving all nodes and element groups in a pandas dataframe
+        # TODO [implement better debugging tools]
+        ## this function should log each pass of the group setter to debug propurses
+        ## this can be done saving all nodes and element groups in a pandas dataframe
+
         # setup geometrical and physical group numbers for elements and nodes
         for group_name, elements_groups in mesh.cell_data_dict.items():
             group_type = self._get_element_group_type(group_name)
@@ -90,28 +192,33 @@ class Mesh:
                 if element_type == ElementType.NODE.value:
                     node_ids = mesh.cells_dict[element_name].flatten()
                     self.nodes_handler.set_group_numbers(
-                        group_type, group_numbers.astype(np.int32), node_ids
+                        group_type, group_numbers, node_ids
                     )
                 else:
                     self.element_containers[element_type].set_group_numbers(
-                        group_type, group_numbers.astype(np.int32), self.nodes_handler
+                        group_type, group_numbers, self.nodes_handler
                     )
 
-    def setup_named_groups(self, mesh):
+    def setup_domain_condition_groups(self, mesh):
         """
         Configure node and element named groups.
         These groups can be used for example to easly setup boundary conditions.
         Both element and nodes could be in marked in named groups.
         """
-        # TODO: this function should log each pass of the group setter to debug propurses
-        #       this can be done saving all nodes and element groups in a pandas dataframe
+        # TODO [implement better debugging tools]
+        ## this function should log each pass of the group setter to debug propurses
+        ## this can be done saving all nodes and element groups in a pandas dataframe
+
         # setup named groups
-        self.named_groups = {
+        self.domain_condition_groups = {
             group_name: number[0] for group_name, number in mesh.field_data.items()
         }
         for group_name, elements_groups in mesh.cell_sets_dict.items():
             # ignore groups that were not named by user that created the mesh
             if re.match("gmsh:*", group_name):
+                # TODO [multiple mesh input formats]
+                ## check how this behaves for other input mesh formats
+                ## maybe meshio can put other prefix for other formats...
                 continue
             # the named elements comes with indices instead of an array with all group numbers
             # so the trick here is just create an array full of zeros and use the indices to
@@ -123,8 +230,8 @@ class Mesh:
                 if element_type == ElementType.NODE.value:
                     group_numbers = np.full_like(
                         indices,
-                        self.named_groups[group_name],
-                        dtype=np.int32,
+                        self.domain_condition_groups[group_name],
+                        dtype=np.int64,
                     )
                     self.nodes_handler.set_group_numbers(
                         GroupType.NAMED.value, group_numbers, indices
@@ -132,9 +239,9 @@ class Mesh:
                 else:
                     group_numbers = np.zeros(
                         self.element_containers[element_type].total_elements,
-                        dtype=np.int32,
+                        dtype=np.int64,
                     )
-                    group_numbers[indices] = self.named_groups[group_name]
+                    group_numbers[indices] = self.domain_condition_groups[group_name]
                     self.element_containers[element_type].set_group_numbers(
                         GroupType.NAMED.value,
                         group_numbers,
@@ -157,17 +264,18 @@ class Mesh:
             return self.ELEMENT_GROUP_TRANSLATION[group_name]
         raise RuntimeError(f"Element group named {group_name} not implemented.")
 
-    def get_element_containers(self) -> list[ElementsContainer]:
+    def get_element_containers(self):
         """Return element container to be used in assembling depending on mesh dimension"""
         element_types = []
         match self.nodes_handler.dimensions:
             case 1:
-                # element_types.append(ElementType.SEGMENT.value)
+                # TODO [implement one dimensional elements]
                 raise NotImplementedError("Not implement 1D meshs yet")
             case 2:
                 element_types.append(ElementType.TRIANGLE.value)
                 element_types.append(ElementType.QUADRILATERAL.value)
             case 3:
+                # TODO [implement three dimensional elements]
                 raise NotImplementedError("Not implement 3D meshs yet")
         used_containers = []
         for element_type in element_types:

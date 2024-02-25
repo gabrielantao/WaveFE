@@ -102,6 +102,8 @@ class SimulationCase:
             }
             with open(cache_info_filepath, "w", encoding="utf-8") as f:
                 toml.dump(cache_info, f)
+            # redo the preprocessing of cached files if needed
+            SimulationPreprocessor(self.cache_folder).setup()
         else:
             logging.info(
                 "no parameters have changed for this simulation since last run"
@@ -120,7 +122,6 @@ class SimulationCase:
     def run(self) -> None:
         """Call simulator to run this case"""
         self._generate_cache_files()
-        SimulationPreprocessor(self.case_folder).setup()
         # run the simulator
         subprocess.run(
             [

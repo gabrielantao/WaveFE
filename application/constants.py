@@ -14,6 +14,7 @@ VALIDATION_TOML_VERSION = 1
 # default name for some files
 DOMAIN_CONDITIONS_FILENAME = "conditions.toml"
 SIMULATION_FILENAME = "simulation.toml"
+SIMULATION_INPUT_DATA_FILENAME = "input.hdf5"
 
 # paths for the simulator
 SIMULATION_CACHE_PATH = Path("cache")

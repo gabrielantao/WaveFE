@@ -10,7 +10,7 @@ struct Node
     
     # kinematics properties
     position::Vector{Float64}
-    velocitie::Vector{Float64}
+    velocity::Vector{Float64}
     acceleration::Vector{Float64}
 end
 
