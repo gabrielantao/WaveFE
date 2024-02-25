@@ -6,11 +6,10 @@ using TOML
 using HDF5
 using ArgParse
 
-# TODO: include all the modules and files here
+# get all the models available
 include("constants.jl")
-
-
-include("./models/register.jl")
+include("models/register.jl")
+include("validator.jl")
 
 
 function parse_commandline()
@@ -25,16 +24,37 @@ function parse_commandline()
     return parse_args(s)
 end
 
+# TODO: remove this, this function is just for test
+# function smoke()
+#     # parse args from comand line
+#     parsed_args = parse_commandline()
+#     folder = parsed_args["folder"]
+    
+#     # input all the relevant data to build the model 
+#     cache_filepath = joinpath(folder, CACHE_FILEPATH)
+#     input_data = h5open(joinpath(cache_filepath, SIMULATION_MESH_FILENAME), "r")
+#     simulation_data = TOML.parsefile(joinpath(cache_filepath, SIMULATION_INPUT_FILENAME))
+#     domain_conditions_data = TOML.parsefile(joinpath(cache_filepath, DOMAIN_CONDITIONS_FILENAME))
+    
+#     # do the logical validations for the inputs
+#     validate_simulation_data(simulation_data)
+#     validate_domain_conditions_data(domain_conditions_data)
+#    # println(folder)
+#     #println(ENV["JULIA_LOAD_PATH"])
+# end
+
 
 function run_simulator()
     # parse args from comand line
     parsed_args = parse_commandline()
     folder = parsed_args["folder"]
 
+    
     # input all the relevant data to build the model 
-    input_data = h5open(joinpath(folder, "cache", "input.hdf5"), "r")
-    simulation_data = TOML.parsefile(joinpath(folder, "cache", "simulation.toml"))
-    domain_conditions_data = TOML.parsefile(joinpath(folder, "cache", DOMAIN_CONDITIONS_FILENAME))
+    cache_filepath = joinpath(folder, CACHE_FILEPATH)
+    input_data = h5open(joinpath(cache_filepath, SIMULATION_MESH_FILENAME), "r")
+    simulation_data = TOML.parsefile(joinpath(cache_filepath, SIMULATION_INPUT_FILENAME))
+    domain_conditions_data = TOML.parsefile(joinpath(cache_filepath, DOMAIN_CONDITIONS_FILENAME))
     
     # do the logical validations for the inputs
     validate_simulation_data(simulation_data)
@@ -42,7 +62,7 @@ function run_simulator()
 
     # get the model based in the simulation model defined in input file
     model = build_model(input_data, simulation_data, domain_conditions_data)
-    
+    exit()
     # TODO: create output manager here
     # create output handler
     # output_manager = create_output_manager(

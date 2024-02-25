@@ -12,11 +12,11 @@ depending on the dimension of the mesh
 abstract type ElementsSet end
 
 # include files for the elements and containers 
-include("./geometry.jl")
 include("./elements/nodes.jl")
 include("./elements/segments.jl")
 include("./elements/triangles.jl")
 include("./elements/quadrilaterals.jl")
+include("./geometry.jl")
 
 
 @enum InterpolationOrder begin

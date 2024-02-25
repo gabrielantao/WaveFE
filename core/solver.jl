@@ -10,7 +10,7 @@ end
 mutable struct Solver
     type::SolverType
     preconditioner_type::SolverPreconditioners
-    steps_limit::Int32
+    steps_limit::Int64
     relative_tolerance::Float64
     absolute_tolerance::Float64
     preconditioner::Dict{String, DiagonalPreconditioner{Float64, Vector{Float64}}}
@@ -45,7 +45,7 @@ end
 """Update the preconditioner used to solve the equation for this variable"""
 function update_preconditioner(
     solver::Solver, 
-    lhs::SparseMatrixCSC{Float64, Int32},
+    lhs::SparseMatrixCSC{Float64, Int64},
     unknown_label::String
 )
     # TODO: select the preconditioner to be used here instead of this default here
@@ -57,7 +57,7 @@ end
 function solve!(
     solver::Solver,
     unknown::String,
-    lhs::SparseMatrixCSC{Float64, Int32},
+    lhs::SparseMatrixCSC{Float64, Int64},
     rhs::Vector{Float64},
     unknowns_handler::UnknownsHandler
 )

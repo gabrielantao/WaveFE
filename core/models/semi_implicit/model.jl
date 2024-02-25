@@ -5,19 +5,22 @@ using SparseArrays
 using Preconditioners
 using IterativeSolvers
 
+# TODO [general performance improvements]
+## investigate if this is the proper way to include code in this module
+## in order to take advantage of Julia precompilation
 
-# implementation for the mesh and domain conditions
-# to be used by this model
+# import all used common code to all models
 include("../../common.jl")
-include("../../mesh/mesh.jl")
-include("../../domain_conditions.jl")
-include("../../base_equation.jl")
 include("../../unknowns_handler.jl")
+include("../../domain_conditions.jl")
+include("../../mesh/mesh.jl")
+include("../../assembler.jl")
+include("../../solver.jl")
+include("../../base_equation.jl")
 
-# get the assembled equations
-include("./equations/equation_one.jl")
-include("./equations/equation_two.jl")
-include("./equations/equation_three.jl")
+
+# exported variables and methods
+export run_iteration
 
 
 """Additional parameters from the input file"""
@@ -26,8 +29,15 @@ struct ModelSemiImplicitParameters <: ModelParameters
     adimensionals::Dict{String, Float64}
 end
 
-const MODEL_NAME_SEMI_IMPLICIT = "CBS Semi-Implicit"
-const MODEL_SEMI_IMPLICIT_ALL_VARIABLES = ["u_1", "u_2", "u_3", "p"]
+
+const MODEL_NAME = "CBS Semi-Implicit"
+const MODEL_UNKNOWNS = ["u_1", "u_2", "u_3", "p"]
+
+
+# get the assembled equations
+include("./equations/equation_one.jl")
+include("./equations/equation_two.jl")
+include("./equations/equation_three.jl")
 
 
 """
@@ -36,10 +46,11 @@ TODO: include description here ....
 """
 struct ModelSemiImplicit
     name::String
+    unknonws::Vector{String}
     mesh::Mesh
     domain_conditions::DomainConditions
-    equations::Vector{ModelEquation}
-    unknowns_handler::Vector{String}
+    equations::Vector{Equation}
+    unknowns_handler::UnknownsHandler
     additional_parameters::ModelSemiImplicitParameters
 
     function ModelSemiImplicit(input_data, simulation_data, domain_conditions_data)
@@ -59,14 +70,14 @@ struct ModelSemiImplicit
 
         # define the unknowns for this model
         # velocities solved in the equation one and three depend on mesh dimension
-        unknonws_velocities = ["u_$i" for i in range(1, Int(mesh.dimension))]
-        unknonws_pressure = ["p"]
-        all_solved_unknowns = [velocities; pressure]
+        unknowns_velocities = ["u_$i" for i in range(1, Int(mesh.dimension))]
+        unknown_pressure = ["p"]
+        all_solved_unknowns = [unknowns_velocities; unknown_pressure]
 
         # build the equations used for this model
         equations = [
-            EquationStepOne(unknonws_velocities, simulation_data),
-            EquationStepTwo(unknonws_pressure, simulation_data),
+            EquationStepOne(unknowns_velocities, simulation_data),
+            EquationStepTwo(unknown_pressure, simulation_data),
             EquationStepThree(unknonws_velocities, simulation_data),
         ]
 
@@ -81,7 +92,8 @@ struct ModelSemiImplicit
         )
 
         new(
-            MODEL_NAME_SEMI_IMPLICIT, 
+            MODEL_NAME, 
+            MODEL_UNKNOWNS,
             mesh,
             domain_conditions,
             unkowns_handler, 
@@ -106,11 +118,7 @@ function run_iteration(model::ModelSemiImplicit)
         if mesh.must_refresh
             # for the current equation preallocate the assembled LHS if
             # mesh is marked as "must refresh" status (e.g. if it was remeshed)
-            update_assembler_indices!(
-                equation.assembler,
-                mesh,
-                model.unknowns_handler
-            )
+            update_assembler_indices!(equation.assembler, mesh)
         end
         if mesh.must_refresh || mesh.nodes.moved
             assembled_lhs = assemble_global_lhs(

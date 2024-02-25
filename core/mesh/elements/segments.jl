@@ -23,13 +23,13 @@ end
 mutable struct SegmentsContainer <: ElementsContainer
     total_elements::Int64
     nodes_per_element::Int64
-    elements::Vector{Triangle}
+    elements::Vector{Segment}
 end
 
 
 """Load data for the segments"""
 function load_segments(input_data, simulation_parameters)
-    elements = Vector{Triangle}()
+    elements = Vector{Segment}()
     # start all these values as NaN to make this break if they are not initialized
     b, c, length, Δt = NaN, NaN, NaN, NaN
     for connectivity in eachrow(input_data["mesh"]["segments"]["connectivity"])

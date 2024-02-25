@@ -32,6 +32,7 @@ function load_triangles(input_data, simulation_parameters)
     elements = Vector{Triangle}()
     # start all these values as NaN to make this break if they are not initialized
     b, c, area, Δt = NaN, NaN, NaN, NaN
+    # TODO: change this to check first if it has the triangles
     for connectivity in eachrow(input_data["mesh"]["triangles"]["connectivity"])
         append!(elements, Triangle(connectivity, b, c, area, Δt))
     end
