@@ -14,7 +14,6 @@ def test_generate_cache_files_2d(
     shared_datadir: Path,
 ):
     """generate all cached files needed for simulation"""
-    # cloned_case = case_corner_2d.clone(datadir)
     case_corner_2d = SimulationCase(shared_datadir / "dummy_case")
     case_corner_2d._generate_cache_files()
 
@@ -44,7 +43,6 @@ def test_generate_input_2d(
     shared_datadir: Path,
 ):
     """generate all cached files needed for simulation"""
-    # cloned_case = case_corner_2d.clone(datadir)
     case_corner_2d = SimulationCase(shared_datadir / "dummy_case")
     case_corner_2d._generate_cache_files()
 
