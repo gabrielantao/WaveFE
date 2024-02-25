@@ -22,6 +22,7 @@ from application.validator import (
     InputFileType,
 )
 from application.simulation_preprocessor import SimulationPreprocessor
+from application.logger import logger
 
 
 class SimulationCase:

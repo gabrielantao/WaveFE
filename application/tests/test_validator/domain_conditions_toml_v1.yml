@@ -38,8 +38,19 @@ general:
   description: Classic lid driven cavity 2D case conditions.
   version: 1
 initial:
-- condition_type: 1
-  description: define initial pressure values for all nodes
+- description: define initial velocity x values for all nodes
+  group_name: ''
+  value: 0.0
+  variable_name: u_1
+- description: define initial velocity y values for all nodes
+  group_name: ''
+  value: 0.0
+  variable_name: u_2
+- description: define initial velocity z values for all nodes
+  group_name: ''
+  value: 0.0
+  variable_name: u_3
+- description: define initial pressure values for all nodes
   group_name: ''
   value: 0.0001
   variable_name: p

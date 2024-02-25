@@ -19,3 +19,6 @@ class ApplicationLogger:
         )
         self.log.addHandler(logger_handler)
         self.log.setLevel(logging_level)
+
+
+logger = ApplicationLogger()

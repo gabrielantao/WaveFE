@@ -5,6 +5,8 @@ import numpy as np
 import meshio
 from enum import Enum, StrEnum, auto
 
+from application.logger import logger
+
 
 class GroupType(Enum):
     """
@@ -131,7 +133,9 @@ class Mesh:
         "gmsh:physical": GroupType.PHYSICAL.value,
     }
 
-    # TODO: maybe this class should run a integrity check for the mesh
+    # TODO [multiple mesh input formats]
+    ## maybe this class should run a integrity check for the mesh
+    # TODO [implement hybrid mesh]
     def __init__(self, mesh_filepath: Path, interpolation_order: int = 1):
         self.filepath = mesh_filepath
         self.interpolation_order = interpolation_order
@@ -153,7 +157,7 @@ class Mesh:
             self.dimension = 2
         else:
             self.dimension = 3
-        self.nodes_handler = NodesHandler(dimension, mesh.points)
+        self.nodes_handler = NodesHandler(self.dimension, mesh.points)
 
     def setup_elements(self, mesh):
         """Create element containers and configure it with data from mesh file"""
@@ -267,7 +271,7 @@ class Mesh:
     def get_element_containers(self):
         """Return element container to be used in assembling depending on mesh dimension"""
         element_types = []
-        match self.nodes_handler.dimensions:
+        match self.dimension:
             case 1:
                 # TODO [implement one dimensional elements]
                 raise NotImplementedError("Not implement 1D meshs yet")

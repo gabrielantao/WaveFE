@@ -3,10 +3,27 @@ version = 1
 description = "Classic lid driven cavity 2D case conditions."
 
 [[initial]]
+description = "define initial velocity x values for all nodes"
+group_name = ""
+variable_name = "u_1"
+value = 0.0
+
+[[initial]]
+description = "define initial velocity y values for all nodes"
+group_name = ""
+variable_name = "u_2"
+value = 0.0
+
+[[initial]]
+description = "define initial velocity z values for all nodes"
+group_name = ""
+variable_name = "u_3"
+value = 0.0
+
+[[initial]]
 description = "define initial pressure values for all nodes"
 group_name = ""
 variable_name = "p"
-condition_type = 1
 value = 0.0001
 
 [[boundary]]
