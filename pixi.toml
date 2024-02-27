@@ -10,6 +10,7 @@ platforms = ["linux-64"]
 scripts = ["setup_env.bash"]
 
 [tasks]
+dev-shell = "cd $PIXI_PACKAGE_ROOT/simulator && julia --project=$PIXI_PACKAGE_ROOT/simulator -i $PIXI_PACKAGE_ROOT/simulator/startup.jl"
 
 [dependencies]
 pytest = ">=8.0.0,<8.1"
