@@ -1,0 +1,162 @@
+[general]
+version = 1
+description = "Classic lid driven cavity 2D case conditions."
+
+[[initial]]
+description = "define initial velocity y values for all nodes"
+group_name =  "3"
+value = 0.0
+variable_name = "u_1"
+
+[[initial]]
+description = "define initial velocity y values for all nodes"
+group_name =  "1"
+value = 0.0
+variable_name = "u_1"
+
+[[initial]]
+description = "define initial velocity y values for all nodes"
+group_name =  "2"
+value = 0.0
+variable_name = "u_1"
+
+[[initial]]
+description = "define initial velocity y values for all nodes"
+group_name =  "1"
+value = 0.0
+variable_name = "u_1"
+
+[[initial]]
+description = "define initial velocity y values for all nodes"
+group_name =  "3"
+value = 0.0
+variable_name = "u_2"
+
+[[initial]]
+description = "define initial velocity y values for all nodes"
+group_name =  "1"
+value = 0.0
+variable_name = "u_2"
+
+[[initial]]
+description = "define initial velocity y values for all nodes"
+group_name =  "2"
+value = 0.0
+variable_name = "u_2"
+
+[[initial]]
+description = "define initial velocity y values for all nodes"
+group_name =  "1"
+value = 0.0
+variable_name = "u_2"
+
+[[initial]]
+description = "define initial velocity z values for all nodes"
+group_name =  "3"
+value = 0.0
+variable_name = "u_3"
+
+[[initial]]
+description = "define initial velocity z values for all nodes"
+group_name =  "1"
+value = 0.0
+variable_name = "u_3"
+
+[[initial]]
+description = "define initial velocity z values for all nodes"
+group_name =  "2"
+value = 0.0
+variable_name = "u_3"
+
+[[initial]]
+description = "define initial velocity z values for all nodes"
+group_name =  "1"
+value = 0.0
+variable_name = "u_3"
+
+[[initial]]
+description = "define initial pressure values for all nodes"
+group_name =  "3"
+value = 0.0001
+variable_name = "p"
+
+[[initial]]
+description = "define initial pressure values for all nodes"
+group_name =  "1"
+value = 0.0001
+variable_name = "p"
+
+[[initial]]
+description = "define initial pressure values for all nodes"
+group_name =  "2"
+value = 0.0001
+variable_name = "p"
+
+
+[[initial]]
+description = "define initial velocity y values for all nodes"
+group_name = ""
+variable_name = "u_2"
+value = 0.0
+
+[[initial]]
+description = "define initial velocity z values for all nodes"
+group_name = "2"
+variable_name = "u_3"
+value = 0.0
+
+[[initial]]
+description = "define initial pressure values for all nodes"
+group_name = "1"
+variable_name = "p"
+value = 0.0001
+
+[[boundary]]
+description = "top boundary"
+group_name = "top"
+condition_type = 1
+variable_name = "u_1"
+value = 1.0
+
+[[boundary]]
+description = "top boundary"
+group_name = "top"
+condition_type = 1
+variable_name = "u_2"
+value = 0.0
+
+[[boundary]]
+description = "left, bottom, right boundary"
+group_name = "no-slip"
+condition_type = 1
+variable_name = "u_1"
+value = 0.0
+
+[[boundary]]
+description = "left, bottom, right boundary"
+group_name = "no-slip"
+condition_type = 1
+variable_name = "u_2"
+value = 0.0
+
+[[boundary]]
+description = "bottom-left corner"
+group_name = "reference"
+variable_name = "u_1"
+condition_type = 1
+value = 0.0
+
+[[boundary]]
+description = "bottom-left corner"
+group_name = "reference"
+variable_name = "u_2"
+condition_type = 1
+value = 0.0
+
+[[boundary]]
+description = "bottom-left corner"
+group_name = "reference"
+condition_type = 1
+variable_name = "p"
+value = 0.0
+

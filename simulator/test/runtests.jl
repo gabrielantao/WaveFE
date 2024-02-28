@@ -1,17 +1,4 @@
-# MyPackage/test/MyPackageTests.jl file
+include("./all_tests.jl")
 
-module WaveUnitTests
-using Wave, ReTest
+run_all_unit_tests()
 
-include("test_smoke.jl")
-
-end # module
-
-# TODO: add more modules here 
-# module WaveUnitTestsGlobal
-
-# using Wave, ReTest
-
-# include("test_assembling.jl")
-
-# end # module
