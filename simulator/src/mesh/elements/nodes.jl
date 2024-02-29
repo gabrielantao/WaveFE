@@ -1,3 +1,7 @@
+# exported entities
+export Node, NodesContainer
+
+
 struct Node
     # physical group used internally by the models 
     # (e.g. to set properties for elements)
@@ -17,7 +21,6 @@ end
 
 """This is a container for the nodes in the mesh"""
 mutable struct NodesContainer
-    total_nodes::Int64
     series::Vector{Node}
     moved::Bool
 end
@@ -41,7 +44,7 @@ function load_nodes(input_data)
         eachrow(input_data["mesh"]["nodes"]["velocities"]),
         eachrow(input_data["mesh"]["nodes"]["accelerations"]),
         )
-        append!(
+        push!(
             nodes,
             Node(
                 physical_group,
@@ -57,7 +60,6 @@ function load_nodes(input_data)
     # at the first time step
     moved = true
     return NodesContainer(
-        input_data["mesh"]["nodes"]["total_nodes"],
         nodes,
         moved
     )

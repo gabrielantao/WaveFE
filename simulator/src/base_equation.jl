@@ -1,3 +1,5 @@
+export BaseModelEquation
+
 """This struct holds the sizes of the equation"""
 mutable struct EquationMembers
     # LHS matrix with domain conditions applied, the key is the unknown label

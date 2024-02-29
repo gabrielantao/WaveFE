@@ -1,22 +1,89 @@
-@testset "smoke" begin
-    @test true
-end
+@testset "load elements data" begin
+    # TODO [implement one dimensional elements]
+    ## implement tests
 
+    @testset "bidimensional elements" begin
+        data = ExampleInputData()
 
-@testset "can import data" begin
-    case_folder = joinpath(WAVE_SIMULATOR_TEST_DATA_PATH, "case_square_cavity") 
-    # input all the relevant data to build the model 
-    input_data = h5open(joinpath(case_folder, SIMULATION_MESH_FILENAME), "r")
-    simulation_data = TOML.parsefile(joinpath(case_folder, SIMULATION_INPUT_FILENAME))
-    domain_conditions_data = TOML.parsefile(joinpath(case_folder, DOMAIN_CONDITIONS_FILENAME))
+        # load the elements for the mesh 
+        triangles = Wave.load_triangles(data.hdf_input, data.simulation)
+      
+        @test Wave.get_total_elements(triangles) == 5000
+        @test triangles.nodes_per_element == 3
+        @test all([isempty(element.b) || isempty(element.c) for element in triangles.elements])
+        @test all([isnan(element.area) || isnan(element.Δt) for element in triangles.elements])
 
-    @test read(input_data["mesh/dimension"]) == 2
-    regression_test("ref_input", "nodes_positions.txt", read(input_data["mesh/nodes/positions"]))
-    regression_test("ref_input", "nodes_domain_conditions.txt", read(input_data["mesh/nodes/domain_condition_groups"]))
-    regression_test("ref_input", "triangles_connectivity.txt", read(input_data["mesh/triangles/connectivity"]))
-    regression_test("ref_input", "simulation_data.bson", simulation_data)
-    regression_test("ref_input", "domain_conditions_data.bson", domain_conditions_data)
+        # load the quadrilaterals of the mesh
+        quadrilaterals = Wave.load_quadrilaterals(data.hdf_input, data.simulation)
     
-    close(input_data)
+        @test Wave.get_total_elements(quadrilaterals) == 0
+        @test quadrilaterals.nodes_per_element == 4
+    end  
+
+    # TODO [implement three dimensional elements]
+    ## implement tests
+
+    # TODO [implement hybrid mesh]
+    ## check how it behaves when load hybrid meshs
 end
 
+
+@testset "load elements data" begin
+    # TODO [implement one dimensional elements]
+    ## implement tests
+
+    @testset "bidimensional elements" begin
+        data = ExampleInputData()
+
+        # load the elements for the mesh 
+        triangles = Wave.load_triangles(data.hdf_input, data.simulation)
+      
+        @test Wave.get_total_elements(triangles) == 5000
+        @test triangles.nodes_per_element == 3
+        @test all([isempty(element.b) || isempty(element.c) for element in triangles.elements])
+        @test all([isnan(element.area) || isnan(element.Δt) for element in triangles.elements])
+
+        # load the quadrilaterals of the mesh
+        quadrilaterals = Wave.load_quadrilaterals(data.hdf_input, data.simulation)
+    
+        @test Wave.get_total_elements(quadrilaterals) == 0
+        @test quadrilaterals.nodes_per_element == 4
+    end  
+
+    # TODO [implement three dimensional elements]
+    ## implement tests
+
+    # TODO [implement hybrid mesh]
+    ## check how it behaves when load hybrid meshs
+end
+
+@testset "load mesh data" begin
+    # TODO [implement one dimensional elements]
+    ## implement tests
+    mock_mesh_input_data = Dict()
+    @testset "bidimensional mesh" begin
+        # check all areas and deltat as NaN and empty b and c
+        # just mock the values for the elements
+        mock_simulation_data = Dict("mesh" => Dict("interpolation_order" => 1))
+        mock_mesh_input_data = Dict(
+            "mesh" => Dict(
+                "dimension" => 2,
+                "nodes" => Dict(
+                    "physical_groups" => Int64[],
+                    "geometrical_groups" => Int64[],
+                    "domain_condition_groups" => Int64[],
+                    "positions" => Float64[],
+                    "velocities" => Float64[],
+                    "accelerations" => Float64[]
+                )
+            )        
+        )
+        mesh = Wave.load_mesh(mock_mesh_input_data, mock_simulation_data)
+        @test mesh.dimension == Wave.BIDIMENSIONAL::Dimension
+        @test mesh.interpolation_order == Wave.ORDER_ONE::InterpolationOrder
+        @test mesh.must_refresh == true
+    end
+
+    # TODO [implement three dimensional elements]
+    ## implement tests
+end

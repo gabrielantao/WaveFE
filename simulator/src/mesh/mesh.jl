@@ -1,3 +1,8 @@
+# exported entities
+export Mesh
+export InterpolationOrder, Dimension
+
+
 # the abstract types used in this module...
 """A generic single element"""
 abstract type Element end 
@@ -124,6 +129,17 @@ end
 # function get_containers(mesh_elements::TriDimensionalElements)
 #     return []
 # end
+
+"""Return the total of nodes in the container"""
+function get_total_nodes(nodes_container::NodesContainer)
+    return length(nodes_container.series)
+end
+
+
+"""Return the total of elements in the container"""
+function get_total_elements(element_container::ElementsContainer)
+    return length(element_container.elements)
+end
 
 
 """Update (move) mesh nodes when a dynamic mesh is used"""

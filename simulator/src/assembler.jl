@@ -1,3 +1,6 @@
+export Assembler
+export MatrixType
+
 @enum MatrixType begin
     DIAGONAL = 1
     SYMMETRIC = 2

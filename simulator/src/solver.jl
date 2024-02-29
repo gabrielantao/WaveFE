@@ -1,3 +1,6 @@
+export Solver
+export SolverType, SolverPreconditioners
+
 @enum SolverType begin
     CONJUGATE_GRADIENT = 1
 end

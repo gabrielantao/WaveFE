@@ -4,8 +4,6 @@
 # NOTE: find for the real julia startup file by typing:
 # pixi run find $WAVE_PATH_ROOT/.pixi/env -name startup.jl
 
-
-#const WAVE_PATH_SIMULATOR = ENV["PIXI_PACKAGE_ROOT"]
 println("Running interactive shell from: $(pwd())")
 println("Pre-imported packages:")
 println("- Revise")

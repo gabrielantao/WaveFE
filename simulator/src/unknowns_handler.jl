@@ -1,3 +1,5 @@
+export UnknownsHandler
+
 """This holds data of all unknowns for a given model"""
 mutable struct UnknownsHandler
     # values of unknowns

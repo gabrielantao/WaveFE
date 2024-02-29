@@ -1,6 +1,6 @@
-# TODO [implement group of elements]
-## for now these groups for elements are not used but they can be useful 
-## to set properties for elements
+# exported entities
+export Triangle, TrianglesContainer
+
 
 """An element of type triangle"""
 struct Triangle <: Element
@@ -14,38 +14,42 @@ struct Triangle <: Element
     # local time interval used for steady state simulation
     # each element has its own local time interval
     Δt::Float64
-    # TODO: check if it's needed to add other properties here...
-    #properties::Dict{String, Vector{Float64}}
+    # TODO [review elements specific properties]
+    ## check if it's needed to add other properties here...
+    ## properties::Dict{String, Vector{Float64}}
 end
 
 
 """A triangle element container"""
 mutable struct TrianglesContainer <: ElementsContainer
-    total_elements::Int64
     nodes_per_element::Int64
     elements::Vector{Triangle}
+    # TODO [implement group of elements]
+    ## for now these groups for elements are not used but they can be useful 
+    ## to set properties for elements
 end
 
 
 """Load data for the triangles"""
-function load_triangles(input_data, simulation_parameters)
+function load_triangles(input_data, simulation_data)
     elements = Vector{Triangle}()
-    # start all these values as NaN to make this break if they are not initialized
-    b, c, area, Δt = NaN, NaN, NaN, NaN
-    # TODO: change this to check first if it has the triangles
-    for connectivity in eachrow(input_data["mesh"]["triangles"]["connectivity"])
-        append!(elements, Triangle(connectivity, b, c, area, Δt))
+    if haskey(input_data, "mesh/triangles")
+        connectivity_data = read(input_data["mesh/triangles/connectivity"])
+        for connectivity in eachcol(connectivity_data)
+            # start all these values as NaN to make this break if they are not initialized
+            push!(elements, Triangle(connectivity, Float64[], Float64[], NaN, NaN))
+        end
     end
 
     # set the depending on the interpolation order of the elements
-    if simulation_parameters["mesh"]["interpolation_order"] == 1
+    if simulation_data["mesh"]["interpolation_order"] == 1
         nodes_per_element = 3
     else
+        # TODO [implement higher order elements]
         throw("Higher order elements not implemented")
     end
 
     return TrianglesContainer(
-        length(elements),
         nodes_per_element,
         elements
     )

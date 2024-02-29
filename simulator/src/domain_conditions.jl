@@ -1,3 +1,7 @@
+export DomainConditions
+export ConditionType
+
+
 """
 First type condtions specifies the values of variable applied at the boundary (AKA Dirichlet)
 Second type condtions specifies the values of the derivative applied at the boundary of the domain. (AKA  Neumann condition)

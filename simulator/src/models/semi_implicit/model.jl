@@ -10,17 +10,11 @@ using IterativeSolvers
 ## in order to take advantage of Julia precompilation
 
 # import all used common code to all models
-include("../../common.jl")
-include("../../unknowns_handler.jl")
-include("../../domain_conditions.jl")
-include("../../mesh/mesh.jl")
-include("../../assembler.jl")
-include("../../solver.jl")
-include("../../base_equation.jl")
+using ..Wave
 
 
 # exported variables and methods
-export run_iteration
+export MODEL_NAME, MODEL_UNKNOWNS, run_iteration
 
 
 """Additional parameters from the input file"""

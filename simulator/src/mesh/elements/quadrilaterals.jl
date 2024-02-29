@@ -1,6 +1,6 @@
-# TODO [implement group of elements]
-## for now these groups for elements are not used but they can be useful 
-## to set properties for elements
+# exported entities
+export Quadrilateral, QuadrilateralsContainer
+
 
 """An element of type quadrilateral"""
 struct Quadrilateral <: Element
@@ -14,37 +14,41 @@ struct Quadrilateral <: Element
     # local time interval used for steady state simulation
     # each element has its own local time interval
     Δt::Float64
-    # TODO: check if it's needed to add other properties here...
-    #properties::Dict{String, Vector{Float64}}
+    # TODO [review elements specific properties]
+    ## check if it's needed to add other properties here...
+    ## properties::Dict{String, Vector{Float64}}
 end
 
 
 """A quadrilaterals element container"""
 mutable struct QuadrilateralsContainer <: ElementsContainer
-    total_elements::Int64
     nodes_per_element::Int64
     elements::Vector{Quadrilateral}
+    # TODO [implement group of elements]
+    ## for now these groups for elements are not used but they can be useful 
+    ## to set properties for elements
 end
 
 
 """Load data for the quadrilaterals"""
-function load_quadrilaterals(input_data, simulation_parameters)
-    elements = Vector{Triangle}()
+function load_quadrilaterals(input_data, simulation_data)
+    elements = Vector{Quadrilateral}()
     # start all these values as NaN to make this break if they are not initialized
-    b, c, area, Δt = NaN, NaN, NaN, NaN
-    for connectivity in eachrow(input_data["mesh"]["quadrilaterals"]["connectivity"])
-        append!(elements, Triangle(connectivity, b, c, area, Δt))
+    if haskey(input_data, "mesh/quadrilaterals")
+        for connectivity in eachcol(input_data["mesh/quadrilaterals/connectivity"])
+            push!(elements, Quadrilateral(connectivity, Float64[], Float64[], NaN, NaN))
+        end
     end
 
     # set the depending on the interpolation order of the elements
-    if simulation_parameters["mesh"]["interpolation_order"] == 1
+    if simulation_data["mesh"]["interpolation_order"] == 1
         nodes_per_element = 4
     else
+        # TODO [implement higher order elements]
         throw("Higher order elements not implemented")
     end
 
-    return TrianglesContainer(
-        length(elements),
+    return QuadrilateralsContainer(
         nodes_per_element,
         elements
     )

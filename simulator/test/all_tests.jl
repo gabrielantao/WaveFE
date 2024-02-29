@@ -1,25 +1,24 @@
 module WaveUnitTests
-using Wave
-
 using ReTest
 using TOML
 using HDF5
 using ReferenceTests
 
+
+using Wave
+
+
+const WAVE_SIMULATOR_TEST_PATH = joinpath(ENV["PIXI_PACKAGE_ROOT"], "simulator", "test")
+const WAVE_SIMULATOR_TEST_DATA_PATH = joinpath(WAVE_SIMULATOR_TEST_PATH, "data")
+
+
 include("utils.jl")
-
-const WAVE_SIMULATOR_TEST_PATH = joinpath(
-    ENV["PIXI_PACKAGE_ROOT"], "simulator", "test"
-)
-
-const WAVE_SIMULATOR_TEST_DATA_PATH = joinpath(
-    WAVE_SIMULATOR_TEST_PATH, "data"
-)
-
+include("fixtures.jl")
 
 # unit test list
+include("test_input.jl")
 include("test_mesh.jl")
-# TODO: include other files with tests here 
+
 
 end # module
 

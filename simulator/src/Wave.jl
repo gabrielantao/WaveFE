@@ -5,13 +5,31 @@ module Wave
 using TOML
 using HDF5
 using ArgParse
+using SparseArrays
+using Preconditioners
+using IterativeSolvers
 
 # get all the models available
 include("constants.jl")
+
+# import all used common code to all models
+include("common.jl")
+include("unknowns_handler.jl")
+include("domain_conditions.jl")
+include("mesh/mesh.jl")
+include("assembler.jl")
+include("solver.jl")
+include("base_equation.jl")
+
+#export ModelParameters
+
 include("models/register.jl")
 include("validator.jl")
 
 
+
+
+"""Extract the values from terminal"""
 function parse_commandline()
     s = ArgParseSettings()
 
@@ -25,9 +43,9 @@ function parse_commandline()
 end
 
 
+"""Main function of the Wave simulator"""
 function main()
-    # parse args from comand line
-    parsed_args = parse_commandline()
+    parse_commandline()
     folder = parsed_args["folder"]
 
     # input all the relevant data to build the model 
@@ -77,10 +95,5 @@ function main()
     # TODO: close the output file
 end
 
-
-##############################
-### RUN THE WAVE SIMULATOR ###
-##############################
-#main()
 
 end # end module
