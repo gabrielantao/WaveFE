@@ -37,12 +37,12 @@ function load_nodes(input_data)
         velocity, 
         acceleration
         ) in zip(
-        eachrow(input_data["mesh"]["nodes"]["physical_groups"]),
-        eachrow(input_data["mesh"]["nodes"]["geometrical_groups"]),
-        eachrow(input_data["mesh"]["nodes"]["domain_condition_groups"]),
-        eachrow(input_data["mesh"]["nodes"]["positions"]),
-        eachrow(input_data["mesh"]["nodes"]["velocities"]),
-        eachrow(input_data["mesh"]["nodes"]["accelerations"]),
+        read(input_data["mesh/nodes/physical_groups"]),
+        read(input_data["mesh/nodes/geometrical_groups"]),
+        read(input_data["mesh/nodes/domain_condition_groups"]),
+        eachcol(read(input_data["mesh/nodes/positions"])),
+        eachcol(read(input_data["mesh/nodes/velocities"])),
+        eachcol(read(input_data["mesh/nodes/accelerations"])),
         )
         push!(
             nodes,
@@ -66,32 +66,46 @@ function load_nodes(input_data)
 end
 
 
+"""Return the total of nodes in the container"""
+function get_total_nodes(nodes_container::NodesContainer)
+    return length(nodes_container.series)
+end
+
+
 """Convinience function to get the list of x positions for node ids"""
 function get_positions_x(nodes::NodesContainer, nodes_ids::Vector{Int64})
     return [nodes.series[node_id].position[1] for node_id in nodes_ids]
 end
 
 
-"""Convinience function to get the list of y positions for node ids"""
+"""
+Convinience function to get the list of y positions for node ids
+NOTE: this internally is going to break if one try to call this in a unidimensional mesh    
+"""
 function get_positions_y(nodes::NodesContainer, nodes_ids::Vector{Int64})
     return [nodes.series[node_id].position[2] for node_id in nodes_ids]
 end
 
 
-"""Convinience function to get the list of z positions for node ids"""
+"""
+Convinience function to get the list of z positions for node ids
+NOTE: this internally is going to break if one try to call this in a uni- or bidimensionalmesh 
+"""
 function get_positions_z(nodes::NodesContainer, nodes_ids::Vector{Int64})
     return [nodes.series[node_id].position[3] for node_id in nodes_ids]
 end
 
 
+"""Get the vector with domain conditions list for all nodes"""
 function get_domain_condition_groups(nodes::NodesContainer)
-    return [node.domain_condition_groupfor node in nodes.series]
+    return [node.domain_condition_group for node in nodes.series]
 end
+
 
 # TODO [implement mesh movement]
 # in the future this function could be implemented in another 
 # file to define the rule for the movement
 """Do the movement for the nodes"""
 function move!(nodes::NodesContainer)
-    nodes.moved = False
+    nodes.moved = false
 end 

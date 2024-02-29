@@ -38,7 +38,8 @@ function run_unit_test()
         retest(
             parsed_args["test-name"], 
             dry=parsed_args["run-dry"],
-            verbose=parsed_args["verbose"])
+            verbose=parsed_args["verbose"]
+        )
     end
 end
 

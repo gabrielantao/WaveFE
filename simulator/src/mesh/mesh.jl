@@ -74,18 +74,18 @@ end
 function load_mesh(input_data, simulation_parameters)
     nodes = load_nodes(input_data)
     # get the dimension of the mesh
-    if input_data["mesh"]["dimension"] == 1 
+    if read(input_data["mesh/dimension"]) == 1
         dimension = UNIDIMENSIONAL::Dimension
         elements = UniDimensionalElements(
             load_segments(input_data, simulation_parameters)
         )
-    elseif input_data["mesh"]["dimension"] == 2
+    elseif read(input_data["mesh/dimension"]) == 2
         dimension = BIDIMENSIONAL::Dimension
         elements = BiDimensionalElements(
             load_triangles(input_data, simulation_parameters), 
             load_quadrilaterals(input_data, simulation_parameters)
         )
-    elseif input_data["mesh"]["dimension"] == 3
+    elseif read(input_data["mesh/dimension"]) == 3
         dimension = TRIDIMENSIONAL::Dimension
         # TODO [implement three dimensional elements]
         throw("Not implemented tridimensional elements")
@@ -130,15 +130,10 @@ end
 #     return []
 # end
 
-"""Return the total of nodes in the container"""
-function get_total_nodes(nodes_container::NodesContainer)
-    return length(nodes_container.series)
-end
-
 
 """Return the total of elements in the container"""
 function get_total_elements(element_container::ElementsContainer)
-    return length(element_container.elements)
+    return length(element_container.series)
 end
 
 

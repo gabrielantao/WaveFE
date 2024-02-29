@@ -3,7 +3,7 @@ export Triangle, TrianglesContainer
 
 
 """An element of type triangle"""
-struct Triangle <: Element
+mutable struct Triangle <: Element
     connectivity::Vector{Int64}    
     # the derivatives
     b::Vector{Float64}
@@ -23,7 +23,7 @@ end
 """A triangle element container"""
 mutable struct TrianglesContainer <: ElementsContainer
     nodes_per_element::Int64
-    elements::Vector{Triangle}
+    series::Vector{Triangle}
     # TODO [implement group of elements]
     ## for now these groups for elements are not used but they can be useful 
     ## to set properties for elements
@@ -85,10 +85,12 @@ function update_properties!(
 )
     update_areas!(elements_container, nodes_container)
     update_shape_coeficients!(elements_container, nodes_container)
+    # get the velocities moduli
+    velocities = sqrt.(unknowns_handler.values["u_1"] .^2 + unknowns_handler.values["u_2"] .^2)
     update_local_time_interval!(
         elements_container, 
         nodes_container, 
-        unknowns_handler,
+        velocities,
         model_parameters.Re, 
         model_parameters.safety_dt_factor
     )
@@ -100,7 +102,7 @@ function update_areas!(
     elements_container::TrianglesContainer, 
     nodes_container::NodesContainer
 )
-    for element in elements_container
+    for element in elements_container.series
         element.area = calculate_area(element, nodes_container)
     end
 end
@@ -113,7 +115,7 @@ function update_shape_coeficients!(
     elements_container::TrianglesContainer, 
     nodes_container::NodesContainer
 )
-    for element in elements_container
+    for element in elements_container.series
         x = get_positions_x(nodes_container, get_border_node_ids(element))
         y = get_positions_y(nodes_container, get_border_node_ids(element))
         # divide by (2.0 * area) to adimensionalize
@@ -128,13 +130,11 @@ end
 function update_local_time_interval!(
     elements_container::TrianglesContainer, 
     nodes_container::NodesContainer,
-    unknowns_handler::UnknownsHandler,
+    velocities::Vector{Float64},
     Re::Float64,
     safety_factor::Float64
 )    
-    # get the velocities moduli
-    velocities = sqrt.(unknowns_handler.values["u_1"] .^2 + unknowns_handler.values["u_2"] .^2)
-    for element in elements_container
+    for element in elements_container.series
         h = calculate_specific_sizes(element, nodes_container)
         max_velocity = maximum(velocities[element.connectivity])
         element.Δt = safety_factor * min((Re / 2.0) * h^2, h / max_velocity)

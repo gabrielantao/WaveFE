@@ -3,7 +3,7 @@ export Quadrilateral, QuadrilateralsContainer
 
 
 """An element of type quadrilateral"""
-struct Quadrilateral <: Element
+mutable struct Quadrilateral <: Element
     connectivity::Vector{Int64}    
     # the derivatives
     b::Vector{Float64}
@@ -23,7 +23,7 @@ end
 """A quadrilaterals element container"""
 mutable struct QuadrilateralsContainer <: ElementsContainer
     nodes_per_element::Int64
-    elements::Vector{Quadrilateral}
+    series::Vector{Quadrilateral}
     # TODO [implement group of elements]
     ## for now these groups for elements are not used but they can be useful 
     ## to set properties for elements
@@ -33,9 +33,9 @@ end
 """Load data for the quadrilaterals"""
 function load_quadrilaterals(input_data, simulation_data)
     elements = Vector{Quadrilateral}()
-    # start all these values as NaN to make this break if they are not initialized
     if haskey(input_data, "mesh/quadrilaterals")
         for connectivity in eachcol(input_data["mesh/quadrilaterals/connectivity"])
+            # start all these values as NaN to make this break if they are not initialized
             push!(elements, Quadrilateral(connectivity, Float64[], Float64[], NaN, NaN))
         end
     end

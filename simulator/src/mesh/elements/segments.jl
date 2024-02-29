@@ -3,7 +3,7 @@ export Segment, SegmentsContainer
 
 
 """An element of type segment"""
-struct Segment <: Element
+mutable struct Segment <: Element
     connectivity::Vector{Int64}      
     # the derivatives
     b::Vector{Float64}
@@ -23,7 +23,7 @@ end
 """An segment element group"""
 mutable struct SegmentsContainer <: ElementsContainer
     nodes_per_element::Int64
-    elements::Vector{Segment}
+    series::Vector{Segment}
     # TODO [implement group of elements]
     ## for now these groups for elements are not used but they can be useful 
     ## to set properties for elements
@@ -34,9 +34,10 @@ end
 function load_segments(input_data, simulation_data)
     elements = Vector{Segment}()
     if haskey(input_data, "mesh/segments")
-        # start all these values as NaN to make this break if they are not initialized
-        for connectivity in eachrow(input_data["mesh/segments/connectivity"])
-            append!(elements, Segment(connectivity, Float64[], Float64[], NaN, NaN))
+        connectivity_data = read(input_data["mesh/segments/connectivity"])
+        for connectivity in eachcol(connectivity_data)
+            # start all these values as NaN to make this break if they are not initialized
+            push!(elements, Segment(connectivity, Float64[], Float64[], NaN, NaN))
         end
     end
 

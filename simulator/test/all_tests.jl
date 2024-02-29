@@ -17,6 +17,10 @@ include("fixtures.jl")
 
 # unit test list
 include("test_input.jl")
+include("test_nodes.jl")
+include("test_segments.jl")
+include("test_triangles.jl")
+include("test_quadrilaterals.jl")
 include("test_mesh.jl")
 
 

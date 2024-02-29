@@ -15,3 +15,4 @@ There are some features and improvements that could be implemented
 12. implement better debugging tools
 13. implement group of elements
 14. implement hybrid mesh
+15. review elements specific properties
