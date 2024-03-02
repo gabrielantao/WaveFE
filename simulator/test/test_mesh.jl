@@ -26,24 +26,26 @@
 
 
         @testset "calculate triangles properties" begin
+            # TODO: maybe this could be done just by calling the update_elements! of the mesh
             Wave.update_areas!(mesh.elements.triangles, mesh.nodes)
             Wave.update_shape_coeficients!(mesh.elements.triangles, mesh.nodes)
             
-            regression_test(
+            @test check_reference_csv(
                 "ref_mesh",
-                "triangle_areas.txt", 
+                "triangle_areas.csv", 
                 [element.area for element in mesh.elements.triangles.series]
             )
-            regression_test(
+            @test check_reference_csv(
                 "ref_mesh",
-                "triangle_coefficient_b.txt", 
+                "triangle_coefficient_b.csv", 
                 [element.b for element in mesh.elements.triangles.series]
             )
-            regression_test(
+            @test check_reference_csv(
                 "ref_mesh",
-                "triangle_coefficient_c.txt", 
+                "triangle_coefficient_c.csv", 
                 [element.c for element in mesh.elements.triangles.series]
             )
+
             # TODO: it needs the domain conditions applied (or mocked here)
             # Wave.update_local_time_interval!(
             #     mesh.elements.triangles, 

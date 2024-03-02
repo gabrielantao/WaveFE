@@ -1,6 +1,19 @@
-include("all_tests.jl")
+module WaveUnitTests
+using ReTest
+using TOML
+using HDF5
+using ReferenceTests
 using ArgParse
+using DelimitedFiles
 
+using Wave
+
+
+const WAVE_SIMULATOR_TEST_PATH = joinpath(ENV["PIXI_PACKAGE_ROOT"], "simulator", "test")
+const WAVE_SIMULATOR_TEST_DATA_PATH = joinpath(WAVE_SIMULATOR_TEST_PATH, "data")
+
+
+"""The argument parser to run the tests from shell"""
 function parse_commandline()
     s = ArgParseSettings()
 
@@ -12,10 +25,12 @@ function parse_commandline()
             help = "show data about the listed tests"
             action = :store_true
         "--verbose", "-v"
-            help = "show data about the listed tests"
+            help = "level of verbosity of printed tests"
             arg_type = Int
             default = 1
-        # TODO: put option to regenerate results in ReferenceTests context
+        "--regenerate-result", "-r" 
+            help = "force regenerate the reference test results"
+            action = :store_true
         # TODO: think if it should be a list
         "test-name"
             help = "test or testset name to be run"
@@ -25,23 +40,44 @@ function parse_commandline()
 end
 
 
+const PARSED_ARGS = parse_commandline()
+
 
 """This function is used to run unit tests from the shell"""
 function run_unit_test()
-    parsed_args = parse_commandline()
-    if parsed_args["run-all"]
-        run_all_unit_tests(
-            parsed_args["run-dry"],
-            parsed_args["verbose"]
+    if PARSED_ARGS["run-all"]
+        retest(
+            WaveUnitTests, 
+            dry=PARSED_ARGS["run-dry"], 
+            verbose=PARSED_ARGS["verbose"]
         )
     else 
         retest(
-            parsed_args["test-name"], 
-            dry=parsed_args["run-dry"],
-            verbose=parsed_args["verbose"]
+            PARSED_ARGS["test-name"], 
+            dry=PARSED_ARGS["run-dry"],
+            verbose=PARSED_ARGS["verbose"]
         )
     end
 end
 
+# basic data for the unit tests
+include("utils.jl")
+include("fixtures.jl")
 
-run_unit_test()
+# unit test list
+include("test_input.jl")
+include("test_nodes.jl")
+include("test_segments.jl")
+include("test_triangles.jl")
+include("test_quadrilaterals.jl")
+include("test_mesh.jl")
+include("test_domain_conditions.jl")
+
+end # module
+
+WaveUnitTests.run_unit_test()
+
+
+
+
+
