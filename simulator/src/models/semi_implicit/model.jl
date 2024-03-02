@@ -49,10 +49,7 @@ struct ModelSemiImplicit
 
     function ModelSemiImplicit(input_data, simulation_data, domain_conditions_data)
         mesh = load_mesh(input_data, simulation_data)
-        domain_conditions = load_domain_conditions(
-            get_domain_condition_groups(mesh.nodes),
-            domain_conditions_data
-        )
+        domain_conditions = load_domain_conditions(input_data, domain_conditions_data)
 
         # configure the additional model parameters
         transient = simulation_data["simulation"]["transient"]

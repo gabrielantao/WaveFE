@@ -27,21 +27,29 @@ end
 
 
 """Load data for domain conditions needed to the simulation"""
-function load_domain_conditions(domain_conditions_groups, domain_conditions_data)
+function load_domain_conditions(input_data, domain_conditions_data)
     indices = Dict{Tuple{String, ConditionType}, Vector{Int64}}()
     values = Dict{Tuple{String, ConditionType}, Vector{Float64}}()
+    domain_conditions_groups = read(input_data["mesh/nodes/domain_condition_groups"])
+    # preallocate the vectors
+    for condition_data in domain_conditions_data["boundary"]
+        unknown = condition_data["unknown"]
+        condition_type = get_condition_type(condition_data["condition_type"])
+        indices[(unknown, condition_type)] = Int64[]
+        values[(unknown, condition_type)] = Float64[]
+    end
     # get boundary conditions
     for condition_data in domain_conditions_data["boundary"]
-        group_number = condition_data["group_name"]
+        group_number = parse(Int64, condition_data["group_name"])
         unknown = condition_data["unknown"]
         value = condition_data["value"]
         condition_type = get_condition_type(condition_data["condition_type"])
-        curent_group_indices = findall(
+        current_group_indices = findall(
             domain_condition_group -> domain_condition_group == group_number, 
             domain_conditions_groups
         )
-        indices[(unknown, condition_type)] = curent_group_indices
-        values[(unknown, condition_type)] = fill(value, length(curent_group_indices))
+        append!(indices[(unknown, condition_type)], current_group_indices)
+        append!(values[(unknown, condition_type)], fill(value, length(current_group_indices)))
     end
     return DomainConditions(indices, values)
 end

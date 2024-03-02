@@ -44,4 +44,4 @@ frequency = 100
 save_result = true
 save_numeric = true
 save_debug = true
-variables = ["u_1", "u_2", "p"]
+unknowns = ["u_1", "u_2", "p"]
