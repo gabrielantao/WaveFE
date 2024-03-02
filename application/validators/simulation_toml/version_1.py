@@ -1,4 +1,5 @@
 """Validators for mesh data version 1"""
+
 from typing import List, Literal, Dict, Optional
 from pathlib import Path
 
@@ -10,7 +11,7 @@ from pydantic import (
 
 from application.validators.common_models import (
     AliasName,
-    VariableName,
+    UnknownName,
     AbsoluteTolerance,
     RelativeTolerance,
     DeltaTimeFactor,
@@ -67,7 +68,7 @@ class SectionOutput(BaseModel):
     save_result: bool
     save_numeric: bool
     save_debug: bool
-    variables: List[VariableName]
+    unknowns: List[UnknownName]
 
 
 class Validator(BaseModel):

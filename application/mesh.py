@@ -40,6 +40,8 @@ class NodesHandler:
         ## implement here a way to inform the initial velocities and accelerations
         self.velocities = np.zeros_like(self.positions)
         self.accelerations = np.zeros_like(self.positions)
+        # TODO [implement validations and input versioning]
+        ## check here for inconsistencies in the mesh e.g. duplicated group names
         self.geometrical_group = np.zeros(self.total_nodes, dtype=np.int64)
         self.physical_group = np.zeros(self.total_nodes, dtype=np.int64)
         self.domain_condition_groups = np.zeros(self.total_nodes, dtype=np.int64)

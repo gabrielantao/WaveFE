@@ -128,9 +128,7 @@ class SimulationCase:
             [
                 "pixi",
                 "run",
-                "julia",
-                f"--project={WAVE_PATH_SIMULATOR}",
-                "simulator.jl",
+                "wave",
                 str(self.case_folder),
             ],
             cwd=WAVE_PATH_SIMULATOR,

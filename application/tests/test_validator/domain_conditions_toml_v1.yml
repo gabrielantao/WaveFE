@@ -2,55 +2,55 @@ boundary:
 - condition_type: 1
   description: top boundary
   group_name: top
+  unknown: u_1
   value: 1.0
-  variable_name: u_1
 - condition_type: 1
   description: top boundary
   group_name: top
+  unknown: u_2
   value: 0.0
-  variable_name: u_2
 - condition_type: 1
   description: left, bottom, right boundary
   group_name: no-slip
+  unknown: u_1
   value: 0.0
-  variable_name: u_1
 - condition_type: 1
   description: left, bottom, right boundary
   group_name: no-slip
+  unknown: u_2
   value: 0.0
-  variable_name: u_2
 - condition_type: 1
   description: bottom-left corner
   group_name: reference
+  unknown: u_1
   value: 0.0
-  variable_name: u_1
 - condition_type: 1
   description: bottom-left corner
   group_name: reference
+  unknown: u_2
   value: 0.0
-  variable_name: u_2
 - condition_type: 1
   description: bottom-left corner
   group_name: reference
+  unknown: p
   value: 0.0
-  variable_name: p
 general:
   description: Classic lid driven cavity 2D case conditions.
   version: 1
 initial:
 - description: define initial velocity x values for all nodes
   group_name: ''
+  unknown: u_1
   value: 0.0
-  variable_name: u_1
 - description: define initial velocity y values for all nodes
   group_name: ''
+  unknown: u_2
   value: 0.0
-  variable_name: u_2
 - description: define initial velocity z values for all nodes
   group_name: ''
+  unknown: u_3
   value: 0.0
-  variable_name: u_3
 - description: define initial pressure values for all nodes
   group_name: ''
+  unknown: p
   value: 0.0001
-  variable_name: p

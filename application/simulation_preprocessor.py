@@ -53,6 +53,7 @@ class SimulationPreprocessor:
         # create the domain conditions
         logger.log.info(f"importing and processing the domain conditions...")
         initial_domain_conditions = []
+        boundary_domain_conditions = []
         for original_initial_condition in self.domain_conditions_data["initial"]:
             group_name = original_initial_condition["group_name"]
             # when the group name is empty means that it must be applied to all groups
@@ -66,13 +67,17 @@ class SimulationPreprocessor:
                 initial_condition = deepcopy(original_initial_condition)
                 initial_condition["group_name"] = group_number
                 initial_domain_conditions.append(initial_condition)
+        for original_boundary_condition in self.domain_conditions_data["boundary"]:
+            group_name = original_boundary_condition["group_name"]
+            group_number = str(mesh.domain_condition_groups[group_name])
+            boundary_condition = deepcopy(original_boundary_condition)
+            boundary_condition["group_name"] = group_number
+            boundary_domain_conditions.append(boundary_condition)
         # replace the original file by the processed file
         with open(self.cache_path / DOMAIN_CONDITIONS_FILENAME, "w") as f:
             domain_conditions_data = {}
             domain_conditions_data["initial"] = initial_domain_conditions
-            domain_conditions_data["boundary"] = deepcopy(
-                self.domain_conditions_data["boundary"]
-            )
+            domain_conditions_data["boundary"] = boundary_domain_conditions
             toml.dump(domain_conditions_data, f)
 
     def setup(self):

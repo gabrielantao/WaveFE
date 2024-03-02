@@ -1,101 +1,101 @@
 boundary:
 - condition_type: 1
   description: top boundary
-  group_name: top
+  group_name: '1'
+  unknown: u_1
   value: 1.0
-  variable_name: u_1
 - condition_type: 1
   description: top boundary
-  group_name: top
+  group_name: '1'
+  unknown: u_2
   value: 0.0
-  variable_name: u_2
 - condition_type: 1
   description: left, bottom, right boundary
-  group_name: no-slip
+  group_name: '2'
+  unknown: u_1
   value: 0.0
-  variable_name: u_1
 - condition_type: 1
   description: left, bottom, right boundary
-  group_name: no-slip
+  group_name: '2'
+  unknown: u_2
   value: 0.0
-  variable_name: u_2
 - condition_type: 1
   description: bottom-left corner
-  group_name: reference
+  group_name: '3'
+  unknown: u_1
   value: 0.0
-  variable_name: u_1
 - condition_type: 1
   description: bottom-left corner
-  group_name: reference
+  group_name: '3'
+  unknown: u_2
   value: 0.0
-  variable_name: u_2
 - condition_type: 1
   description: bottom-left corner
-  group_name: reference
+  group_name: '3'
+  unknown: p
   value: 0.0
-  variable_name: p
 initial:
 - description: define initial velocity x values for all nodes
   group_name: '3'
+  unknown: u_1
   value: 0.0
-  variable_name: u_1
 - description: define initial velocity x values for all nodes
   group_name: '1'
+  unknown: u_1
   value: 0.0
-  variable_name: u_1
 - description: define initial velocity x values for all nodes
   group_name: '2'
+  unknown: u_1
   value: 0.0
-  variable_name: u_1
 - description: define initial velocity x values for all nodes
   group_name: '1'
+  unknown: u_1
   value: 0.0
-  variable_name: u_1
 - description: define initial velocity y values for all nodes
   group_name: '3'
+  unknown: u_2
   value: 0.0
-  variable_name: u_2
 - description: define initial velocity y values for all nodes
   group_name: '1'
+  unknown: u_2
   value: 0.0
-  variable_name: u_2
 - description: define initial velocity y values for all nodes
   group_name: '2'
+  unknown: u_2
   value: 0.0
-  variable_name: u_2
 - description: define initial velocity y values for all nodes
   group_name: '1'
+  unknown: u_2
   value: 0.0
-  variable_name: u_2
 - description: define initial velocity z values for all nodes
   group_name: '3'
+  unknown: u_3
   value: 0.0
-  variable_name: u_3
 - description: define initial velocity z values for all nodes
   group_name: '1'
+  unknown: u_3
   value: 0.0
-  variable_name: u_3
 - description: define initial velocity z values for all nodes
   group_name: '2'
+  unknown: u_3
   value: 0.0
-  variable_name: u_3
 - description: define initial velocity z values for all nodes
   group_name: '1'
+  unknown: u_3
   value: 0.0
-  variable_name: u_3
 - description: define initial pressure values for all nodes
   group_name: '3'
+  unknown: p
   value: 0.0001
-  variable_name: p
 - description: define initial pressure values for all nodes
   group_name: '1'
+  unknown: p
   value: 0.0001
-  variable_name: p
 - description: define initial pressure values for all nodes
   group_name: '2'
+  unknown: p
   value: 0.0001
-  variable_name: p
 - description: define initial pressure values for all nodes
   group_name: '1'
+  unknown: p
   value: 0.0001
-  variable_name: p
