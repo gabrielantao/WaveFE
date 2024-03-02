@@ -73,12 +73,14 @@ struct ModelSemiImplicit
         ]
 
         # setup initial values for the unknowns
+        unknowns_default_values = Dict(unknown => 0.0 for unknown in all_solved_unknowns)
         unkowns_handler = load_unknowns_handler(
-            all_solved_unknowns, 
-            get_domain_condition_groups(mesh.nodes),
-            domain_conditions_data
+            unknowns_default_values, 
+            input_data,
+            simulation_data,
+            domain_conditions_data,
         )
-        setup_boundary_values(
+        setup_boundary_values!(
             domain_conditions, unkowns_handler
         )
 
@@ -143,7 +145,7 @@ function run_iteration(model::ModelSemiImplicit)
             end
             # for this model always reapply the conditions for reassembled RHS
             equation.rhs[unknown] = assembled_rhs[unknown]
-            apply_domain_conditions_rhs!(
+            equation.members.rhs[unknown] = apply_domain_conditions_rhs!(
                 domain_conditions, 
                 unknown, 
                 equation.assembler.lhs, 

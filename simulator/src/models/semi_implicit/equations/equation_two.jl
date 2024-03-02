@@ -59,6 +59,9 @@ function assemble_element_lhs(
     unknowns_handler::UnknownsHandler,
     model_parameters::ModelSemiImplicitParameters
 )
+    # TODO [general performance improvements]
+    ## check if is possible to use this Δt divided in RHS instead of here
+    ## this avoids the LHS be recalculated every time step for this equation
     return element.Δt * element.area * (element.b * element.b' + element.c * element.c') 
 end
 

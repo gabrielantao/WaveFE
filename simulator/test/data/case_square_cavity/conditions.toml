@@ -145,5 +145,5 @@ description = "bottom-left corner"
 group_name = "4"
 condition_type = 1
 unknown = "p"
-value = 0.0001
+value = 0.0
 

@@ -58,9 +58,9 @@ end
 """Auxiliary function to convert a type number of condition into the enum values"""
 function get_condition_type(condition_type_number)
     if condition_type_number == 1
-        return FIRST
+        return FIRST::ConditionType
     elseif condition_type_number == 2
-        return SECOND
+        return SECOND::ConditionType
     else
         throw("Not implement group number of type $condition_type_number")
     end
@@ -68,20 +68,19 @@ end
 
 
 """Setup initial boundary values for the unknowns"""
-function setup_boundary_values(
+function setup_boundary_values!(
     domain_conditions::DomainConditions,
     unknowns_handler::UnknownsHandler,
 )
     for unknown in keys(unknowns_handler.values)
-        if haskey(domain_conditions, (FIRST, unknown))
-            indices = domain_conditions[(FIRST, unknown)].indices
-            values = domain_conditions[(FIRST, unknown)].values
+        if haskey(domain_conditions.values, (unknown, FIRST::ConditionType))
+            indices = domain_conditions.indices[(unknown, FIRST::ConditionType)]
+            values = domain_conditions.values[(unknown, FIRST::ConditionType)]
             unknowns_handler.values[unknown][indices] = values
             unknowns_handler.old_values[unknown][indices] = values
         end
     end
 end
-
 
 
 """Apply boundary conditions to the LHS matrix"""
@@ -100,7 +99,8 @@ function apply_domain_conditions_lhs!(
         lhs[index, :] .= 0.0
         lhs[index, index] = 1.0
     end
-    # TODO: check how to apply condition for the other type here
+    # TODO [implement other domain conditions]
+    ## do the calculations for the other condition_types
 end
 
 
@@ -117,18 +117,18 @@ function apply_domain_conditions_rhs!(
     #     rhs_condition_applied,
     # )
     # first condition application
-    indices = domain_conditions.indices[
-        (unknown, ConditionType.FIRST.value)
-    ]
-    values = domain_conditions.values[
-        (unknown, ConditionType.FIRST.value)
-    ]
+    indices = domain_conditions.indices[(unknown, FIRST::ConditionType)]
+    values = domain_conditions.values[(unknown, FIRST::ConditionType)]
     offset_vector = calculate_rhs_offset_values(
         assembled_lhs, indices, values
     )
-    rhs = rhs - offset_vector
-    rhs[indices] .= values
-    # TODO: do the calculations for the other condition_types
+    rhs -= offset_vector
+    # force reapply the domain condition for the nodes with these indices
+    rhs[indices] = values
+    
+    # TODO [implement other domain conditions]
+    ## do the calculations for the other condition_types
+    return rhs
 end
 
 

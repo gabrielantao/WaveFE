@@ -71,19 +71,19 @@ end
 
 
 """Import a mesh from files in cache path."""
-function load_mesh(input_data, simulation_parameters)
+function load_mesh(input_data, simulation_data)
     nodes = load_nodes(input_data)
     # get the dimension of the mesh
     if read(input_data["mesh/dimension"]) == 1
         dimension = UNIDIMENSIONAL::Dimension
         elements = UniDimensionalElements(
-            load_segments(input_data, simulation_parameters)
+            load_segments(input_data, simulation_data)
         )
     elseif read(input_data["mesh/dimension"]) == 2
         dimension = BIDIMENSIONAL::Dimension
         elements = BiDimensionalElements(
-            load_triangles(input_data, simulation_parameters), 
-            load_quadrilaterals(input_data, simulation_parameters)
+            load_triangles(input_data, simulation_data), 
+            load_quadrilaterals(input_data, simulation_data)
         )
     elseif read(input_data["mesh/dimension"]) == 3
         dimension = TRIDIMENSIONAL::Dimension
@@ -91,11 +91,11 @@ function load_mesh(input_data, simulation_parameters)
         throw("Not implemented tridimensional elements")
     end
     # get the interpolation order for the mesh
-    if simulation_parameters["mesh"]["interpolation_order"] == 1
+    if simulation_data["mesh"]["interpolation_order"] == 1
         interpolation_order = ORDER_ONE::InterpolationOrder
-    elseif simulation_parameters["mesh"]["interpolation_order"] == 2
+    elseif simulation_data["mesh"]["interpolation_order"] == 2
         interpolation_order = ORDER_TWO::InterpolationOrder
-    elseif simulation_parameters["mesh"]["interpolation_order"] == 3
+    elseif simulation_data["mesh"]["interpolation_order"] == 3
         interpolation_order = ORDER_THREE::InterpolationOrder
     end
     # initially it need to be set to refresh to force the

@@ -5,6 +5,7 @@ using HDF5
 using ReferenceTests
 using ArgParse
 using DelimitedFiles
+using SparseArrays
 
 using Wave
 
@@ -72,6 +73,7 @@ include("test_triangles.jl")
 include("test_quadrilaterals.jl")
 include("test_mesh.jl")
 include("test_domain_conditions.jl")
+include("test_unknowns_handler.jl")
 
 end # module
 

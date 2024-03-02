@@ -16,32 +16,47 @@ end
 
 """Load data for initial conditions needed to the simulation"""
 function load_unknowns_handler(
-    all_solved_unknowns, domain_condition_groups, domain_conditions_data
+    unknowns_default_values, 
+    input_data, 
+    simulation_data, 
+    domain_conditions_data
 )
-    values = Dict{Tuple{String, ConditionType}, Vector{Int64}}()
-    old_values = Dict{Tuple{String, ConditionType}, Vector{Float64}}()
-    # get boundary conditions
+    domain_conditions_groups = read(input_data["mesh/nodes/domain_condition_groups"])
+    # preallocate with de default values chosen by the models
+    values = Dict(unknown => fill(value, length(domain_conditions_groups)) for (unknown, value) in unknowns_default_values)
+    old_values = Dict(unknown => fill(value, length(domain_conditions_groups)) for (unknown, value) in unknowns_default_values)
+    # set initial conditions
+    all_solved_unknowns = collect(keys(unknowns_default_values))
     for condition_data in domain_conditions_data["initial"]
-        if condition_data["unknown_name"] in all_solved_unknowns
-            group_number = condition_data["group_number"]
+        if condition_data["unknown"] in all_solved_unknowns
+            group_number = parse(Int64, condition_data["group_name"])
             unknown = condition_data["unknown"]
             value = condition_data["value"]
-            curent_group_indices = findall(
+            current_group_indices = findall(
                 domain_condition_group -> domain_condition_group == group_number, 
-                domain_condition_groups
+                domain_conditions_groups
             )
-            values[curent_group_indices] .= value
-            old_values[curent_group_indices] .= value
+            values[unknown][current_group_indices] .= value
+            old_values[unknown][current_group_indices] .= value
+        #else
+            # TODO: log message this variable is not present in the model, ignored
         end
     end
     return UnknownsHandler(
         values,
         old_values,
         Dict(unknown => false for unknown in all_solved_unknowns),
-        simulation_parameters["simulation"]["tolerance_relative"],
-        simulation_parameters["simulation"]["tolerance_absolute"]
+        simulation_data["simulation"]["tolerance_relative"],
+        simulation_data["simulation"]["tolerance_absolute"]
     )
 end
+
+
+"""Get unknonws labels"""
+function get_registered_unknowns(unknowns_handler::UnknownsHandler)
+    return collect(keys(unknowns_handler.values))
+end
+
 
 """Get the values of the unknowns for the nodes"""
 function get_values(
@@ -73,7 +88,7 @@ end
 
 """Check values for convergence of unknowns"""
 function check_unknowns_convergence!(unknowns_handler::UnknownsHandler)
-    for unknown in unknowns_handler.variables
+    for unknown in get_registered_unknowns(unknowns_handler)
         unknowns_handler.converged[unknown] = all(
             isapprox.(
                 unknowns_handler.values[unknown], 
