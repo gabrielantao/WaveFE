@@ -16,3 +16,10 @@ There are some features and improvements that could be implemented
 13. implement group of elements
 14. implement hybrid mesh
 15. review elements specific properties
+16. implement explicit method
+17. implement artificial compressibility method
+18. implement other domain conditions
+19. implement model with heat transfer
+20. implement model with chemical spiecies transfer
+21. implement model with porous media 
+22. add solvers and preconditioner options

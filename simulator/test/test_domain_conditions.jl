@@ -14,6 +14,15 @@
         Dict("u_1" => 0.0, "u_2" => 0.0, "p" => 0.0),
     )
 
+    function get_reference_lhs()
+        # get the reference data to build a LHS matrix fixture 
+        data = h5open(joinpath(WAVE_SIMULATOR_TEST_DATA_PATH, "case_square_cavity", "reference.hdf5"), "r")
+        # offset 1 position because all indices started at zero (Python generated)
+        indices = read(data["/t_0/step 2/lhs_assembled/indices"])
+        values = read(data["/t_0/step 2/lhs_assembled/values"])
+        # input all the relevant data to build the model 
+        return sparse(Vector{Int64}(indices[1, :]), Vector{Int64}(indices[2, :]), values)
+    end
 
     @testset "import conditions data" begin
         # TODO [implement other domain conditions]
@@ -56,7 +65,7 @@
 
     @testset "apply LHS conditions" begin
         # test if it can apply the LHS conditions
-        lhs_step2 = copy(reference_lhs_step2_data)
+        lhs_step2 = get_reference_lhs()
         Wave.apply_domain_conditions_lhs!(
             domain_conditions,
             "u_1",
@@ -82,7 +91,7 @@
     end
 
     @testset "setup RHS conditions" begin
-        lhs_step2 = copy(reference_lhs_step2_data)
+        lhs_step2 = get_reference_lhs()
         indices = domain_conditions.indices[("u_1", Wave.FIRST::ConditionType)]
         values = domain_conditions.values[("u_1", Wave.FIRST::ConditionType)]
         offset = Wave.calculate_rhs_offset_values(lhs_step2, indices, values)

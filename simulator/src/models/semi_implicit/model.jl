@@ -141,7 +141,7 @@ function run_iteration(model::ModelSemiImplicit)
                     model.domain_conditions, unknown, equation.members.lhs[unknown]
                 )
                 # use the new built LHS to update the solver perconditioner
-                update_preconditioner(equation.solver, equation.members.lhs[unknown], unknown)
+                update_preconditioner!(equation.solver, equation.members.lhs[unknown], unknown)
             end
             # for this model always reapply the conditions for reassembled RHS
             equation.rhs[unknown] = assembled_rhs[unknown]

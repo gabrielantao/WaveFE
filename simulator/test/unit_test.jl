@@ -74,6 +74,7 @@ include("test_quadrilaterals.jl")
 include("test_mesh.jl")
 include("test_domain_conditions.jl")
 include("test_unknowns_handler.jl")
+include("test_solver.jl")
 
 end # module
 
