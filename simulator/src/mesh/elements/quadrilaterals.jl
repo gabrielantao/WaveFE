@@ -56,7 +56,7 @@ end
 
 
 """Update properties if needed (when mesh coordinates changed)"""
-function update_properties(
+function update_properties!(
     elements_container::QuadrilateralsContainer, 
     nodes_container::NodesContainer,
     unknowns_handler::UnknownsHandler,
@@ -68,8 +68,8 @@ function update_properties(
         elements_container, 
         nodes_container, 
         unknowns_handler,
-        model_parameters.Re, 
-        model_parameters.safety_dt_factor
+        model_parameters.adimensionals["Re"], 
+        model_parameters.safety_Δt_factor
     )
 end
 
@@ -98,7 +98,7 @@ function update_local_time_interval!(
     nodes_container::NodesContainer,
     unknowns_handler::UnknownsHandler,
     Re::Float64,
-    safety_factor::Float64
+    safety_Δt_factor::Float64
 )    
 end
 

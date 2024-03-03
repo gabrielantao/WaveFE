@@ -90,8 +90,8 @@ function update_properties!(
         elements_container, 
         nodes_container, 
         unknowns_handler,
-        model_parameters.Re, 
-        model_parameters.safety_dt_factor
+        model_parameters.adimensionals["Re"], 
+        model_parameters.safety_Δt_factor
     )
 end
 
@@ -101,7 +101,7 @@ function update_areas!(
     elements_container::TrianglesContainer, 
     nodes_container::NodesContainer
 )
-    for element in elements_container.series
+    for element in get_elements(elements_container)
         element.area = calculate_area(element, nodes_container)
     end
 end
@@ -114,7 +114,7 @@ function update_shape_coeficients!(
     elements_container::TrianglesContainer, 
     nodes_container::NodesContainer
 )
-    for element in elements_container.series
+    for element in get_elements(elements_container)
         x = get_positions_x(nodes_container, get_border_node_ids(element))
         y = get_positions_y(nodes_container, get_border_node_ids(element))
         # divide by (2.0 * area) to adimensionalize
@@ -131,14 +131,14 @@ function update_local_time_interval!(
     nodes_container::NodesContainer,
     unknowns_handler::UnknownsHandler,
     Re::Float64,
-    safety_factor::Float64
+    safety_Δt_factor::Float64
 )    
     # get the velocities moduli
     velocities = sqrt.(unknowns_handler.values["u_1"] .^2 + unknowns_handler.values["u_2"] .^2)
-    for element in elements_container.series
+    for element in get_elements(elements_container)
         h = calculate_specific_sizes(element, nodes_container)
         max_velocity = maximum(velocities[element.connectivity])
-        element.Δt = safety_factor * min((Re / 2.0) * h^2, h / max_velocity)
+        element.Δt = safety_Δt_factor * min((Re / 2.0) * h^2, h / max_velocity)
     end 
 end
 

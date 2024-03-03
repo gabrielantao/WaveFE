@@ -5,32 +5,26 @@ using SparseArrays
 using Preconditioners
 using IterativeSolvers
 
+
+# exported variables and methods
+export ModelSemiImplicit, run_iteration
+
+# TODO: maybe this block of code include could be automatically generated via a macro
+
 # TODO [general performance improvements]
 ## investigate if this is the proper way to include code in this module
 ## in order to take advantage of Julia precompilation
 include("../../core/wave_core.jl")
 using .WaveCore
 
-# exported variables and methods
-export MODEL_NAME, MODEL_UNKNOWNS, run_iteration
-
-
-"""Additional parameters from the input file"""
-struct ModelSemiImplicitParameters <: ModelParameters
-    transient::Bool
-    adimensionals::Dict{String, Float64}
-end
-
-
-const MODEL_NAME = "CBS Semi-Implicit"
-const MODEL_UNKNOWNS = ["u_1", "u_2", "u_3", "p"]
-
+# basic data for the model
+include("header.jl")
 
 # get the assembled equations
 include("./equations/equation_one.jl")
 include("./equations/equation_two.jl")
 include("./equations/equation_three.jl")
-
+include("../../core/global_assembling.jl")
 
 """
 Semi-implicit model
@@ -53,8 +47,10 @@ struct ModelSemiImplicit
         # configure the additional model parameters
         transient = simulation_data["simulation"]["transient"]
         adimensionals = simulation_data["parameter"]
+        safety_Δt_factor = simulation_data["simulation"]["safety_dt_factor"]
         additional_parameters = ModelSemiImplicitParameters(
             transient,
+            safety_Δt_factor,
             adimensionals
         )
 
@@ -110,7 +106,7 @@ function run_iteration(model::ModelSemiImplicit)
         if mesh.must_refresh
             # for the current equation preallocate the assembled LHS if
             # mesh is marked as "must refresh" status (e.g. if it was remeshed)
-            update_assembler_indices!(equation.assembler, mesh)
+            update_assembler_indices!(equation.base.assembler, mesh)
         end
         if mesh.must_refresh || mesh.nodes.moved
             assembled_lhs = assemble_global_lhs(
@@ -130,35 +126,38 @@ function run_iteration(model::ModelSemiImplicit)
 
         # TODO [make the solver paralallel] 
         # the domain conditions and solve could be done in parallel for each unknown
-        for unknown in equation.solved_unknowns
+        for unknown in equation.base.solved_unknowns
             ### APPLY DOMAIN CONDITIONS ###
             if mesh.must_refresh || mesh.nodes.moved
                 # it uses assembled_lhs as template for all variables so it needs to copy here 
                 # update the LHS matrix
-                equation.members.lhs[unknown] = copy(assembled_lhs)
+                equation.base.members.lhs[unknown] = copy(assembled_lhs)
                 apply_domain_conditions_lhs!(
-                    model.domain_conditions, unknown, equation.members.lhs[unknown]
+                    model.domain_conditions, 
+                    unknown, 
+                    equation.base.members.lhs[unknown]
                 )
                 # use the new built LHS to update the solver perconditioner
                 update_preconditioner!(
-                    equation.solver, equation.members.lhs[unknown], unknown
+                    equation.base.solver, 
+                    equation.base.members.lhs[unknown], 
+                    unknown
                 )
             end
             # for this model always reapply the conditions for reassembled RHS
-            equation.rhs[unknown] = assembled_rhs[unknown]
-            equation.members.rhs[unknown] = apply_domain_conditions_rhs!(
+            equation.base.members.rhs[unknown] = apply_domain_conditions_rhs!(
                 domain_conditions, 
                 unknown, 
-                equation.assembler.lhs, 
-                equation.members.rhs[unknown]
+                equation.base.assembler.lhs, 
+                assembled_rhs[unknown]
             )
 
             ### SOLVE THE EQUATION ###
             solve!(
-                equation.solver,
+                equation.base.solver,
                 unknown,
-                equation.members.lhs[unknown],
-                equation.members.rhs[unknown],
+                equation.base.members.lhs[unknown],
+                equation.base.members.rhs[unknown],
                 model.unknowns_handler
             )
         end

@@ -48,17 +48,17 @@
             @test check_reference_csv(
                 "ref_mesh",
                 "triangle_areas.csv", 
-                [element.area for element in mesh.elements.triangles.series]
+                [element.area for element in WaveCore.get_elements(mesh.elements.triangles)]
             )
             @test check_reference_csv(
                 "ref_mesh",
                 "triangle_coefficient_b.csv", 
-                [element.b for element in mesh.elements.triangles.series]
+                [element.b for element in WaveCore.get_elements(mesh.elements.triangles)]
             )
             @test check_reference_csv(
                 "ref_mesh",
                 "triangle_coefficient_c.csv", 
-                [element.c for element in mesh.elements.triangles.series]
+                [element.c for element in WaveCore.get_elements(mesh.elements.triangles)]
             )
 
             WaveCore.update_local_time_interval!(
@@ -71,7 +71,7 @@
             @test check_reference_csv(
                 "ref_mesh",
                 "triangle_coefficient_dt.csv", 
-                [element.Δt for element in mesh.elements.triangles.series]
+                [element.Δt for element in WaveCore.get_elements(mesh.elements.triangles)]
             )
         end
 

@@ -4,14 +4,11 @@ struct EquationStepThree <: Equation
     base::BaseModelEquation
     # if the assembler should use the diagonal matrix for the elements
     use_lumped_mass::Bool
-    # the safety_dt_factor used to calculate local Δt for the elements
-    safety_dt_factor::Float64
 
     function EquationStepThree(solved_unknowns, simulation_parameters)   
         # TODO: this should be in a section model in the input file
         use_lumped_mass = !simulation_parameters["simulation"]["transient"]
-        safety_dt_factor = simulation_parameters["simulation"]["safety_dt_factor"]
-        lhs_type = use_lumped_mass ? DIAGONAL : SYMMETRIC
+        lhs_type = use_lumped_mass ? WaveCore.DIAGONAL::MatrixType : WaveCore.SYMMETRIC::MatrixType
         assembler = Assembler(lhs_type)
         solver = load_solver(simulation_parameters)
         members = EquationMembers()
@@ -26,7 +23,6 @@ struct EquationStepThree <: Equation
         new(
             base,
             use_lumped_mass,
-            safety_dt_factor
         )
     end
 end

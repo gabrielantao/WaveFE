@@ -40,11 +40,11 @@ function check_reference_csv(
     obtained::AbstractArray, 
     rtol::Float64=0.001, 
     atol::Float64=0.0,
-    elementwise::Bool=true, 
-    must_regenerate::Bool=false
+    elementwise::Bool=true
 )
     filepath = joinpath(WAVE_SIMULATOR_TEST_PATH, test_folder_name, filename)
     MAXIMUM_DIFF_TO_SHOW = 10
+    must_regenerate = PARSED_ARGS["regenerate-result"]
     # force the obtained to be a matrix
     obtained = to_matrix(obtained)
     if !isfile(filepath)
@@ -52,11 +52,6 @@ function check_reference_csv(
         writedlm(filepath, obtained, ',')
         @info "File not found, created: $filepath"
         return false
-    end
-    if must_regenerate
-        writedlm(filepath, obtained, ',')
-        @info "Updated result: $filepath"
-        return true
     end
     reference = readdlm(filepath, ',', Float64, '\n')
     if elementwise
@@ -79,7 +74,13 @@ function check_reference_csv(
                 row = "at position $(Tuple(diff_pos)) => $obtained_i != $reference_i\n"
                 diff_message = diff_message * row
             end
-            @error diff_message
+            # check if it need to be regenerated
+            if must_regenerate
+                writedlm(filepath, obtained, ',')
+                @info "Updated result: $filepath"
+            else
+                @error diff_message
+            end
             return false
         end               
     else

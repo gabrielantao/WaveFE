@@ -72,6 +72,12 @@ function get_total_nodes(nodes_container::NodesContainer)
 end
 
 
+"""Return the total of nodes in the container"""
+function get_nodes(nodes_container::NodesContainer)
+    return nodes_container.series
+end
+
+
 """Convinience function to get the list of x positions for node ids"""
 function get_positions_x(nodes::NodesContainer, nodes_ids::Vector{Int64})
     return [nodes.series[node_id].position[1] for node_id in nodes_ids]

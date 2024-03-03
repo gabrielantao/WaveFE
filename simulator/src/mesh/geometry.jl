@@ -1,7 +1,8 @@
 """Calculate length given the nodes ids of the edge endings"""
 function calculate_length(nodes_ids::Vector{Int64}, nodes::NodesContainer)
     x = get_positions_x(nodes, nodes_ids)
-    return abs(x[1] - x[2])
+    y = get_positions_y(nodes, nodes_ids)
+    return sqrt((x[1] - x[2])^2 + (y[1] - y[2])^2)
 end
 
 """Calculate length for an segment"""

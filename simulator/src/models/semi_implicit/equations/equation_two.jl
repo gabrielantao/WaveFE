@@ -2,13 +2,10 @@
 struct EquationStepTwo <: Equation
     # common data ("base class" data)
     base::BaseModelEquation
-    # the safety_dt_factor used to calculate local Δt for the elements
-    safety_dt_factor::Float64
 
     function EquationStepTwo(solved_unknowns, simulation_parameters)   
         # TODO: this should be in a section model in the input file
-        safety_dt_factor = simulation_parameters["simulation"]["safety_dt_factor"]
-        assembler = Assembler(SYMMETRIC)
+        assembler = Assembler(WaveCore.SYMMETRIC::MatrixType)
         solver = load_solver(simulation_parameters)
         members = EquationMembers()
 
@@ -19,11 +16,7 @@ struct EquationStepTwo <: Equation
             solver, 
             members,
         )
-        new(
-            base,
-            use_lumped_mass,
-            safety_dt_factor
-        )
+        new(base)
     end
 end
 

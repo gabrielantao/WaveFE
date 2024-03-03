@@ -8,8 +8,8 @@
     @testset "triangles loaded" begin
         @test WaveCore.get_total_elements(triangles) == 5000
         @test triangles.nodes_per_element == 3
-        @test all([isempty(element.b) || isempty(element.c) for element in triangles.series])
-        @test all([isnan(element.area) || isnan(element.Δt) for element in triangles.series])
+        @test all([isempty(element.b) || isempty(element.c) for element in WaveCore.get_elements(triangles)])
+        @test all([isnan(element.area) || isnan(element.Δt) for element in WaveCore.get_elements(triangles)])
     end
 
     @testset "get triangles properties" begin

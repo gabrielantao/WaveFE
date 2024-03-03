@@ -137,6 +137,12 @@ function get_total_elements(element_container::ElementsContainer)
 end
 
 
+"""Return the elements in the container"""
+function get_elements(element_container::ElementsContainer)
+    return element_container.series
+end
+
+
 """Update (move) mesh nodes when a dynamic mesh is used"""
 function update_elements!(
     mesh::Mesh,

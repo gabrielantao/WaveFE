@@ -8,8 +8,8 @@
         @test nodes.series[1].position ≈ [0.0, 0.0]
         @test nodes.series[2601].position ≈ [1.0, 1.0]
         # static mesh so these values should be zero anyway
-        @test all([node.velocity ≈ [0.0, 0.0] for node in nodes.series])
-        @test all([node.acceleration ≈ [0.0, 0.0] for node in nodes.series])
+        @test all([node.velocity ≈ [0.0, 0.0] for node in WaveCore.get_nodes(nodes)])
+        @test all([node.acceleration ≈ [0.0, 0.0] for node in WaveCore.get_nodes(nodes)])
     end
     
     @testset "get nodes properties" begin

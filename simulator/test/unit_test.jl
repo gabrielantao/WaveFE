@@ -11,9 +11,12 @@ using SparseArrays
 include("../src/core/wave_core.jl")
 using .WaveCore
 
-include("../src/models/semi_implicit/model.jl")
-using .ModuleSemiImplicit
-
+# import the equations of semi-implicit model to be used to test the assembler
+# TODO: maybe this should be tested in another module (for the models or tested only in validation tests)
+include("../src/models/semi_implicit/header.jl")
+include("../src/models/semi_implicit/equations/equation_one.jl")
+include("../src/models/semi_implicit/equations/equation_two.jl")
+include("../src/core/global_assembling.jl")
 
 const WAVE_SIMULATOR_TEST_PATH = joinpath(ENV["PIXI_PACKAGE_ROOT"], "simulator", "test")
 const WAVE_SIMULATOR_TEST_DATA_PATH = joinpath(WAVE_SIMULATOR_TEST_PATH, "data")
@@ -85,8 +88,3 @@ include("test_assembler.jl")
 end # module
 
 WaveUnitTests.run_unit_test()
-
-
-
-
-

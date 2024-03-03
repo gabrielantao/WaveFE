@@ -38,14 +38,12 @@ function update_assembler_indices!(assembler::Assembler, mesh::Mesh)
             assembler.lhs_type == DIAGONAL::MatrixType ? DIAGONAL::MatrixType : DENSE::MatrixType, 
             element_container.nodes_per_element
         )
-        for element in element_container
-            push!(
-                indices,
-                [
-                    (element.connectivity[i], element.connectivity[j])
-                    for (i, j) in index_iterator
-                ]
-            )
+        for element in get_elements(element_container)
+            for (i, j) in index_iterator
+                push!(
+                    all_indices_pairs, (element.connectivity[i], element.connectivity[j])
+                )
+            end
         end
     end
     # ensure the vector are empty then fill them with the indices values
@@ -71,87 +69,4 @@ function get_local_indices_iterator(lhs_type::MatrixType, nodes_per_element::Int
     else 
         throw("Not implemented special matrix type to be assembled")
     end
-end
-
-
-"""Assemble the global matrix for LHS"""
-function assemble_global_lhs(
-    equation::Equation,
-    mesh::Mesh,
-    unknowns_handler::UnknownsHandler,
-    model_parameters::ModelParameters
-)  
-    # preallocate the sparse matrix with zeros
-    lhs = sparse(
-        equation.assembler.lhs_indices_i, 
-        equation.assembler.lhs_indices_j, 
-        zeros(length(equation.assembler.lhs_indices_i))
-    )
-    # do the assembling of global matrix for each element container in the mesh
-    for element_container in get_containers(mesh.elements)
-        index_iterator = get_local_indices_iterator(
-            equation.assembler.lhs_type, 
-            element_container.nodes_per_element
-        )
-        for element in element_container
-            assembled_local_lhs = assemble_element_lhs(
-                equation, 
-                element, 
-                unknowns_handler,
-                model_parameters
-            )
-            for (i, j) in index_iterator
-                global_i = element.connectivity[i]
-                global_j = element.connectivity[j]
-                lhs[global_i, global_j] += assembled_local_lhs[i, j]
-            end
-        end
-    end
-    # TODO [review symmetric matrix assembling]: 
-    # for now its assembling symmetric both sides off-diagonal (upper and lower)
-    # of sparse matrix. This should be reviewed in the future to use other types of
-    # sparse that don't waste space (e.g. package SparseMatrixCRC.jl) 
-    # for now just copy the values of upper side of matrix to the lower side
-    if equation.assembler.lhs_type == SYMMETRIC::MatrixType
-        for (i, j) in zip(equation.assembler.lhs_indices_i, equation.assembler.lhs_indices_j)
-            if i < j
-                lhs[j, i] = lhs[i, j]
-            end
-        end
-    end
-    return lhs
-end
-
-
-"""Assemble RHS vectors for the elements of the mesh"""
-function assemble_global_rhs( 
-    equation::Equation,
-    mesh::Mesh,
-    unknowns_handler::UnknownsHandler,
-    model_parameters::ModelParameters
-)
-    # preallocate the assembled rhs vectors
-    # TODO [general performance improvements]
-    ## maybe this should use NamedTuple (or just tuple) instead of dict
-    rhs = Dict(unknown => zeros(mesh.nodes.total_nodes) for unknown in equation.solved_unknowns)
-    # do the assembling of global matrix for each element container in the mesh
-    for element_container in get_containers(mesh.elements)
-        for element in element_container
-            assembled_local_rhs = assemble_element_rhs(
-                equation,
-                element, 
-                unknowns_handler,
-                model_parameters
-            )
-            # TODO [general performance improvements]
-            ## review if the best is use a named tuple or something else
-            for unknown in keys(assembled_local_rhs)
-                for i in range(1, element_container.nodes_per_element)
-                    global_i = element.connectivity[i]
-                    rhs[unknown][global_i] += assembled_local_rhs[unknown][i]
-                end
-            end
-        end
-    end
-    return rhs
 end
