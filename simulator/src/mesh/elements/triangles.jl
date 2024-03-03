@@ -69,9 +69,9 @@ end
 """Get the edges nodes ids of an element."""
 function get_edges_node_ids(element::Triangle)
     return [
-        [element.connectivity[1] element.connectivity[2]], 
-        [element.connectivity[2] element.connectivity[3]],
-        [element.connectivity[3] element.connectivity[1]]
+        [element.connectivity[1], element.connectivity[2]], 
+        [element.connectivity[2], element.connectivity[3]],
+        [element.connectivity[3], element.connectivity[1]]
     ]
 end
 
@@ -85,12 +85,11 @@ function update_properties!(
 )
     update_areas!(elements_container, nodes_container)
     update_shape_coeficients!(elements_container, nodes_container)
-    # get the velocities moduli
-    velocities = sqrt.(unknowns_handler.values["u_1"] .^2 + unknowns_handler.values["u_2"] .^2)
+
     update_local_time_interval!(
         elements_container, 
         nodes_container, 
-        velocities,
+        unknowns_handler,
         model_parameters.Re, 
         model_parameters.safety_dt_factor
     )
@@ -130,10 +129,12 @@ end
 function update_local_time_interval!(
     elements_container::TrianglesContainer, 
     nodes_container::NodesContainer,
-    velocities::Vector{Float64},
+    unknowns_handler::UnknownsHandler,
     Re::Float64,
     safety_factor::Float64
 )    
+    # get the velocities moduli
+    velocities = sqrt.(unknowns_handler.values["u_1"] .^2 + unknowns_handler.values["u_2"] .^2)
     for element in elements_container.series
         h = calculate_specific_sizes(element, nodes_container)
         max_velocity = maximum(velocities[element.connectivity])

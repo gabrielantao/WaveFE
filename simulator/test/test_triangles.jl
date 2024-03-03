@@ -15,7 +15,7 @@
     @testset "get triangles properties" begin
         @test Wave.get_border_node_ids(triangles.series[1]) == [1, 53, 52]
         @test Wave.get_border_node_ids(triangles.series[5000]) == [2549, 2550, 2601]
-        @test Wave.get_edges_node_ids(triangles.series[1]) == [[1 53], [53 52], [52 1]]
+        @test Wave.get_edges_node_ids(triangles.series[1]) == [[1, 53], [53, 52], [52, 1]]
     end
 
 end

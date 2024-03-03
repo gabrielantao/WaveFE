@@ -9,6 +9,21 @@
             input_square_cavity_triangles.hdf_data, 
             input_square_cavity_triangles.simulation_data
         )
+
+        function get_unknowns()
+            # get the reference data to build a LHS matrix fixture 
+            data = h5open(joinpath(WAVE_SIMULATOR_TEST_DATA_PATH, "case_square_cavity", "result.hdf5"), "r")
+            u_1 = read(data["/result/t_0/u_1"])
+            u_2 = read(data["/result/t_0/u_2"])
+            p = read(data["/result/t_0/p"])
+            return UnknownsHandler(
+                Dict("u_1" => u_1, "u_2" => u_2, "p" => p),
+                Dict("u_1" => u_1, "u_2" => u_2, "p" => p),
+                Dict("u_1" => false, "u_2" => false, "p" => false),
+                Dict("u_1" => 1e-5, "u_2" => 1e-5, "p" => 1e-5),
+                Dict("u_1" => 0.0, "u_2" => 0.0, "p" => 0.0),
+            )
+        end
         
         # check mesh proeprties
         @test mesh.dimension == Wave.BIDIMENSIONAL::Dimension
@@ -46,19 +61,18 @@
                 [element.c for element in mesh.elements.triangles.series]
             )
 
-            # TODO: it needs the domain conditions applied (or mocked here)
-            # Wave.update_local_time_interval!(
-            #     mesh.elements.triangles, 
-            #     mesh.nodes, 
-            #     unknowns_handler,
-            #     input_square_cavity_triangles.simulation_data["parameter"]["Re"], 
-            #     input_square_cavity_triangles.simulation_data["simulation"]["safety_dt_factor"]
-            # )
-            # regression_test(
-            #     "ref_mesh",
-            #     "triangle_coefficient_c.txt", 
-            #     [element.Δt for element in mesh.elements.triangles.series]
-            # )
+            Wave.update_local_time_interval!(
+                mesh.elements.triangles, 
+                mesh.nodes, 
+                get_unknowns(),
+                input_square_cavity_triangles.simulation_data["parameter"]["Re"], 
+                input_square_cavity_triangles.simulation_data["simulation"]["safety_dt_factor"]
+            )
+            @test check_reference_csv(
+                "ref_mesh",
+                "triangle_coefficient_dt.csv", 
+                [element.Δt for element in mesh.elements.triangles.series]
+            )
         end
 
         # static mesh does nothing in update 
