@@ -7,7 +7,12 @@ using ArgParse
 using DelimitedFiles
 using SparseArrays
 
-using Wave
+
+include("../src/core/wave_core.jl")
+using .WaveCore
+
+include("../src/models/semi_implicit/model.jl")
+using .ModuleSemiImplicit
 
 
 const WAVE_SIMULATOR_TEST_PATH = joinpath(ENV["PIXI_PACKAGE_ROOT"], "simulator", "test")
@@ -75,6 +80,7 @@ include("test_mesh.jl")
 include("test_domain_conditions.jl")
 include("test_unknowns_handler.jl")
 include("test_solver.jl")
+include("test_assembler.jl")
 
 end # module
 

@@ -16,7 +16,7 @@ mutable struct Assembler
     lhs_indices_i::Vector{Int64}
     lhs_indices_j::Vector{Int64}
 
-    function Assembler(lhs_type::MatrixType=DENSE)
+    function Assembler(lhs_type::MatrixType = DENSE::MatrixType)
         new(
             lhs_type,
             Int64[],
@@ -35,7 +35,7 @@ function update_assembler_indices!(assembler::Assembler, mesh::Mesh)
         # of sparse matrix. This should be reviewed in the future to use other types of
         # sparse that don't waste space (e.g. package SparseMatrixCRC.jl) 
         index_iterator = get_local_indices_iterator(
-            assembler.lhs_type == DIAGONAL ? DIAGONAL : DENSE, 
+            assembler.lhs_type == DIAGONAL::MatrixType ? DIAGONAL::MatrixType : DENSE::MatrixType, 
             element_container.nodes_per_element
         )
         for element in element_container
@@ -60,13 +60,13 @@ end
 
 """Auxiliary function to get local indices to the assembler"""
 function get_local_indices_iterator(lhs_type::MatrixType, nodes_per_element::Int64)
-    if lhs_type == DIAGONAL
+    if lhs_type == DIAGONAL::MatrixType
         return Iterators.zip(1:nodes_per_element, 1:nodes_per_element)
-    elseif lhs_type == SYMMETRIC  
+    elseif lhs_type == SYMMETRIC::MatrixType  
         indices = Iterators.product(1:nodes_per_element, 1:nodes_per_element)
         # return upper (and diagonal) indices of matrix
         return Iterators.filter(index -> index[1] <= index[2], indices)
-    elseif lhs_type == DENSE
+    elseif lhs_type == DENSE::MatrixType
         return Iterators.product(1:nodes_per_element, 1:nodes_per_element)
     else 
         throw("Not implemented special matrix type to be assembled")
@@ -112,7 +112,7 @@ function assemble_global_lhs(
     # of sparse matrix. This should be reviewed in the future to use other types of
     # sparse that don't waste space (e.g. package SparseMatrixCRC.jl) 
     # for now just copy the values of upper side of matrix to the lower side
-    if equation.assembler.lhs_type == SYMMETRIC
+    if equation.assembler.lhs_type == SYMMETRIC::MatrixType
         for (i, j) in zip(equation.assembler.lhs_indices_i, equation.assembler.lhs_indices_j)
             if i < j
                 lhs[j, i] = lhs[i, j]

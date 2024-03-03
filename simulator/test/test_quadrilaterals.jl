@@ -1,5 +1,5 @@
 @testset "elements quadrilaterals" begin 
-    quadrilaterals = Wave.load_quadrilaterals(
+    quadrilaterals = WaveCore.load_quadrilaterals(
         input_square_cavity_triangles.hdf_data, 
         input_square_cavity_triangles.simulation_data
     )

@@ -1,5 +1,5 @@
 @testset "solver" begin
-    solver = Wave.load_solver(input_square_cavity_triangles.simulation_data)
+    solver = WaveCore.load_solver(input_square_cavity_triangles.simulation_data)
 
     function get_unknowns(timestep)
         # get the reference data to build a LHS matrix fixture 
@@ -36,8 +36,8 @@
     end
 
     @testset "import solver data" begin
-        @test solver.type == Wave.CONJUGATE_GRADIENT::SolverType
-        @test solver.preconditioner_type == Wave.JACOBI::SolverPreconditioners
+        @test solver.type == WaveCore.CONJUGATE_GRADIENT::SolverType
+        @test solver.preconditioner_type == WaveCore.JACOBI::SolverPreconditioners
         @test solver.steps_limit == 10000
         @test solver.relative_tolerance ≈ 1e-8
         @test solver.absolute_tolerance ≈ 0.0
@@ -49,9 +49,9 @@
         lhs = get_reference_lhs(1, "u_1")
         rhs = get_reference_rhs(1, "u_1")
         unknowns_handler = get_unknowns(0)
-        Wave.update_preconditioner!(solver, lhs, "u_1")
+        WaveCore.update_preconditioner!(solver, lhs, "u_1")
         @test unknowns_handler.values["u_1"] ≈ unknowns_handler.old_values["u_1"]
-        Wave.solve!(solver, "u_1", lhs, rhs, unknowns_handler)
+        WaveCore.solve!(solver, "u_1", lhs, rhs, unknowns_handler)
         # ensure the result has been updated
         @test !(unknowns_handler.values["u_1"] ≈ unknowns_handler.old_values["u_1"])
         @test check_reference_csv(
@@ -66,9 +66,9 @@
         lhs = get_reference_lhs(2, "p")
         rhs = get_reference_rhs(2, "p")
         unknowns_handler = get_unknowns(0)
-        Wave.update_preconditioner!(solver, lhs, "p")
+        WaveCore.update_preconditioner!(solver, lhs, "p")
         @test unknowns_handler.values["p"] ≈ unknowns_handler.old_values["p"]
-        Wave.solve!(solver, "p", lhs, rhs, unknowns_handler)
+        WaveCore.solve!(solver, "p", lhs, rhs, unknowns_handler)
         # ensure the result has been updated
         @test !(unknowns_handler.values["p"] ≈ unknowns_handler.old_values["p"])
         @test check_reference_csv(

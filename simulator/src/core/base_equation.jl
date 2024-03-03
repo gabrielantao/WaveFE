@@ -1,4 +1,4 @@
-export BaseModelEquation
+export BaseModelEquation, EquationMembers
 
 """This struct holds the sizes of the equation"""
 mutable struct EquationMembers
@@ -9,11 +9,12 @@ mutable struct EquationMembers
 
     function EquationMembers()
         new(
-            Dict{String, sparse([], [], Float64[])}(),
+            Dict{String, SparseMatrixCSC{Float64, Int64}}(),
             Dict{String, Vector{Float64}}()
         )
     end
 end
+
 
 
 """This struct keeps all common data for an equation struct"""

@@ -9,9 +9,9 @@ struct InputDataFixture
         # input all the relevant data to build the model 
         new(
             description,
-            h5open(joinpath(case_folder, SIMULATION_MESH_FILENAME), "r"),
-            TOML.parsefile(joinpath(case_folder, SIMULATION_INPUT_FILENAME)),
-            TOML.parsefile(joinpath(case_folder, DOMAIN_CONDITIONS_FILENAME))
+            h5open(joinpath(case_folder, ModuleSemiImplicit.SIMULATION_MESH_FILENAME), "r"),
+            TOML.parsefile(joinpath(case_folder, ModuleSemiImplicit.SIMULATION_INPUT_FILENAME)),
+            TOML.parsefile(joinpath(case_folder, ModuleSemiImplicit.DOMAIN_CONDITIONS_FILENAME))
         )
     end
 end

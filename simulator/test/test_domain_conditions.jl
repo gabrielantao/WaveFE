@@ -1,5 +1,5 @@
 @testset "domain conditions" begin
-    domain_conditions = Wave.load_domain_conditions(
+    domain_conditions = WaveCore.load_domain_conditions(
         input_square_cavity_triangles.hdf_data, 
         input_square_cavity_triangles.domain_conditions_data
     )
@@ -28,8 +28,8 @@
         # TODO [implement other domain conditions]
         ## it only check the first condition here, it should check all conditions
         for unknown in ["u_1", "u_2"]
-            indices = domain_conditions.indices[(unknown, Wave.FIRST::ConditionType)]
-            values = domain_conditions.values[(unknown, Wave.FIRST::ConditionType)]
+            indices = domain_conditions.indices[(unknown, WaveCore.FIRST::ConditionType)]
+            values = domain_conditions.values[(unknown, WaveCore.FIRST::ConditionType)]
             @test length(indices) == length(values)
             @test check_reference_csv(
                 "ref_domain_conditions",
@@ -42,14 +42,14 @@
                 values
             )
         end
-        @test domain_conditions.indices[("p", Wave.FIRST::ConditionType)] == [1]
-        @test domain_conditions.values[("p", Wave.FIRST::ConditionType)] ≈ [0.0]
+        @test domain_conditions.indices[("p", WaveCore.FIRST::ConditionType)] == [1]
+        @test domain_conditions.values[("p", WaveCore.FIRST::ConditionType)] ≈ [0.0]
     end
 
 
     @testset "setup boundary conditions" begin
         # test if it can set initial boundary condition in the variables
-        Wave.setup_boundary_values!(
+        WaveCore.setup_boundary_values!(
             domain_conditions,
             unknowns_handler
         )
@@ -66,12 +66,12 @@
     @testset "apply LHS conditions" begin
         # test if it can apply the LHS conditions
         lhs_step2 = get_reference_lhs()
-        Wave.apply_domain_conditions_lhs!(
+        WaveCore.apply_domain_conditions_lhs!(
             domain_conditions,
             "u_1",
             lhs_step2
         )
-        indices = domain_conditions.indices[("u_1", Wave.FIRST::ConditionType)]
+        indices = domain_conditions.indices[("u_1", WaveCore.FIRST::ConditionType)]
         # test diagonal elements and below and above diagonal elements
         @test all([lhs_step2[i, i] ≈ 1.0 for i in indices])
         @test all([all(collect(lhs_step2[i+1:end, i]) .≈ 0.0) for i in indices])
@@ -92,11 +92,11 @@
 
     @testset "setup RHS conditions" begin
         lhs_step2 = get_reference_lhs()
-        indices = domain_conditions.indices[("u_1", Wave.FIRST::ConditionType)]
-        values = domain_conditions.values[("u_1", Wave.FIRST::ConditionType)]
-        offset = Wave.calculate_rhs_offset_values(lhs_step2, indices, values)
+        indices = domain_conditions.indices[("u_1", WaveCore.FIRST::ConditionType)]
+        values = domain_conditions.values[("u_1", WaveCore.FIRST::ConditionType)]
+        offset = WaveCore.calculate_rhs_offset_values(lhs_step2, indices, values)
         rhs = zeros(length(offset))
-        rhs = Wave.apply_domain_conditions_rhs!(
+        rhs = WaveCore.apply_domain_conditions_rhs!(
             domain_conditions,
             "u_1",
             lhs_step2,
@@ -112,4 +112,35 @@
             rhs
         )
     end
+
+    # TODO: remove this testset here it is just for generate new data
+    # @testset "temp setup" begin
+    #     for num=1:5
+    #         unknown = "u_1"
+    #         filepath = joinpath(WAVE_SIMULATOR_TEST_PATH, "data", "case_square_cavity", "vefe_0000$num.csv")
+    #         reference = readdlm(filepath, ',', Float64, '\n')[:, 1]
+    #         unknowns_handler_internal = UnknownsHandler(
+    #             Dict("u_1" => reference, "u_2" => zeros(total_nodes), "p" => zeros(total_nodes)),
+    #             Dict("u_1" => zeros(total_nodes), "u_2" => zeros(total_nodes), "p" => zeros(total_nodes)),
+    #             Dict("u_1" => false, "u_2" => false, "p" => false),
+    #             Dict("u_1" => 1e-5, "u_2" => 1e-5, "p" => 1e-5),
+    #             Dict("u_1" => 0.0, "u_2" => 0.0, "p" => 0.0),
+    #         )
+        
+    #         # test if it can set initial boundary condition in the variables
+    #         WaveCore.setup_boundary_values!(
+    #             domain_conditions,
+    #             unknowns_handler_internal
+    #         )
+ 
+    #         @test check_reference_csv(
+    #             "results_reference",
+    #             "t_$(num)_$(unknown)_efet.csv", 
+    #             unknowns_handler_internal.values[unknown]
+    #         )
+    #     end
+    # end
+
+
+
 end

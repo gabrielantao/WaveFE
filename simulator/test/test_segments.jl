@@ -1,6 +1,6 @@
 @testset "elements segments" begin 
     # load the elements for the mesh 
-    segments = Wave.load_segments(
+    segments = WaveCore.load_segments(
         input_square_cavity_triangles.hdf_data, 
         input_square_cavity_triangles.simulation_data
     )

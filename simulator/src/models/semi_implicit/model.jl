@@ -8,10 +8,8 @@ using IterativeSolvers
 # TODO [general performance improvements]
 ## investigate if this is the proper way to include code in this module
 ## in order to take advantage of Julia precompilation
-
-# import all used common code to all models
-using ..Wave
-
+include("../../core/wave_core.jl")
+using .WaveCore
 
 # exported variables and methods
 export MODEL_NAME, MODEL_UNKNOWNS, run_iteration
@@ -48,6 +46,7 @@ struct ModelSemiImplicit
     additional_parameters::ModelSemiImplicitParameters
 
     function ModelSemiImplicit(input_data, simulation_data, domain_conditions_data)
+        # load the mesh and domain conditions (AKA boundary conditions)
         mesh = load_mesh(input_data, simulation_data)
         domain_conditions = load_domain_conditions(input_data, domain_conditions_data)
 
@@ -141,7 +140,9 @@ function run_iteration(model::ModelSemiImplicit)
                     model.domain_conditions, unknown, equation.members.lhs[unknown]
                 )
                 # use the new built LHS to update the solver perconditioner
-                update_preconditioner!(equation.solver, equation.members.lhs[unknown], unknown)
+                update_preconditioner!(
+                    equation.solver, equation.members.lhs[unknown], unknown
+                )
             end
             # for this model always reapply the conditions for reassembled RHS
             equation.rhs[unknown] = assembled_rhs[unknown]

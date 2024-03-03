@@ -1,5 +1,5 @@
 @testset "unknowns handler data" begin
-    unknowns_handler = Wave.load_unknowns_handler(
+    unknowns_handler = WaveCore.load_unknowns_handler(
         Dict("u_1" => 0.0, "u_2" => 0.0, "p" => 0.0001),
         input_square_cavity_triangles.hdf_data, 
         input_square_cavity_triangles.simulation_data,
@@ -26,25 +26,25 @@
     end
 
     @testset "get unknowns properties" begin
-        @test sort(Wave.get_registered_unknowns(unknowns_handler)) == sort(["u_1", "u_2", "p"])
-        @test Wave.get_values(unknowns_handler, "u_1", [1, 53, 52]) ≈ zeros(3)
-        @test Wave.get_old_values(unknowns_handler, "u_1", [1, 53, 52]) ≈ zeros(3)
+        @test sort(WaveCore.get_registered_unknowns(unknowns_handler)) == sort(["u_1", "u_2", "p"])
+        @test WaveCore.get_values(unknowns_handler, "u_1", [1, 53, 52]) ≈ zeros(3)
+        @test WaveCore.get_old_values(unknowns_handler, "u_1", [1, 53, 52]) ≈ zeros(3)
     end
 
     @testset "update unknowns" begin
         unknowns_handler.values["u_1"][1] = 100.0
-        new_value = Wave.get_values(unknowns_handler, "u_1", [1])[1]
-        old_value = Wave.get_old_values(unknowns_handler, "u_1", [1])[1]
+        new_value = WaveCore.get_values(unknowns_handler, "u_1", [1])[1]
+        old_value = WaveCore.get_old_values(unknowns_handler, "u_1", [1])[1]
         @test new_value != old_value
-        Wave.update!(unknowns_handler)
-        new_value = Wave.get_values(unknowns_handler, "u_1", [1])[1]
-        old_value = Wave.get_old_values(unknowns_handler, "u_1", [1])[1]
+        WaveCore.update!(unknowns_handler)
+        new_value = WaveCore.get_values(unknowns_handler, "u_1", [1])[1]
+        old_value = WaveCore.get_old_values(unknowns_handler, "u_1", [1])[1]
         @test new_value == old_value
     end
 
     @testset "convergence of unknowns" begin
         unknowns_handler.values["u_1"] = fill(100.0, length(unknowns_handler.values["u_1"]))
-        Wave.check_unknowns_convergence!(unknowns_handler)
+        WaveCore.check_unknowns_convergence!(unknowns_handler)
         @test unknowns_handler.converged["u_1"] == false
         @test unknowns_handler.converged["u_2"] == true
     end

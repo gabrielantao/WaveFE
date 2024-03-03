@@ -1,5 +1,6 @@
 export Solver
 export SolverType, SolverPreconditioners
+export load_solver
 
 @enum SolverType begin
     CONJUGATE_GRADIENT = 1
@@ -78,7 +79,7 @@ function solve!(
     # )
     # TODO [add solvers and preconditioner options]
     ## use the tolerance values in the solver
-    if solver.type == Wave.CONJUGATE_GRADIENT::SolverType
+    if solver.type == WaveCore.CONJUGATE_GRADIENT::SolverType
         unknowns_handler.values[unknown], info = cg(
             lhs,
             rhs,

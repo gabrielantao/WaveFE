@@ -1,9 +1,9 @@
 @testset "nodes" begin
     # load the elements for the mesh 
-    nodes = Wave.load_nodes(input_square_cavity_triangles.hdf_data)
+    nodes = WaveCore.load_nodes(input_square_cavity_triangles.hdf_data)
     
     @testset "nodes loaded" begin
-        @test Wave.get_total_nodes(nodes) == 2601
+        @test WaveCore.get_total_nodes(nodes) == 2601
         # just check the first and last nodes
         @test nodes.series[1].position ≈ [0.0, 0.0]
         @test nodes.series[2601].position ≈ [1.0, 1.0]
@@ -13,18 +13,18 @@
     end
     
     @testset "get nodes properties" begin
-        @test Wave.get_positions_x(nodes, [1, 53, 52]) ≈ [0.0, 0.0033401432, 0.0]
-        @test Wave.get_positions_y(nodes, [1, 53, 52]) ≈ [0.0, 0.0033401432, 0.0033401432]
+        @test WaveCore.get_positions_x(nodes, [1, 53, 52]) ≈ [0.0, 0.0033401432, 0.0]
+        @test WaveCore.get_positions_y(nodes, [1, 53, 52]) ≈ [0.0, 0.0033401432, 0.0033401432]
         # this must break because this mesh is bidimensional!
-        @test_throws BoundsError Wave.get_positions_z(nodes, [1, 53, 52])
+        @test_throws BoundsError WaveCore.get_positions_z(nodes, [1, 53, 52])
 
         domain_condition_groups = read(input_square_cavity_triangles.hdf_data["mesh/nodes/domain_condition_groups"])
-        @test Wave.get_domain_condition_groups(nodes) == domain_condition_groups
+        @test WaveCore.get_domain_condition_groups(nodes) == domain_condition_groups
     end
     
     @testset "update nodes position" begin
         # this is static mesh so move method shoud just set moved nodes to false
-        Wave.move!(nodes)
+        WaveCore.move!(nodes)
         @test nodes.moved == false
     end
 end

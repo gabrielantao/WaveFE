@@ -11,7 +11,7 @@ struct EquationStepOne <: Equation
         # TODO: this should be in a section model in the input file
         use_lumped_mass = !simulation_parameters["simulation"]["transient"]
         safety_dt_factor = simulation_parameters["simulation"]["safety_dt_factor"]
-        lhs_type = use_lumped_mass ? DIAGONAL : SYMMETRIC
+        lhs_type = use_lumped_mass ? WaveCore.DIAGONAL::MatrixType : WaveCore.SYMMETRIC::MatrixType
         assembler = Assembler(lhs_type)
         solver = load_solver(simulation_parameters)
         members = EquationMembers()
