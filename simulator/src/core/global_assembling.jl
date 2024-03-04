@@ -59,7 +59,8 @@ function assemble_global_rhs(
     # preallocate the assembled rhs vectors
     # TODO [general performance improvements]
     ## maybe this should use NamedTuple (or just tuple) instead of dict
-    rhs = Dict(unknown => zeros(mesh.nodes.total_nodes) for unknown in equation.solved_unknowns)
+    total_nodes = WaveCore.get_total_nodes(mesh.nodes)
+    rhs = Dict(unknown => zeros(total_nodes) for unknown in equation.base.solved_unknowns)
     # do the assembling of global matrix for each element container in the mesh
     for element_container in WaveCore.get_containers(mesh.elements)
         for element in WaveCore.get_elements(element_container)

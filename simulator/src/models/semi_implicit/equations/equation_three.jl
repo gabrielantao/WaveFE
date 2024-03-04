@@ -81,11 +81,11 @@ function assemble_element_rhs(
     model_parameters::ModelSemiImplicitParameters
 )
     # pressure
-    p = get_values(unknowns_handler, "p", element.connectivity)
-    p_old = get_old_values(unknowns_handler, "p", element.connectivity)
+    p = WaveCore.get_values(unknowns_handler, "p", element.connectivity)
+    p_old = WaveCore.get_old_values(unknowns_handler, "p", element.connectivity)
     # these are last registered results (i.e. last time step result)
-    u_1_old = get_old_values(unknowns_handler, "u_1", element.connectivity)
-    u_2_old = get_old_values(unknowns_handler, "u_2", element.connectivity)
+    u_1_old = WaveCore.get_old_values(unknowns_handler, "u_1", element.connectivity)
+    u_2_old = WaveCore.get_old_values(unknowns_handler, "u_2", element.connectivity)
     # calculate gradients and use mean velocity for computations
     grad_1 = (element.area / 3.0) * dot(element.b, p)
     grad_2 = (element.area / 3.0) * dot(element.c, p)

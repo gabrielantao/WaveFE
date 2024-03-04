@@ -5,8 +5,10 @@ using HDF5
 using ReferenceTests
 using ArgParse
 using DelimitedFiles
-using SparseArrays
 
+using SparseArrays
+using LinearAlgebra: dot
+using Statistics: mean
 
 include("../src/core/wave_core.jl")
 using .WaveCore

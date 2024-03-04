@@ -37,11 +37,11 @@
     end
 
     # get the reference data to build a LHS matrix fixture 
-    function get_reference_rhs(step, unknown)
+    function get_reference_rhs(step)
         # get the reference data to build a LHS matrix fixture 
         data = h5open(joinpath(WAVE_SIMULATOR_TEST_DATA_PATH, "case_square_cavity", "reference.hdf5"), "r")
         # offset 1 position because all indices started at zero (Python generated)
-        return read(data["/t_0/step $step/$unknown/rhs_assembled"])
+        return read(data["/t_1/step $step/rhs_assembled"])
     end
 
     mesh = WaveCore.load_mesh(
@@ -54,19 +54,18 @@
         input_square_cavity_triangles.simulation_data["simulation"]["safety_dt_factor"],
         Dict("Re" => input_square_cavity_triangles.simulation_data["parameter"]["Re"])
     )
+    # update the parameters for the elements 
+    WaveCore.update_elements!(mesh, unknowns_handler, model_parameters)
+
 
     @testset "diagonal LHS matrix" begin
-        assembler = WaveCore.Assembler(WaveCore.DIAGONAL)
-        equation = EquationStepOne(
+        equation_one = EquationStepOne(
             ["u_1", "u_2"], input_square_cavity_triangles.simulation_data
         )
-        # update the parameters for the elements 
-        WaveCore.update_elements!(mesh, unknowns_handler, model_parameters)
-        
         # if mesh must refresh it must update the assembler indices
-        WaveCore.update_assembler_indices!(equation.base.assembler, mesh)
+        WaveCore.update_assembler_indices!(equation_one.base.assembler, mesh)
         assembled_lhs = assemble_global_lhs(
-            equation, 
+            equation_one, 
             mesh,
             unknowns_handler,
             model_parameters
@@ -82,16 +81,13 @@
 
 
     @testset "symmetric LHS matrix" begin
-        equation = EquationStepTwo(
+        equation_two = EquationStepTwo(
             ["p"], input_square_cavity_triangles.simulation_data
         )
-        # update the parameters for the elements 
-        WaveCore.update_elements!(mesh, unknowns_handler, model_parameters)
-        
         # if mesh must refresh it must update the assembler indices
-        WaveCore.update_assembler_indices!(equation.base.assembler, mesh)
+        WaveCore.update_assembler_indices!(equation_two.base.assembler, mesh)
         assembled_lhs = assemble_global_lhs(
-            equation, 
+            equation_two, 
             mesh,
             unknowns_handler,
             model_parameters
@@ -114,6 +110,27 @@
     end
 
     @testset "RHS vector" begin
+        equation_one = EquationStepOne(
+            ["u_1", "u_2"], input_square_cavity_triangles.simulation_data
+        )
+        assembled_rhs = assemble_global_rhs(
+            equation_one, 
+            mesh,
+            unknowns_handler,
+            model_parameters
+        )
+        
+        # TODO: review these results, they are not equal to the reference
+        @test check_reference_csv(
+            "ref_assembler",
+            "rhs_step_1_u_1.csv", 
+            assembled_rhs["u_1"]
+        )
+        @test check_reference_csv(
+            "ref_assembler",
+            "rhs_step_1_u_2.csv", 
+            assembled_rhs["u_2"]
+        )
     end
 
 end

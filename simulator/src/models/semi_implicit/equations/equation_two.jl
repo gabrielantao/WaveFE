@@ -71,11 +71,11 @@ function assemble_element_rhs(
     ## Nithiarasu pag 210 eq 7.163
 
     # intermediate velocities
-    u_1_int = get_values(unknowns_handler, "u_1", element.connectivity)
-    u_2_int = get_values(unknowns_handler, "u_2", element.connectivity)
+    u_1_int = WaveCore.get_values(unknowns_handler, "u_1", element.connectivity)
+    u_2_int = WaveCore.get_values(unknowns_handler, "u_2", element.connectivity)
     # these are last registered results (i.e. last time step result)
-    u_1_old = get_old_values(unknowns_handler, "u_1", element.connectivity)
-    u_2_old = get_old_values(unknowns_handler, "u_2", element.connectivity)
+    u_1_old = WaveCore.get_old_values(unknowns_handler, "u_1", element.connectivity)
+    u_2_old = WaveCore.get_old_values(unknowns_handler, "u_2", element.connectivity)
     Δu_1 = u_1_int - u_1_old
     Δu_2 = u_2_int - u_2_old
     rhs = (element.area / 3.0) * (dot(element.b, u_1_old) + dot(element.c, u_2_old))

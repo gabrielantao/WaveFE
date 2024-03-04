@@ -1,6 +1,7 @@
 module ModuleSemiImplicit
 
-using LinearAlgebra
+using LinearAlgebra: dot
+using Statistics: mean
 using SparseArrays
 using Preconditioners
 using IterativeSolvers
