@@ -1,7 +1,6 @@
 include("Wave.jl")
-using Wave
+using Wave: main
 
 # call the main function of the simulator
-run_simulation()
-
+main()
 

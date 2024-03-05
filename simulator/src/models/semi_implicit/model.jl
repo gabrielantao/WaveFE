@@ -5,7 +5,7 @@ using Statistics: mean
 using SparseArrays
 using Preconditioners
 using IterativeSolvers
-
+using Logging, LoggingExtras
 
 # exported variables and methods
 export ModelSemiImplicit, run_iteration
@@ -20,8 +20,7 @@ export ModelSemiImplicit, run_iteration
 # TODO [general performance improvements]
 ## investigate if this is the proper way to include code in this module
 ## in order to take advantage of Julia precompilation
-include("../../core/wave_core.jl")
-using .WaveCore
+using ..WaveCore
 
 # basic data for the model
 include("header.jl")
@@ -42,18 +41,21 @@ TODO: include description here ....
 struct ModelSemiImplicit <: WaveModel
     name::String
     unknonws::Vector{String}
-    mesh::Mesh
-    domain_conditions::DomainConditions
     equations::Vector{Equation}
     unknowns_handler::UnknownsHandler
-    output_handler::OutputHandler
     additional_parameters::ModelSemiImplicitParameters
+    # TODO: review if these parameters should be here or somewhere else
+    mesh::Mesh
+    domain_conditions::DomainConditions
+    output_handler::OutputHandler
+    logger::FileLogger
 
-    function ModelSemiImplicit(folder, input_data, simulation_data, domain_conditions_data)
+    function ModelSemiImplicit(simulation_folder, input_data, simulation_data, domain_conditions_data)
         # load the mesh and domain conditions (AKA boundary conditions)
-        mesh = load_mesh(input_data, simulation_data)
-        domain_conditions = load_domain_conditions(input_data, domain_conditions_data)
-        output_handler = load_output_handler(folder, simulation_data)
+        mesh = WaveCore.load_mesh(input_data, simulation_data)
+        domain_conditions = WaveCore.load_domain_conditions(input_data, domain_conditions_data)
+        output_handler = WaveCore.load_output_handler(simulation_folder, simulation_data)
+        logger = FileLogger(joinpath(simulation_folder, CACHE_PATH, SIMULATOR_LOG_FILENAME))
 
         # configure the additional model parameters
         transient = simulation_data["simulation"]["transient"]
@@ -75,31 +77,32 @@ struct ModelSemiImplicit <: WaveModel
         equations = [
             EquationStepOne(unknowns_velocities, simulation_data),
             EquationStepTwo(unknown_pressure, simulation_data),
-            EquationStepThree(unknonws_velocities, simulation_data),
+            EquationStepThree(unknowns_velocities, simulation_data),
         ]
 
         # load the initial values for the unknowns
         unknowns_default_values = Dict(unknown => 0.0 for unknown in all_solved_unknowns)
-        unkowns_handler = load_unknowns_handler(
+        unkowns_handler = WaveCore.load_unknowns_handler(
             unknowns_default_values, 
             input_data,
             simulation_data,
             domain_conditions_data,
         )
         # setup the boundary values for the unknowns
-        setup_boundary_values!(
+        WaveCore.setup_boundary_values!(
             domain_conditions, unkowns_handler
         )
 
         new(
             MODEL_NAME, 
             MODEL_UNKNOWNS,
+            equations,
+            unkowns_handler, 
+            additional_parameters,
             mesh,
             domain_conditions,
-            unkowns_handler, 
             output_handler,
-            equations,
-            additional_parameters
+            logger
         )
     end
 end

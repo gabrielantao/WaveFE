@@ -12,6 +12,7 @@ scripts = ["setup_env.bash"]
 [tasks]
 dev-shell = "cd $PIXI_PACKAGE_ROOT/simulator/src && julia --project=$PIXI_PACKAGE_ROOT/simulator -i $PIXI_PACKAGE_ROOT/simulator/startup.jl"
 test-unit = "julia --project=$PIXI_PACKAGE_ROOT/simulator $PIXI_PACKAGE_ROOT/simulator/test/unit_test.jl"
+test-case = "julia --project=$PIXI_PACKAGE_ROOT/simulator $PIXI_PACKAGE_ROOT/simulator/test/validation_test.jl"
 wave = "julia --project=$PIXI_PACKAGE_ROOT/simulator $PIXI_PACKAGE_ROOT/simulator/main.jl"
 
 [dependencies]

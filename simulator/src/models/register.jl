@@ -10,5 +10,7 @@ function build_model(folder, input_data, simulation_data, domain_conditions_data
         return ModelSemiImplicit(folder, input_data, simulation_data, domain_conditions_data)
     # elseif name == "NEW MODEL HERE"
         # The one that implements a new model must include if here in this function
+    else
+        throw("The model named $model_name is not registered as a model.")
     end
 end

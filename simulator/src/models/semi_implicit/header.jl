@@ -1,6 +1,6 @@
 export MODEL_NAME, MODEL_UNKNOWNS
 
-const MODEL_NAME = "CBS Semi-Implicit"
+const MODEL_NAME = "CBS semi-implicit"
 const MODEL_UNKNOWNS = ["u_1", "u_2", "u_3", "p"]
 
 

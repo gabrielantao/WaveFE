@@ -13,9 +13,9 @@ end
 
 
 """Load data to create the output files handler for the simulation"""
-function load_output_handler(folder, simulation_data)
-    result_file = h5open(joinpath(folder, CACHE_PATH, RESULT_PATH, RESULT_FILENAME), "w")
-    debug_file = h5open(joinpath(folder, CACHE_PATH, RESULT_PATH, DEBUG_FILENAME), "w")
+function load_output_handler(simulation_folder, simulation_data)
+    result_file = h5open(joinpath(simulation_folder, CACHE_PATH, RESULT_PATH, RESULT_FILENAME), "w")
+    debug_file = h5open(joinpath(simulation_folder, CACHE_PATH, RESULT_PATH, DEBUG_FILENAME), "w")
     result_file["version"] = RESULT_FILE_CURRENT_VERSION
     result_file["description"] = simulation_data["general"]["description"]
     debug_file["version"] = DEBUG_FILE_CURRENT_VERSION
