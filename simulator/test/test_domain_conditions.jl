@@ -96,7 +96,7 @@
         values = domain_conditions.values[("u_1", WaveCore.FIRST::ConditionType)]
         offset = WaveCore.calculate_rhs_offset_values(lhs_step2, indices, values)
         rhs = zeros(length(offset))
-        rhs = WaveCore.apply_domain_conditions_rhs!(
+        rhs = WaveCore.apply_domain_conditions_rhs(
             domain_conditions,
             "u_1",
             lhs_step2,

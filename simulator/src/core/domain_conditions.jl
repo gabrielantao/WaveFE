@@ -105,7 +105,7 @@ end
 
 
 """Apply boundary conditions to the RHS vector"""
-function apply_domain_conditions_rhs!(
+function apply_domain_conditions_rhs(
     domain_conditions::DomainConditions, 
     unknown::String,
     assembled_lhs::SparseMatrixCSC{Float64, Int64},

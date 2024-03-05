@@ -137,3 +137,21 @@ function assemble_element_rhs(
 )
     throw("Not implemented bidimensional elements assembling")
 end
+
+"""Solve the equation of step one and update the unknowns_handler"""
+function solve!(
+    equation::EquationStepOne,
+    unknown::String,
+    unknowns_handler::UnknownsHandler
+)
+    solution = calculate_solution(
+        equation.base.solver,
+        unknown,
+        equation.base.members.lhs[unknown],
+        equation.base.members.rhs[unknown],
+        unknowns_handler
+    )
+
+    # the solution of this equation is a Δu, so it must sum u_(t+1) = u_t + solution
+    unknowns_handler.values[unknown] += solution
+end

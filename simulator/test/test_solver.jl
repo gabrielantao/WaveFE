@@ -50,14 +50,11 @@
         rhs = get_reference_rhs(1, "u_1")
         unknowns_handler = get_unknowns(0)
         WaveCore.update_preconditioner!(solver, lhs, "u_1")
-        @test unknowns_handler.values["u_1"] ≈ unknowns_handler.old_values["u_1"]
-        WaveCore.solve!(solver, "u_1", lhs, rhs, unknowns_handler)
-        # ensure the result has been updated
-        @test !(unknowns_handler.values["u_1"] ≈ unknowns_handler.old_values["u_1"])
+        
         @test check_reference_csv(
             "ref_solver",
             "t_1_step_1_u_1.csv", 
-            unknowns_handler.values["u_1"]
+            WaveCore.calculate_solution(solver, "u_1", lhs, rhs, unknowns_handler)
         )
     end
 
@@ -67,14 +64,11 @@
         rhs = get_reference_rhs(2, "p")
         unknowns_handler = get_unknowns(0)
         WaveCore.update_preconditioner!(solver, lhs, "p")
-        @test unknowns_handler.values["p"] ≈ unknowns_handler.old_values["p"]
-        WaveCore.solve!(solver, "p", lhs, rhs, unknowns_handler)
-        # ensure the result has been updated
-        @test !(unknowns_handler.values["p"] ≈ unknowns_handler.old_values["p"])
+
         @test check_reference_csv(
             "ref_solver",
             "t_1_step_2_p.csv", 
-            unknowns_handler.values["p"]
+            WaveCore.calculate_solution(solver, "p", lhs, rhs, unknowns_handler)
         )
     end 
 end

@@ -2,6 +2,8 @@
 ## implement logic validators here
 ## transcribe this original Python code
 function validate_simulation_data(simulation_data)
+    # - check it has all unknowns in the tolerance list
+
     # logger.info("doing logical validation of the simulation.toml")
     # # check if solver options are correct
     # if self.simulation_data["solver"]["name"] not in self.SOLVER_OPTIONS:
@@ -79,5 +81,7 @@ function validate_domain_conditions_data(domain_conditions_data)
     #   message ambiguous or duplicated
     # - for now only allow first type condition (value conition) for initial values
     #   change this for validation process
+    # - make sure all nodes have initial values conditions 
+    #   (get all groups numbers, check if each variable has iniital condition value)    
 end
 

@@ -67,7 +67,7 @@ end
 
 
 """Solve a variable and save in result vector"""
-function solve!(
+function calculate_solution(
     solver::Solver,
     unknown::String,
     lhs::SparseMatrixCSC{Float64, Int64},
@@ -80,7 +80,7 @@ function solve!(
     # TODO [add solvers and preconditioner options]
     ## use the tolerance values in the solver
     if solver.type == WaveCore.CONJUGATE_GRADIENT::SolverType
-        unknowns_handler.values[unknown], info = cg(
+        solution, info = cg(
             lhs,
             rhs,
             Pl=solver.preconditioners[unknown],
@@ -91,8 +91,10 @@ function solve!(
         ## add more options of solvers options 
         throw("Not implemented yet other types of solvers")
     end
+    
     # TODO: log the status of solver inside this function
     #       catch convergence log by doing log=true and save data (NUMERIC)
     # TODO [implement better debugging tools]
     ## write numeric for each dimension here.  
+    return solution
 end

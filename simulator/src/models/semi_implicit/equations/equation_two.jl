@@ -108,3 +108,20 @@ function assemble_element_rhs(
 )
     throw("Not implemented bidimensional elements assembling")
 end
+
+
+"""Solve the equation of step two and update the unknowns_handler"""
+function solve!(
+    equation::EquationStepTwo,
+    unknown::String,
+    unknowns_handler::UnknownsHandler
+)
+    # the solution of this equation is the pressure
+    unknowns_handler.values[unknown] = calculate_solution(
+        equation.base.solver,
+        unknown,
+        equation.base.members.lhs[unknown],
+        equation.base.members.rhs[unknown],
+        unknowns_handler
+    )
+end
