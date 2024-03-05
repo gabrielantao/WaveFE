@@ -86,6 +86,7 @@ include("test_domain_conditions.jl")
 include("test_unknowns_handler.jl")
 include("test_solver.jl")
 include("test_assembler.jl")
+include("test_output.jl")
 
 end # module
 

@@ -10,7 +10,12 @@ using IterativeSolvers
 # exported variables and methods
 export ModelSemiImplicit, run_iteration
 
+
+###############################################
+###############################################
 # TODO: maybe this block of code include could be automatically generated via a macro
+###############################################
+############################################### START OF BLOCK
 
 # TODO [general performance improvements]
 ## investigate if this is the proper way to include code in this module
@@ -27,23 +32,28 @@ include("./equations/equation_two.jl")
 include("./equations/equation_three.jl")
 include("../../core/global_assembling.jl")
 
+###############################################
+############################################### END OF BLOCK
+
 """
 Semi-implicit model
 TODO: include description here ....
 """
-struct ModelSemiImplicit
+struct ModelSemiImplicit <: WaveModel
     name::String
     unknonws::Vector{String}
     mesh::Mesh
     domain_conditions::DomainConditions
     equations::Vector{Equation}
     unknowns_handler::UnknownsHandler
+    output_handler::OutputHandler
     additional_parameters::ModelSemiImplicitParameters
 
-    function ModelSemiImplicit(input_data, simulation_data, domain_conditions_data)
+    function ModelSemiImplicit(folder, input_data, simulation_data, domain_conditions_data)
         # load the mesh and domain conditions (AKA boundary conditions)
         mesh = load_mesh(input_data, simulation_data)
         domain_conditions = load_domain_conditions(input_data, domain_conditions_data)
+        output_handler = load_output_handler(folder, simulation_data)
 
         # configure the additional model parameters
         transient = simulation_data["simulation"]["transient"]
@@ -68,7 +78,7 @@ struct ModelSemiImplicit
             EquationStepThree(unknonws_velocities, simulation_data),
         ]
 
-        # setup initial values for the unknowns
+        # load the initial values for the unknowns
         unknowns_default_values = Dict(unknown => 0.0 for unknown in all_solved_unknowns)
         unkowns_handler = load_unknowns_handler(
             unknowns_default_values, 
@@ -76,6 +86,7 @@ struct ModelSemiImplicit
             simulation_data,
             domain_conditions_data,
         )
+        # setup the boundary values for the unknowns
         setup_boundary_values!(
             domain_conditions, unkowns_handler
         )
@@ -86,6 +97,7 @@ struct ModelSemiImplicit
             mesh,
             domain_conditions,
             unkowns_handler, 
+            output_handler,
             equations,
             additional_parameters
         )
@@ -146,7 +158,7 @@ function run_iteration(model::ModelSemiImplicit)
                 )
             end
             # for this model always reapply the conditions for reassembled RHS
-            equation.base.members.rhs[unknown] = apply_domain_conditions_rhs!(
+            equation.base.members.rhs[unknown] = apply_domain_conditions_rhs(
                 domain_conditions, 
                 unknown, 
                 equation.base.assembler.lhs, 
@@ -154,13 +166,7 @@ function run_iteration(model::ModelSemiImplicit)
             )
 
             ### SOLVE THE EQUATION ###
-            solve!(
-                equation.base.solver,
-                unknown,
-                equation.base.members.lhs[unknown],
-                equation.base.members.rhs[unknown],
-                model.unknowns_handler
-            )
+            solve!(equation, unknown, model.unknowns_handler)
         end
     end
 

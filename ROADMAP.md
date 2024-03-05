@@ -24,6 +24,7 @@ There are some features and improvements that could be implemented
 20. implement model with chemical spiecies transfer
 21. implement model with porous media 
 22. add solvers and preconditioner options
+23. automatically run validation tests cases
 
 # Descriptions
 ## implement one dimensional elements
