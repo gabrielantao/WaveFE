@@ -117,7 +117,7 @@ function solve!(
     unknowns_handler::UnknownsHandler
 )
     # the solution of this equation is the pressure
-    unknowns_handler.values[unknown] = calculate_solution(
+    unknowns_handler.values[unknown] = WaveCore.calculate_solution(
         equation.base.solver,
         unknown,
         equation.base.members.lhs[unknown],

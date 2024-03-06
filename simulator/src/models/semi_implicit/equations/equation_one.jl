@@ -144,7 +144,7 @@ function solve!(
     unknown::String,
     unknowns_handler::UnknownsHandler
 )
-    solution = calculate_solution(
+    solution = WaveCore.calculate_solution(
         equation.base.solver,
         unknown,
         equation.base.members.lhs[unknown],

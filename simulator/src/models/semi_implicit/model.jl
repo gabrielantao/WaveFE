@@ -111,23 +111,30 @@ end
 """Run one iteration for this model"""
 function run_iteration(model::ModelSemiImplicit) 
     # update elements internal data
-    update_elements!(mesh, unknowns_handler, model_parameters)
+    WaveCore.update_elements!(
+        model.mesh, 
+        model.unknowns_handler, 
+        model.additional_parameters
+    )
     
     # update the unknowns by coping current values to the old values
-    update!(model.unknowns_handler)
+    WaveCore.update!(model.unknowns_handler)
 
     # solve the sequence of registered equations for each variable
     for equation in model.equations
         ### ASSEMBLE THE EQUATION ###
-        if mesh.must_refresh
+        if model.mesh.must_refresh
             # for the current equation preallocate the assembled LHS if
             # mesh is marked as "must refresh" status (e.g. if it was remeshed)
-            update_assembler_indices!(equation.base.assembler, mesh)
+            WaveCore.update_assembler_indices!(
+                equation.base.assembler, 
+                model.mesh
+            )
         end
-        if mesh.must_refresh || mesh.nodes.moved
-            assembled_lhs = assemble_global_lhs(
+        if model.mesh.must_refresh || model.mesh.nodes.moved
+            equation.base.assembler.assembled_lhs = assemble_global_lhs(
                 equation, 
-                mesh,
+                model.mesh,
                 model.unknowns_handler,
                 model.additional_parameters
             )
@@ -135,7 +142,7 @@ function run_iteration(model::ModelSemiImplicit)
         # for this model always reassemble RHS
         assembled_rhs = assemble_global_rhs(
             equation, 
-            mesh,
+            model.mesh,
             model.unknowns_handler,
             model.additional_parameters
         )
@@ -144,27 +151,27 @@ function run_iteration(model::ModelSemiImplicit)
         # the domain conditions and solve could be done in parallel for each unknown
         for unknown in equation.base.solved_unknowns
             ### APPLY DOMAIN CONDITIONS ###
-            if mesh.must_refresh || mesh.nodes.moved
+            if model.mesh.must_refresh || model.mesh.nodes.moved
                 # it uses assembled_lhs as template for all variables so it needs to copy here 
                 # update the LHS matrix
-                equation.base.members.lhs[unknown] = copy(assembled_lhs)
-                apply_domain_conditions_lhs!(
+                equation.base.members.lhs[unknown] = copy(equation.base.assembler.assembled_lhs)
+                WaveCore.apply_domain_conditions_lhs!(
                     model.domain_conditions, 
                     unknown, 
                     equation.base.members.lhs[unknown]
                 )
                 # use the new built LHS to update the solver perconditioner
-                update_preconditioner!(
+                WaveCore.update_preconditioner!(
                     equation.base.solver, 
                     equation.base.members.lhs[unknown], 
                     unknown
                 )
             end
             # for this model always reapply the conditions for reassembled RHS
-            equation.base.members.rhs[unknown] = apply_domain_conditions_rhs(
-                domain_conditions, 
+            equation.base.members.rhs[unknown] = WaveCore.apply_domain_conditions_rhs(
+                model.domain_conditions, 
                 unknown, 
-                equation.base.assembler.lhs, 
+                equation.base.assembler.assembled_lhs, 
                 assembled_rhs[unknown]
             )
 
@@ -174,11 +181,11 @@ function run_iteration(model::ModelSemiImplicit)
     end
 
     # do the updates for the mesh (e.g. movement, remesh, etc.)
-    update!(mesh)
+    WaveCore.update!(model.mesh)
     
     # TODO [general performance improvements]
     ## it should check if it is diverging to abort simulation
-    check_unknowns_convergence!(model.unknowns_handler)
+    WaveCore.check_unknowns_convergence!(model.unknowns_handler)
 end
 
 

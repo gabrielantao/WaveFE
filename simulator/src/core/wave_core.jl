@@ -64,9 +64,9 @@ function main_loop(model, total_step_limits, show_progress)
 
     # elapsed_time = @elapsed begin   
         # run main loop 
+
         for timestep_counter in range(1, total_step_limits) 
             # ProgressMeter.next!(progress)
-            
             run_iteration(model)
 
             # stop simulation loop if converged
@@ -82,7 +82,6 @@ function main_loop(model, total_step_limits, show_progress)
     write_result_data(model.output_handler, model.unknowns_handler, timestep_counter)
     write_additional_data(model.output_handler, success, timestep_counter, elapsed_time)
     close_files(model.output_handler)
-    return timestep_counter
 end
 
 end # module

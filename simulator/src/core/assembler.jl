@@ -15,12 +15,16 @@ mutable struct Assembler
     # indices of LHS matrix to be used to preallocate 
     lhs_indices_i::Vector{Int64}
     lhs_indices_j::Vector{Int64}
+    assembled_lhs::SparseMatrixCSC{Float64, Int64}
+    # TODO [general performance improvements]
+    ## assembled_rhs::Dict{String, Vector{Float64}}
 
     function Assembler(lhs_type::MatrixType = DENSE::MatrixType)
         new(
             lhs_type,
             Int64[],
             Int64[],
+            sparse([], [], [])
         )
     end
 end
