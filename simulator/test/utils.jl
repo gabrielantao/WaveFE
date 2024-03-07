@@ -64,7 +64,7 @@ function check_reference_csv(
             diff_message = "Obtained and reference differs in $(total_diff) places.\n"
             diff_message = diff_message * "obtained != reference:\n"
             for i in range(1, total_diff)
-                if total_diff > MAXIMUM_DIFF_TO_SHOW
+                if i > MAXIMUM_DIFF_TO_SHOW
                     diff_message = diff_message * "and so on..."
                     break
                 end

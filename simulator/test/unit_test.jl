@@ -18,6 +18,7 @@ using .WaveCore
 include("../src/models/semi_implicit/header.jl")
 include("../src/models/semi_implicit/equations/equation_one.jl")
 include("../src/models/semi_implicit/equations/equation_two.jl")
+include("../src/models/semi_implicit/equations/equation_three.jl")
 include("../src/core/global_assembling.jl")
 
 const WAVE_SIMULATOR_TEST_PATH = joinpath(ENV["PIXI_PACKAGE_ROOT"], "simulator", "test")
@@ -87,6 +88,7 @@ include("test_unknowns_handler.jl")
 include("test_solver.jl")
 include("test_assembler.jl")
 include("test_output.jl")
+include("test_assemble_elements.jl")
 
 end # module
 

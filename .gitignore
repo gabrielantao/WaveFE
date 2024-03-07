@@ -5,8 +5,9 @@ scripts/
 simulator/cbs_models/models/*/cases/*/cache
 experiments/
 
-# pixi environments
+# environments and IDE local files
 .pixi
+.vscode
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
