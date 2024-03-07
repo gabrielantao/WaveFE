@@ -57,29 +57,42 @@ end
 function main_loop(model, total_step_limits, show_progress)
     # TODO: write elapsed time and total steps elapsed (and log it)
     elapsed_time = 0.0
+    running = true
     success = false
+    timestep_counter = 1
     # TODO: wrap here the main loop with the progress
     # https://github.com/timholy/ProgressMeter.jl?tab=readme-ov-file#conditionally-disabling-a-progress-meter
     # progress = ProgressUnknown("running... ", spinner=true, color = :white)  
 
     # elapsed_time = @elapsed begin   
         # run main loop 
-
-        for timestep_counter in range(1, total_step_limits) 
+        while running 
             # ProgressMeter.next!(progress)
             run_iteration(model)
+            #println(timestep_counter)
 
             # stop simulation loop if converged
-            if all(values(model.unknowns_handler.converged))
-                success = true
-                break
+            success = all(values(model.unknowns_handler.converged))
+            if success || timestep_counter == total_step_limits
+                # force to write the result at last time step
+                force_write_result = true
+                running = false
+            else
+                force_write_result = false
+                
             end
-            write_result_data(model.output_handler, model.unknowns_handler, timestep_counter)
+
+            # output the current time step result
+            write_result_data(
+                model.output_handler, 
+                model.unknowns_handler, 
+                timestep_counter,
+                force_write_result
+            )
+            timestep_counter += 1
         end
     # end # elapsed macro
 
-    # force to write the result at last time step
-    write_result_data(model.output_handler, model.unknowns_handler, timestep_counter)
     write_additional_data(model.output_handler, success, timestep_counter, elapsed_time)
     close_files(model.output_handler)
 end

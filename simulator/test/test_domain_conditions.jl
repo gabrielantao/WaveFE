@@ -112,35 +112,4 @@
             rhs
         )
     end
-
-    # TODO: remove this testset here it is just for generate new data
-    # @testset "temp setup" begin
-    #     for num=1:5
-    #         unknown = "u_1"
-    #         filepath = joinpath(WAVE_SIMULATOR_TEST_PATH, "data", "case_square_cavity", "vefe_0000$num.csv")
-    #         reference = readdlm(filepath, ',', Float64, '\n')[:, 1]
-    #         unknowns_handler_internal = UnknownsHandler(
-    #             Dict("u_1" => reference, "u_2" => zeros(total_nodes), "p" => zeros(total_nodes)),
-    #             Dict("u_1" => zeros(total_nodes), "u_2" => zeros(total_nodes), "p" => zeros(total_nodes)),
-    #             Dict("u_1" => false, "u_2" => false, "p" => false),
-    #             Dict("u_1" => 1e-5, "u_2" => 1e-5, "p" => 1e-5),
-    #             Dict("u_1" => 0.0, "u_2" => 0.0, "p" => 0.0),
-    #         )
-        
-    #         # test if it can set initial boundary condition in the variables
-    #         WaveCore.setup_boundary_values!(
-    #             domain_conditions,
-    #             unknowns_handler_internal
-    #         )
- 
-    #         @test check_reference_csv(
-    #             "results_reference",
-    #             "t_$(num)_$(unknown)_efet.csv", 
-    #             unknowns_handler_internal.values[unknown]
-    #         )
-    #     end
-    # end
-
-
-
 end

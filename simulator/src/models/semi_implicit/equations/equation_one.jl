@@ -90,8 +90,8 @@ function assemble_element_rhs(
 
     Re = model_parameters.adimensionals["Re"]
     # calculate momentum convection term
-    u_1 = WaveCore.get_values(unknowns_handler, "u_1", element.connectivity)
-    u_2 = WaveCore.get_values(unknowns_handler, "u_2", element.connectivity)
+    u_1 = WaveCore.get_old_values(unknowns_handler, "u_1", element.connectivity)
+    u_2 = WaveCore.get_old_values(unknowns_handler, "u_2", element.connectivity)
     u_1_sum = sum(u_1)
     u_2_sum = sum(u_2)
     # ((2.0 * area) * (1 / 24.0)) .* ((u_1_sum .+ u_1) * b' + (u_2_sum .+ u_2) * c') 

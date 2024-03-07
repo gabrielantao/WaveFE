@@ -89,6 +89,8 @@ end
 """Check values for convergence of unknowns"""
 function check_unknowns_convergence!(unknowns_handler::UnknownsHandler)
     for unknown in get_registered_unknowns(unknowns_handler)
+        # must ensure all values are finite values
+        @assert all(isfinite, unknowns_handler.values[unknown])
         unknowns_handler.converged[unknown] = all(
             isapprox.(
                 unknowns_handler.values[unknown], 

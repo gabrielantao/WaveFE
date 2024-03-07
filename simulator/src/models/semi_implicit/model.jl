@@ -177,6 +177,10 @@ function run_iteration(model::ModelSemiImplicit)
 
             ### SOLVE THE EQUATION ###
             solve!(equation, unknown, model.unknowns_handler)
+            # force the boundary conditions 
+            WaveCore.setup_boundary_values!(
+                model.domain_conditions, model.unknowns_handler
+            )
         end
     end
 

@@ -3,8 +3,8 @@ export OutputHandler
 struct OutputHandler
     save_frequency::Int64
     saved_unknowns::Vector{String}
-    save_result::Bool
-    save_numeric::Bool
+    save_intermediate_result::Bool
+    save_intermediate_numeric::Bool
     save_debug::Bool
     result_file::HDF5.File
     debug_file::HDF5.File
@@ -37,10 +37,13 @@ end
 function write_result_data(
     output_handler::OutputHandler, 
     unknowns_handler::UnknownsHandler, 
-    current_step::Int64
+    current_step::Int64,
+    force_write::Bool=false
 )
+    save_current_timestep = current_step % output_handler.save_frequency == 0
     # write the results of current iteraction for the selected variables
-    if output_handler.save_result || current_step % output_handler.save_frequency == 0
+    if force_write || (output_handler.save_intermediate_result && save_current_timestep)
+        # println("DENTRO $current_step")
         # TODO: it should save Δt as well
         for (unknown, values) in unknowns_handler.values
             if unknown in output_handler.saved_unknowns
@@ -50,7 +53,7 @@ function write_result_data(
     end
 
     # write convergence data
-    if output_handler.save_numeric
+    if force_write || (output_handler.save_intermediate_numeric && save_current_timestep)
         for (unknown, converged) in unknowns_handler.converged
             if unknown in output_handler.saved_unknowns
                 output_handler.result_file["convergence/$unknown/t_$current_step"] = converged
@@ -82,6 +85,7 @@ end
 
 """Close all output files"""
 function close_files(output_handler::OutputHandler)
+    # println("CLOSING")
     close(output_handler.result_file)
     close(output_handler.debug_file)
 end
