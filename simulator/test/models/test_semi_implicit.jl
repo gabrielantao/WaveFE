@@ -1,7 +1,4 @@
-# TODO: this test should go for a folder for the semi implicit model
-# each model must have its own folder
-# TODO: these tests don't need to check all elements they can check only one
-@testset "assemble elements" begin
+@testset "semi implicit" begin
     function get_unknowns()
         # get the reference data to build a LHS matrix fixture 
         data_filepath = joinpath(

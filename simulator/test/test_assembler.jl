@@ -1,4 +1,3 @@
-
 @testset "assembler" begin
     function get_unknowns()
         # get the reference data to build a LHS matrix fixture 
@@ -111,13 +110,6 @@
         @test all([assembled_lhs[j, i] ≈ assembled_lhs[i, j] for (i, j) in zip(indices_i, indices_j)])
         # check diagonal elements
         @test all([ref_assembled[i, i] ≈ assembled_lhs[i, i] for i=1:2601]) 
-
-        # TODO: remove this, only for debug
-        # for (i, j) in zip(indices_i[1000:1050], indices_j[1000:1050])
-        #     if i != j
-        #     println("$i  $j =>", ref_assembled[i, j], " ", assembled_lhs[i, j])
-        #     end
-        # end
     end
 
     @testset "RHS vector" begin
@@ -131,8 +123,6 @@
             model_parameters
         )
         
-        # TODO: review these results, they are not equal to the reference
-        # TODO: remove this test for global and keep only the elemental assemble functions
         @test check_reference_csv(
             "ref_assembler",
             "rhs_step_1_u_1.csv", 

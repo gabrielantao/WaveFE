@@ -59,7 +59,7 @@ function main_loop(model, total_step_limits, show_progress)
     elapsed_time = 0.0
     running = true
     success = false
-    timestep_counter = 1
+    timestep_counter = 0
     # TODO: wrap here the main loop with the progress
     # https://github.com/timholy/ProgressMeter.jl?tab=readme-ov-file#conditionally-disabling-a-progress-meter
     # progress = ProgressUnknown("running... ", spinner=true, color = :white)  
@@ -67,6 +67,7 @@ function main_loop(model, total_step_limits, show_progress)
     # elapsed_time = @elapsed begin   
         # run main loop 
         while running 
+            timestep_counter += 1
             # ProgressMeter.next!(progress)
             run_iteration(model)
             #println(timestep_counter)
@@ -89,7 +90,6 @@ function main_loop(model, total_step_limits, show_progress)
                 timestep_counter,
                 force_write_result
             )
-            timestep_counter += 1
         end
     # end # elapsed macro
 

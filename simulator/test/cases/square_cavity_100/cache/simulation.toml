@@ -6,15 +6,15 @@ alias = "cavity_re_100"
 
 [simulation]
 model = "CBS semi-implicit"
-steps_limit = 1100
+steps_limit = 1500
 transient = false
 safety_dt_factor = 0.7
 
 [simulation.tolerance_relative]
-u_1 = 8e-5
-u_2 = 8e-5
-u_3 = 8e-5
-p =  8e-5
+u_1 = 1e-6
+u_2 = 1e-6
+u_3 = 1e-6
+p =  1e-6
 
 [simulation.tolerance_absolute]
 u_1 = 0.0
@@ -37,10 +37,10 @@ name = "Conjugate Gradient"
 preconditioner = "Jacobi"
 steps_limit = 10000
 tolerance_absolute = 0.0
-tolerance_relative = 1e-8
+tolerance_relative = 1e-9
 
 [output]
-frequency = 100
+frequency = 200
 save_result = true
 save_numeric = true
 save_debug = true

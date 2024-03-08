@@ -1,7 +1,7 @@
 @testset "output simulation data" begin
-    OUTPUT_FOLDER = joinpath(WAVE_SIMULATOR_TEST_PATH, "ref_output")
+    output_folder = joinpath(WAVE_SIMULATOR_TEST_PATH, "ref_output")
     output_handler = WaveCore.load_output_handler(
-        OUTPUT_FOLDER,
+        output_folder,
         input_square_cavity_triangles.simulation_data
     )
     unknowns_handler = WaveCore.UnknownsHandler(
@@ -17,7 +17,7 @@
     output_handler.debug_file["some_debug_data"] = fill(4.0, 5)
     WaveCore.close_files(output_handler)
 
-    result_path = joinpath(OUTPUT_FOLDER, WaveCore.CACHE_PATH, WaveCore.RESULT_PATH)
+    result_path = joinpath(output_folder, WaveCore.CACHE_PATH, WaveCore.RESULT_PATH)
     result_file = h5open(joinpath(result_path, WaveCore.RESULT_FILENAME), "r")
     debug_file = h5open(joinpath(result_path, WaveCore.DEBUG_FILENAME), "r")
     
@@ -45,6 +45,9 @@
     @test read(result_file["success"]) == true
     @test read(result_file["total_steps"]) == 200
     @test read(result_file["total_elapsed_time"]) == 1000.0
+
+    # clean up the files
+    rm(output_folder, force=true, recursive=true)
 
     # TODO [implement mesh movement]
     ## test the function write_mesh_data()

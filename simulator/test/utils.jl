@@ -29,6 +29,8 @@ function get_reference_data_format(filename)
     end
 end
 
+# transform a e.g. Vector{Vector{Float64}} into a matrix for the tests
+to_matrix(data) = reduce(vcat, transpose(data))
 
 # TODO [implement better debugging tools]
 ## this is just a workaraound for now to get csv as reference file once CSVFile is not compiling
@@ -88,6 +90,3 @@ function check_reference_csv(
     end       
 end
 
-
-# transform a e.g. Vector{Vector{Float64}} into a matrix for the tests
-to_matrix(data) = reduce(vcat, transpose(data))

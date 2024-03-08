@@ -1,6 +1,7 @@
 # file paths
 const CACHE_PATH = "cache"
 const RESULT_PATH = "result"
+const REFERENCE_PATH = "reference"
 
 # input files names
 const DOMAIN_CONDITIONS_FILENAME = "conditions.toml"

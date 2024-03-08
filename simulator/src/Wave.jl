@@ -1,7 +1,10 @@
 module Wave
 
 using ArgParse
-using WaveCore: run_simulation
+
+# TODO: check if this include is needed or just for debug
+include("core/wave_core.jl")
+using .WaveCore: run_simulation
 
 """Extract the values from terminal"""
 function parse_commandline()

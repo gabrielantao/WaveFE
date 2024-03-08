@@ -88,7 +88,9 @@ include("test_unknowns_handler.jl")
 include("test_solver.jl")
 include("test_assembler.jl")
 include("test_output.jl")
-include("test_assemble_elements.jl")
+
+# model specific elemental assemblers
+include("models/test_semi_implicit.jl")
 
 end # module
 
