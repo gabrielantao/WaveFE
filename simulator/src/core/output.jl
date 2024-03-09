@@ -48,8 +48,8 @@ function write_result_data(
     save_current_timestep = current_step % output_handler.save_frequency == 0
     # write the results of current iteraction for the selected variables
     if force_write || (output_handler.save_intermediate_result && save_current_timestep)
-        # println("DENTRO $current_step")
-        # TODO: it should save Δt as well
+        # TODO [implement transient CBS]
+        ## it should save Δt as well
         for (unknown, values) in unknowns_handler.values
             if unknown in output_handler.saved_unknowns
                 output_handler.result_file["result/$unknown/t_$current_step"] = values

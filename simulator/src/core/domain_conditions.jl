@@ -9,7 +9,8 @@ Second type condtions specifies the values of the derivative applied at the boun
 @enum ConditionType begin
     FIRST = 1
     SECOND = 2
-    # TODO: maybe implement in the future the other conditions (Cauchy and Robin) with combination of these two others
+    # TODO [implement other domain conditions]
+    ## maybe implement in the future the other conditions (Cauchy and Robin) with combination of these two others
 end
 
 

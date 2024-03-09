@@ -4,7 +4,8 @@ struct EquationStepTwo <: Equation
     base::BaseModelEquation
 
     function EquationStepTwo(solved_unknowns, simulation_parameters)   
-        # TODO: this should be in a section model in the input file
+        # TODO [move application responsabilities to the Julia]
+        ## this should be in a section model in the input file
         assembler = Assembler(WaveCore.SYMMETRIC::MatrixType)
         solver = load_solver(simulation_parameters)
         members = EquationMembers()

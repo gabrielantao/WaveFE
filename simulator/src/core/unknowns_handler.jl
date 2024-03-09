@@ -39,7 +39,8 @@ function load_unknowns_handler(
             values[unknown][current_group_indices] .= value
             old_values[unknown][current_group_indices] .= value
         #else
-            # TODO: log message this variable is not present in the model, ignored
+            # TODO [implement validations and input versioning]
+            ## log message this variable is not present in the model, ignored
         end
     end
     return UnknownsHandler(

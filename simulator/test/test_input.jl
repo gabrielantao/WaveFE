@@ -1,9 +1,10 @@
 @testset "import simulation data" begin
     @test read(input_square_cavity_triangles.hdf_data["mesh/dimension"]) == 2
+
     @test check_reference_csv(
         "ref_input", 
         "nodes_positions.csv", 
-        read(input_square_cavity_triangles.hdf_data["mesh/nodes/positions"])
+        [column for column in eachcol(read(input_square_cavity_triangles.hdf_data["mesh/nodes/positions"]))]
     )
     @test check_reference_csv(
         "ref_input", 
@@ -13,7 +14,7 @@
     @test check_reference_csv(
         "ref_input", 
         "triangles_connectivity.csv", 
-        read(input_square_cavity_triangles.hdf_data["mesh/triangles/connectivity"])
+        [column for column in eachcol(read(input_square_cavity_triangles.hdf_data["mesh/triangles/connectivity"]))]
     )
     check_reference_data(
         "ref_input", 

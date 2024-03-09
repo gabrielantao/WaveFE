@@ -41,7 +41,6 @@
 
 
         @testset "calculate triangles properties" begin
-            # TODO: maybe this could be done just by calling the update_elements! of the mesh
             WaveCore.update_areas!(mesh.elements.triangles, mesh.nodes)
             WaveCore.update_shape_coeficients!(mesh.elements.triangles, mesh.nodes)
             

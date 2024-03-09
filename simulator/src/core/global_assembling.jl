@@ -1,5 +1,6 @@
-# TODO: these functions should be moved to a macro with imports automatically the equations
-# and add the model include("header.jl") before the equations and these functions after the equation
+# TODO [implement model with heat transfer]
+## these functions should be moved to a macro with imports automatically the equations
+## and add the model include("header.jl") before the equations and these functions after the equation
 
 
 # """Assemble the global matrix for LHS"""

@@ -73,5 +73,6 @@ function plot_ghia_et_al_result()
     values = u_2[group_indices]
     ref_positions_x, ref_values = load_ghia_et_al_reference(case_filepath, 100, 2)
     
-    # TODO: plot the results and reference together here...
+    # TODO [add validation cases for the semi implicit]
+    ## add plot here
 end

@@ -55,12 +55,14 @@ end
 
 """The main loop"""
 function main_loop(model, total_step_limits, show_progress)
-    # TODO: write elapsed time and total steps elapsed (and log it)
+    # TODO [move application responsabilities to the Julia] 
+    ## write elapsed time and total steps elapsed (and log it)
     elapsed_time = 0.0
     running = true
     success = false
     timestep_counter = 0
-    # TODO: wrap here the main loop with the progress
+    # TODO [move application responsabilities to the Julia]
+    ## wrap here the main loop with the progress
     # https://github.com/timholy/ProgressMeter.jl?tab=readme-ov-file#conditionally-disabling-a-progress-meter
     # progress = ProgressUnknown("running... ", spinner=true, color = :white)  
 

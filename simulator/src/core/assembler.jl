@@ -74,3 +74,20 @@ function get_local_indices_iterator(lhs_type::MatrixType, nodes_per_element::Int
         throw("Not implemented special matrix type to be assembled")
     end
 end
+
+"""Get the global indices depending on the type of matrix assembled"""
+function get_global_indices(
+    local_row::Int64,
+    local_column::Int64,
+    connectivity::Vector{Int64},
+    lhs_type::MatrixType,
+)
+    global_row = connectivity[local_row]
+    global_column = connectivity[local_column]
+    if lhs_type == SYMMETRIC::MatrixType && global_row > global_column
+        # reverse row and columns global indices to ensure that assembler
+        # will only fill the upper (and diagonal) elements of the sparse matrix
+        return global_column, global_row
+    end
+    return global_row, global_column
+end

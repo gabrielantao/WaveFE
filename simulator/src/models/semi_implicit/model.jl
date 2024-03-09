@@ -13,7 +13,8 @@ export ModelSemiImplicit, run_iteration
 
 ###############################################
 ###############################################
-# TODO: maybe this block of code include could be automatically generated via a macro
+# TODO [implement model with heat transfer]
+## maybe this block of code include could be automatically generated via a macro
 ###############################################
 ############################################### START OF BLOCK
 
@@ -44,7 +45,8 @@ struct ModelSemiImplicit <: WaveModel
     equations::Vector{Equation}
     unknowns_handler::UnknownsHandler
     additional_parameters::ModelSemiImplicitParameters
-    # TODO: review if these parameters should be here or somewhere else
+    # TODO [implement model with heat transfer]
+    ## review if these parameters should be here or somewhere else
     mesh::Mesh
     domain_conditions::DomainConditions
     output_handler::OutputHandler

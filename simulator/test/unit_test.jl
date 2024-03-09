@@ -14,7 +14,8 @@ include("../src/core/wave_core.jl")
 using .WaveCore
 
 # import the equations of semi-implicit model to be used to test the assembler
-# TODO: maybe this should be tested in another module (for the models or tested only in validation tests)
+# TODO [implement model with heat transfer]
+## maybe this should be tested in another module (for the models or tested only in validation tests)
 include("../src/models/semi_implicit/header.jl")
 include("../src/models/semi_implicit/equations/equation_one.jl")
 include("../src/models/semi_implicit/equations/equation_two.jl")
@@ -43,7 +44,6 @@ function parse_commandline()
         "--regenerate-result", "-r" 
             help = "force regenerate the reference test results"
             action = :store_true
-        # TODO: think if it should be a list
         "test-name"
             help = "test or testset name to be run"
     end

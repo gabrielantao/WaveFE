@@ -25,6 +25,10 @@ There are some features and improvements that could be implemented
 21. implement model with porous media 
 22. add solvers and preconditioner options
 23. automatically run validation tests cases
+24. move application responsabilities to the Julia
+25. add basic documentation
+26. implement transient CBS 
+27. add validation cases for the semi implicit
 
 # Descriptions
 ## implement one dimensional elements

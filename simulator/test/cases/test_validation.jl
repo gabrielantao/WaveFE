@@ -86,6 +86,7 @@ end
         case_folder_name,
         "u_2"
     )
-    # TODO: create the plot for the figure in the cache folder
 
+    # TODO [add validation cases for the semi implicit]
+    ## add plot here
 end
