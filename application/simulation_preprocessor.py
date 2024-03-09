@@ -73,12 +73,51 @@ class SimulationPreprocessor:
             boundary_condition = deepcopy(original_boundary_condition)
             boundary_condition["group_name"] = group_number
             boundary_domain_conditions.append(boundary_condition)
+        # validate the processed boundary conditions before write the data
+        self._prevalidate_domain_conditions(
+            initial_domain_conditions, boundary_domain_conditions
+        )
         # replace the original file by the processed file
         with open(self.cache_path / DOMAIN_CONDITIONS_FILENAME, "w") as f:
             domain_conditions_data = {}
             domain_conditions_data["initial"] = initial_domain_conditions
             domain_conditions_data["boundary"] = boundary_domain_conditions
             toml.dump(domain_conditions_data, f)
+
+    def _prevalidate_mesh(self, mesh):
+        """Make a prevalidation of mesh"""
+        # TODO [implement validations and input versioning]
+        ## check here for inconsistencies in the mesh e.g. duplicated group names
+        pass
+
+    # TODO [implement validations and input versioning]
+    ## check if this validation should go to the core
+    def _prevalidate_domain_conditions(
+        self, initial_domain_conditions, boundary_domain_conditions
+    ):
+        """Ensure the input for the simulation are consistent"""
+        mesh_groups = "\n".join(
+            [
+                f"{number} => {name}"
+                for name, number in mesh.domain_condition_groups.items()
+            ]
+        )
+        # check if are redundant defined initial or boundary conditions
+        for label, conditions_list in zip(
+            [
+                ["initial", "boundary"],
+                [initial_domain_conditions, boundary_domain_conditions],
+            ]
+        ):
+            conditions_set = set()
+            for condition in conditions_list:
+                group_unknown = (
+                    condition["unknown"],
+                    condition["group_name"],
+                )
+                assert (
+                    group_unknown not in conditions_set
+                ), f"The {label} condition for unknown {group_unknown[0]} and group number {group_unknown[1]} was defined twice. You must fix this redundancy.\nThe mesh groups:{mesh_groups}"
 
     def setup(self):
         """Setup all is needed to build a simulation"""
@@ -92,6 +131,8 @@ class SimulationPreprocessor:
             self.cache_path / self.simulation_data["mesh"]["filename"],
             self.simulation_data["mesh"]["interpolation_order"],
         )
+        self._prevalidate_mesh(mesh)
         self._process_mesh(mesh)
         self._process_domain_conditions(mesh)
+        self.prevalidate_domain_conditions()
         logger.log.info("All simulation setup done!")
