@@ -1,7 +1,7 @@
 from pathlib import Path
 import pytest
 
-from simulator.simulation_case import SimulationCase
+from application.simulation_case import SimulationCase
 
 
 @pytest.fixture

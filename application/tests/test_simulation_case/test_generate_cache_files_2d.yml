@@ -1,9 +1,0 @@
-checksum:
-  conditions: 34bcff4f44780273291bd619c566b4aa
-  mesh: 5a72644af044e8d2557ea8932b7bb52e
-  simulation: fa0fdb1748f5b26bc49ff03d77c1b13c
-general:
-  alias: cavity_re_100
-  description: Cavity test case with Re = 100
-  title: Square Cavity Re=100
-  version: 1

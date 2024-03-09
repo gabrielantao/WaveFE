@@ -11,7 +11,7 @@ output:
   save_debug: false
   save_numeric: true
   save_result: true
-  variables:
+  unknowns:
   - u_1
   - u_2
   - p

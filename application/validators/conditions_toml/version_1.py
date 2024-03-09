@@ -1,9 +1,10 @@
 """Validators for mesh data version 1"""
+
 from typing import List, Dict, Optional
 from pydantic import BaseModel
 
 from application.validators.common_models import (
-    VariableName,
+    UnknownName,
     ConditionType,
 )
 
@@ -27,8 +28,7 @@ class Initial(BaseModel):
     """
 
     group_name: str
-    condition_type: ConditionType
-    variable_name: VariableName
+    unknown: UnknownName
     value: float
     description: Optional[str] = ""
 
@@ -42,7 +42,7 @@ class Boundary(BaseModel):
 
     group_name: str
     condition_type: ConditionType
-    variable_name: VariableName
+    unknown: UnknownName
     value: float
     description: Optional[str] = ""
 
