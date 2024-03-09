@@ -52,12 +52,12 @@
                 push!(result_u_2, assembled["u_2"])
             end
             @test check_reference_csv(
-                "ref_assembling",
+                "ref_semi_implicit_assembling",
                 "equation_1_t_2_u_1.csv", 
                 result_u_1
             )
             @test check_reference_csv(
-                "ref_assembling",
+                "ref_semi_implicit_assembling",
                 "equation_1_t_2_u_2.csv", 
                 result_u_2
             )
@@ -76,7 +76,7 @@
                 push!(result, assembled["p"])
             end
             @test check_reference_csv(
-                "ref_assembling",
+                "ref_semi_implicit_assembling",
                 "equation_2_t_2.csv", 
                 result
             )
@@ -97,12 +97,12 @@
                 push!(result_u_2, assembled["u_2"])
             end
             @test check_reference_csv(
-                "ref_assembling",
+                "ref_semi_implicit_assembling",
                 "equation_3_t_2_u_1.csv", 
                 result_u_1
             )
             @test check_reference_csv(
-                "ref_assembling",
+                "ref_semi_implicit_assembling",
                 "equation_3_t_2_u_2.csv", 
                 result_u_2
             )

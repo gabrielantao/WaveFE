@@ -1,97 +1,62 @@
 # TODO: these functions should be moved to a macro with imports automatically the equations
 # and add the model include("header.jl") before the equations and these functions after the equation
 
-# """Assemble the global matrix for LHS"""
-# function assemble_global_lhs(
-#     equation::Equation,
-#     mesh::Mesh,
-#     unknowns_handler::UnknownsHandler,
-#     model_parameters::ModelParameters
-# )  
-#     # preallocate the sparse matrix with zeros
-#     lhs = sparse(
-#         equation.base.assembler.lhs_indices_i, 
-#         equation.base.assembler.lhs_indices_j, 
-#         zeros(length(equation.base.assembler.lhs_indices_i))
-#     )
-#     # do the assembling of global matrix for each element container in the mesh
-#     for element_container in WaveCore.get_containers(mesh.elements)
-#         index_iterator = WaveCore.get_local_indices_iterator(
-#             equation.base.assembler.lhs_type, 
-#             element_container.nodes_per_element
-#         )
-#         for element in WaveCore.get_elements(element_container)
-#             assembled_local_lhs = assemble_element_lhs(
-#                 equation, 
-#                 element, 
-#                 unknowns_handler,
-#                 model_parameters
-#             )
-#             for (i, j) in index_iterator
-#                 global_i = element.connectivity[i]
-#                 global_j = element.connectivity[j]
-#                 lhs[global_i, global_j] += assembled_local_lhs[i, j]
-#             end
-#         end
-#     end
-#     # TODO [review symmetric matrix assembling]
-#     # for now its assembling symmetric both sides off-diagonal (upper and lower)
-#     # of sparse matrix. This should be reviewed in the future to use other types of
-#     # sparse that don't waste space (e.g. package SparseMatrixCRC.jl) 
-#     # for now just copy the values of upper side of matrix to the lower side
-#     if equation.base.assembler.lhs_type == WaveCore.SYMMETRIC::MatrixType
-#         for (i, j) in zip(
-#             equation.base.assembler.lhs_indices_i, equation.base.assembler.lhs_indices_j
-#         )
-#             if i < j
-#                 lhs[j, i] = lhs[i, j]
-#             end
-#         end
-#     end
-#     return lhs
-# end
 
-# TODO: refactor this function to work by using the preallocation strategy
-"""Assemble LHS vectors for a given group of elements"""
+# """Assemble the global matrix for LHS"""
 function assemble_global_lhs(
     equation::Equation,
     mesh::Mesh,
     unknowns_handler::UnknownsHandler,
     model_parameters::ModelParameters
-)    
-    # this dictionary used as auxiliar variable to avoid waste of memory
-    # just by summing same indices values together
-    sparse_values = Dict{Tuple{Int32, Int32}, Float64}()
-   
+)  
+    # preallocate the sparse matrix with zeros
+    lhs = sparse(
+        equation.base.assembler.lhs_indices_i, 
+        equation.base.assembler.lhs_indices_j, 
+        zeros(length(equation.base.assembler.lhs_indices_i))
+    )
+    # do the assembling of global matrix for each element container in the mesh
     for element_container in WaveCore.get_containers(mesh.elements)
+        index_iterator = WaveCore.get_local_indices_iterator(
+            equation.base.assembler.lhs_type, 
+            element_container.nodes_per_element
+        )
+        # TODO [review symmetric matrix assembling]
+        ## maybe here should come the swap of row and column global index
+        ## done by now inside the get_global_indices to compute differently if is symmetric of not
         for element in WaveCore.get_elements(element_container)
-            elemental_matrix = assemble_element_lhs(
+            assembled_local_lhs = assemble_element_lhs(
                 equation, 
                 element, 
                 unknowns_handler,
                 model_parameters
             )
-            for (i, (row, column)) in enumerate(Iterators.product(element.connectivity, element.connectivity))
-                if haskey(sparse_values, (row, column))
-                    sparse_values[(row, column)] += elemental_matrix[i]
-                else
-                    sparse_values[(row, column)] = elemental_matrix[i]
-                end
+            for (local_row, local_column) in index_iterator
+                global_row, global_column = WaveCore.get_global_indices(
+                    local_row, local_column, element.connectivity, equation.base.assembler.lhs_type
+                )
+                lhs[global_row, global_column] += assembled_local_lhs[local_row, local_column]
             end
         end
     end
-
-    # build the sparse matrix from auxiliar dictionary
-    total_nodes = WaveCore.get_total_nodes(mesh.nodes)
-    ii = Vector{Int32}()
-    jj = Vector{Int32}()
-    values = Vector{Float64}()
-    for ((row, column), value) in sparse_values
-        push!(ii, row)
-        push!(jj, column)
-        push!(values, value)
-    end    
-    return sparse(ii, jj, values, total_nodes, total_nodes)
+    # TODO [review symmetric matrix assembling]
+    # for now it is assembling symmetric both sides off-diagonal (upper and lower)
+    # of sparse matrix. This should be reviewed in the future to use other types of
+    # sparse that don't waste space (e.g. package SparseMatrixCRC.jl) 
+    # for now just copy the values of upper side of matrix to the lower side 
+    if equation.base.assembler.lhs_type == WaveCore.SYMMETRIC::MatrixType
+        for (i, j) in zip(
+            equation.base.assembler.lhs_indices_i, equation.base.assembler.lhs_indices_j
+        )
+            if i < j
+                if !(lhs[j, i] ≈ 0.0)
+                    println("$i $j lhs[i,j]=$(lhs[i, j]) lhs[j,i]=$(lhs[j, i])")
+                end
+                lhs[j, i] = lhs[i, j]
+            end
+        end
+    end
+    return lhs
 end
 
 

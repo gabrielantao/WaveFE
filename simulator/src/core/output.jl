@@ -90,7 +90,8 @@ end
 
 """Close all output files"""
 function close_files(output_handler::OutputHandler)
-    # println("CLOSING")
+    # TODO [move application responsabilities to the Julia] 
+    ## should log println("CLOSING")
     close(output_handler.result_file)
     close(output_handler.debug_file)
 end

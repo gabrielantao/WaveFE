@@ -86,7 +86,7 @@ include("test_mesh.jl")
 include("test_domain_conditions.jl")
 include("test_unknowns_handler.jl")
 include("test_solver.jl")
-include("test_assembler.jl")
+include("test_global_assembling.jl")
 include("test_output.jl")
 
 # model specific elemental assemblers

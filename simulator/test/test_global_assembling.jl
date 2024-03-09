@@ -58,6 +58,14 @@
     WaveCore.update_elements!(mesh, unknowns_handler, model_parameters)
 
 
+    @testset "assembler indices generator" begin
+        @test WaveCore.get_global_indices(2, 2, [1, 53, 52], WaveCore.DIAGONAL::MatrixType) == (53, 53)
+        @test WaveCore.get_global_indices(2, 3, [1, 53, 52], WaveCore.DENSE::MatrixType) == (53, 52)
+        @test WaveCore.get_global_indices(2, 2, [1, 53, 52], WaveCore.SYMMETRIC::MatrixType) == (53, 53)
+        # it should always only return the upper element in the matrix when SYMMETRIC
+        @test WaveCore.get_global_indices(2, 3, [1, 53, 52], WaveCore.SYMMETRIC::MatrixType) == (52, 53)
+    end
+
     @testset "diagonal LHS matrix" begin
         equation_one = EquationStepOne(
             ["u_1", "u_2"], input_square_cavity_triangles.simulation_data
@@ -71,19 +79,17 @@
             model_parameters
         )
 
-        indices_i, indices_j, values = findnz(assembled_lhs)
-        @test_broken indices_i == indices_j
-        @test length(values) == 17801
+        indices_i, indices_j, values = findnz(dropzeros(assembled_lhs))
+        @test indices_i == indices_j
+        @test length(values) == 2601
         # check diagonal values 
-        _, _, ref_values = findnz(get_reference_lhs(1))
-        @test_broken values ≈ ref_values
         @test check_reference_csv(
-            "ref_assembler",
+            "ref_global_assembling",
             "lhs_diagonal_indices.csv", 
             [[i, j] for (i, j) in zip(indices_i, indices_j)]
         )
         @test check_reference_csv(
-            "ref_assembler",
+            "ref_global_assembling",
             "lhs_diagonal_values.csv", 
             values
         )
@@ -102,14 +108,23 @@
             unknowns_handler,
             model_parameters
         )
+        
+        indices_i, indices_j, values = findnz(assembled_lhs)
 
-        indices_i, indices_j, values = findnz(dropzeros(assembled_lhs))
-        # check diagonal values 
-        ref_assembled = dropzeros(get_reference_lhs(2))
         # check symmetric
         @test all([assembled_lhs[j, i] ≈ assembled_lhs[i, j] for (i, j) in zip(indices_i, indices_j)])
-        # check diagonal elements
-        @test all([ref_assembled[i, i] ≈ assembled_lhs[i, i] for i=1:2601]) 
+
+        # save regression data
+        @test check_reference_csv(
+            "ref_global_assembling",
+            "lhs_symmetric_indices.csv", 
+            [[i, j] for (i, j) in zip(indices_i, indices_j)]
+        )
+        @test check_reference_csv(
+            "ref_global_assembling",
+            "lhs_symmetric_values.csv", 
+            values
+        )
     end
 
     @testset "RHS vector" begin
@@ -124,12 +139,12 @@
         )
         
         @test check_reference_csv(
-            "ref_assembler",
+            "ref_global_assembling",
             "rhs_step_1_u_1.csv", 
             assembled_rhs["u_1"]
         )
         @test check_reference_csv(
-            "ref_assembler",
+            "ref_global_assembling",
             "rhs_step_1_u_2.csv", 
             assembled_rhs["u_2"]
         )
