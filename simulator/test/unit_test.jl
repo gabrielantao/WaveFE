@@ -22,7 +22,7 @@ include("../src/models/semi_implicit/equations/equation_two.jl")
 include("../src/models/semi_implicit/equations/equation_three.jl")
 include("../src/core/global_assembling.jl")
 
-const WAVE_SIMULATOR_TEST_PATH = joinpath(ENV["PIXI_PACKAGE_ROOT"], "simulator", "test")
+const WAVE_SIMULATOR_TEST_PATH = joinpath(ENV["PIXI_PROJECT_ROOT"], "simulator", "test")
 const WAVE_SIMULATOR_TEST_DATA_PATH = joinpath(WAVE_SIMULATOR_TEST_PATH, "data")
 
 

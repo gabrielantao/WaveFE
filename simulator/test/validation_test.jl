@@ -5,7 +5,7 @@ using ArgParse
 using HDF5
 using DelimitedFiles
 
-const WAVE_SIMULATOR_TEST_PATH = joinpath(ENV["PIXI_PACKAGE_ROOT"], "simulator", "test")
+const WAVE_SIMULATOR_TEST_PATH = joinpath(ENV["PIXI_PROJECT_ROOT"], "simulator", "test")
 const WAVE_SIMULATOR_TEST_CASE_PATH = joinpath(WAVE_SIMULATOR_TEST_PATH, "cases")
 
 
