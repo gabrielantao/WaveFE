@@ -2,7 +2,7 @@ module WaveCore
 
 using TOML
 using HDF5
-#using ProgressMeter
+using ProgressMeter
 using SparseArrays
 using Preconditioners
 using IterativeSolvers
@@ -34,7 +34,7 @@ function run_simulation(parsed_args)
     domain_conditions_data = TOML.parsefile(joinpath(cache_filepath, DOMAIN_CONDITIONS_FILENAME))
     
     # do the logical validations for the inputs
-    # TODO [general performance improvements] 
+    # TODO [move application responsabilities to the Julia] 
     ## maybe move these validations for the model file (if it depends on model... think about it)
     validate_simulation_data(simulation_data)
     validate_domain_conditions_data(domain_conditions_data)
@@ -47,6 +47,7 @@ function run_simulation(parsed_args)
     
     main_loop(
         model, 
+        simulation_data["general"]["alias"],
         simulation_data["simulation"]["steps_limit"], 
         parsed_args["show-progress"]
     )
@@ -54,25 +55,26 @@ end
 
 
 """The main loop"""
-function main_loop(model, total_step_limits, show_progress)
-    # TODO [move application responsabilities to the Julia] 
-    ## write elapsed time and total steps elapsed (and log it)
-    elapsed_time = 0.0
+function main_loop(model, case_alias, total_step_limits, show_progress)
     running = true
     success = false
     timestep_counter = 0
-    # TODO [move application responsabilities to the Julia]
-    ## wrap here the main loop with the progress
-    # https://github.com/timholy/ProgressMeter.jl?tab=readme-ov-file#conditionally-disabling-a-progress-meter
-    # progress = ProgressUnknown("running... ", spinner=true, color = :white)  
+    progress_bar = Progress(
+        total_step_limits, 
+        desc=case_alias, 
+        enabled=show_progress,
+        barglyphs=BarGlyphs('|','█', ['▁' ,'▂' ,'▃' ,'▄' ,'▅' ,'▆', '▇'],' ','|',),
+        color=:white
+    )  
 
-    # elapsed_time = @elapsed begin   
+    elapsed_time = @elapsed begin   
         # run main loop 
         while running 
             timestep_counter += 1
-            # ProgressMeter.next!(progress)
+            next!(progress_bar)
+
+            # run the function that make one iteration for the model
             run_iteration(model)
-            #println(timestep_counter)
 
             # stop simulation loop if converged
             success = all(values(model.unknowns_handler.converged))
@@ -81,8 +83,7 @@ function main_loop(model, total_step_limits, show_progress)
                 force_write_result = true
                 running = false
             else
-                force_write_result = false
-                
+                force_write_result = false  
             end
 
             # output the current time step result
@@ -93,8 +94,9 @@ function main_loop(model, total_step_limits, show_progress)
                 force_write_result
             )
         end
-    # end # elapsed macro
+    end # elapsed macro
 
+    finish!(progress_bar)
     write_additional_data(model.output_handler, success, timestep_counter, elapsed_time)
     close_files(model.output_handler)
 end
