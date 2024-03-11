@@ -41,42 +41,35 @@ end
 
 const PARSED_ARGS = parse_commandline()
 
+include("../src/core/wave_core.jl")
+using .WaveCore: run_simulation
 
-"""This function is used to run unit tests from the shell"""
-function run_unit_test()
+# get the registered models in order to get their names
+include("../src/models/register.jl")
+
+# utilities to run the validation cases
+include("cases/utils.jl")
+
+# the list of registered cases
+include("cases/test_validation.jl")
+
+"""This function is used to run case tests from the shell"""
+function run_cases()
     if PARSED_ARGS["run-all"]
         retest(
             WaveValidationTests, 
             dry=PARSED_ARGS["run-dry"], 
             verbose=PARSED_ARGS["verbose"]
         )
-    else 
+    else
         retest(
             PARSED_ARGS["test-name"], 
             dry=PARSED_ARGS["run-dry"],
             verbose=PARSED_ARGS["verbose"]
-        )
+        )    
     end
 end
 
-
-include("../src/core/wave_core.jl")
-using .WaveCore: run_simulation
-
-
-"""Run a validation case"""
-function run_validation_case(case_folder)
-    simulation_args = Dict(
-        "log-level" => PARSED_ARGS["log-level"],
-        "show-progress" => false,
-        "folder" => joinpath(WAVE_SIMULATOR_TEST_CASE_PATH, case_folder)
-    )
-    run_simulation(simulation_args)
-end
-
-
-include("cases/test_validation.jl")
-
 end # module
 
-WaveValidationTests.run_unit_test()
+WaveValidationTests.run_cases()
