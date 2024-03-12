@@ -29,6 +29,7 @@ There are some features and improvements that could be implemented
 25. add basic documentation
 26. implement transient CBS 
 27. add validation cases for the semi implicit
+28. make the solver parallel
 
 # Descriptions
 ## implement one dimensional elements

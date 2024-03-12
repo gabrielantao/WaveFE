@@ -190,7 +190,8 @@ function run_iteration(model::ModelSemiImplicit)
     WaveCore.update!(model.mesh)
     
     # TODO [general performance improvements]
-    ## it should check if it is diverging to abort simulation
+    ## - it should check if it is diverging to abort simulation
+    ## - review the metrics to calculate convergence
     WaveCore.check_unknowns_convergence!(model.unknowns_handler)
 end
 

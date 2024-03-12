@@ -11,6 +11,7 @@ using IterativeSolvers
 export run_simulation
 
 
+# general core files
 include("constants.jl")
 include("common.jl")
 include("unknowns_handler.jl")
@@ -20,6 +21,9 @@ include("../mesh/mesh.jl")
 include("assembler.jl")
 include("solver.jl")
 include("base_equation.jl")
+
+# not related directly with the simulation core
+include("../schema/schemas.jl")
 include("validator.jl")
 include("../models/register.jl")
 

@@ -22,6 +22,9 @@ function assemble_global_lhs(
             equation.base.assembler.lhs_type, 
             element_container.nodes_per_element
         )
+        # TODO [make the solver paralallel]
+        ## check if the different unknowns could be assembled in parallel 
+        ## because they are assembled to the same sparse matrix this could generate a race condition (?)
         # TODO [review symmetric matrix assembling]
         ## maybe here should come the swap of row and column global index
         ## done by now inside the get_global_indices to compute differently if is symmetric of not
@@ -71,6 +74,9 @@ function assemble_global_rhs(
     # preallocate the assembled rhs vectors
     # TODO [general performance improvements]
     ## maybe this should use NamedTuple (or just tuple) instead of dict
+    # TODO [make the solver paralallel]
+    ## the different unknowns could be assembled in parallel 
+    ## once they are represented by different vector in the dict
     total_nodes = WaveCore.get_total_nodes(mesh.nodes)
     rhs = Dict(unknown => zeros(total_nodes) for unknown in equation.base.solved_unknowns)
     # do the assembling of global matrix for each element container in the mesh

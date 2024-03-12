@@ -13,7 +13,7 @@ scripts = ["setup_env.bash"]
 dev-shell = "cd $PIXI_PROJECT_ROOT/simulator/src && julia --project=$PIXI_PROJECT_ROOT/simulator -i $PIXI_PROJECT_ROOT/simulator/startup.jl"
 test-unit = "julia --project=$PIXI_PROJECT_ROOT/simulator $PIXI_PROJECT_ROOT/simulator/test/unit_test.jl"
 test-case = "julia --project=$PIXI_PROJECT_ROOT/simulator $PIXI_PROJECT_ROOT/simulator/test/validation_test.jl"
-wave = "julia --project=$PIXI_PROJECT_ROOT/simulator $PIXI_PROJECT_ROOT/simulator/main.jl"
+wave = "julia --project=$PIXI_PROJECT_ROOT/simulator $PIXI_PROJECT_ROOT/simulator/src/main.jl"
 
 [dependencies]
 gmsh = ">=4.12.2,<4.13"
