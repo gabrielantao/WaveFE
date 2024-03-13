@@ -2,7 +2,7 @@ module SimulationFileSchema
 using ..WaveCore
 
 
-struct GeneralSection <: ValidatorSection
+struct GeneralSection <: DataSection
     version::String
     title::String
     description::String
@@ -40,7 +40,7 @@ function validate_schema(section::GeneralSection)
 end
 
 
-struct SimulationSection <: ValidatorSection
+struct SimulationSection <: DataSection
     model::String
     steps_limit::Int64
     transient::Bool
@@ -96,7 +96,7 @@ function validate_schema(section::SimulationSection)
 end
 
 
-struct MeshSection <: ValidatorSection
+struct MeshSection <: DataSection
     filename::String
     interpolation_order::InterpolationOrder
 end
@@ -124,7 +124,7 @@ function validate_schema(section::MeshSection)
 end
 
 
-struct ParameterSection <: ValidatorSection
+struct ParameterSection <: DataSection
     parameters::Dict{String, Float64}
 end
 
@@ -153,9 +153,9 @@ function validate_schema(section::ParameterSection)
 end
 
 
-struct SolverSection <: ValidatorSection
+struct SolverSection <: DataSection
     type::SolverType
-    preconditioner::SolverPreconditioners
+    preconditioner_type::PreconditionerType
     steps_limit::Int64
     tolerance_relative::Float64
     tolerance_absolute::Float64
@@ -167,7 +167,7 @@ function build_solver_section(section_data)
     type = WaveCore.get_solver_type(
         get_section_field(data, "type", String)
     )
-    preconditioner = WaveCore.get_solver_preconditioner(
+    preconditioner_type = WaveCore.get_solver_preconditioner_type(
         get_section_field(data, "preconditioner", String)
     )
     steps_limit = get_section_field(data, "steps_limit", Int64)
@@ -175,7 +175,7 @@ function build_solver_section(section_data)
     tolerance_absolute = get_section_field(data, "tolerance_absolute", Float64)
     assert_only_supported_entries(data, "solver")
     return SolverSection(
-        type, preconditioner, steps_limit, tolerance_relative, tolerance_absolute
+        type, preconditioner_type, steps_limit, tolerance_relative, tolerance_absolute
     )
 end
 
@@ -189,7 +189,7 @@ end
 
 
 
-struct OutputSection <: ValidatorSection
+struct OutputSection <: DataSection
     frequency::Int64
     save_result::Bool
     save_numeric::Bool
@@ -224,7 +224,7 @@ function validate_schema(section::OutputSection)
 end
 
 
-struct SimulationSchema <: ValidatorSchema
+struct SimulationData <: DataSchema
     general::GeneralSection
     simulation::SimulationSection
     mesh::MeshSection
@@ -232,7 +232,7 @@ struct SimulationSchema <: ValidatorSchema
     solver::SolverSection
     output::OutputSection
 
-    function SimulationSchema(data) 
+    function SimulationData(data) 
         new(
             build_general_section(data["general"]),
             build_simulation_section(data["simulation"]),
@@ -243,7 +243,7 @@ struct SimulationSchema <: ValidatorSchema
         )
     end
 
-    function validate_schema(schema::SimulationSchema)
+    function validate_schema(schema::SimulationData)
         validate_schema(schema.general)
         validate_schema(schema.simulation)
         validate_schema(schema.mesh)

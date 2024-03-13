@@ -27,7 +27,7 @@ end
 
 
 """Import data for nodes."""
-function load_nodes(input_data)
+function load_nodes(mesh_data::HDF5)
     nodes = Vector{Node}()
     for (
         physical_group, 
@@ -37,12 +37,12 @@ function load_nodes(input_data)
         velocity, 
         acceleration
         ) in zip(
-        read(input_data["mesh/nodes/physical_groups"]),
-        read(input_data["mesh/nodes/geometrical_groups"]),
-        read(input_data["mesh/nodes/domain_condition_groups"]),
-        eachcol(read(input_data["mesh/nodes/positions"])),
-        eachcol(read(input_data["mesh/nodes/velocities"])),
-        eachcol(read(input_data["mesh/nodes/accelerations"])),
+        read(mesh_data["mesh/nodes/physical_groups"]),
+        read(mesh_data["mesh/nodes/geometrical_groups"]),
+        read(mesh_data["mesh/nodes/domain_condition_groups"]),
+        eachcol(read(mesh_data["mesh/nodes/positions"])),
+        eachcol(read(mesh_data["mesh/nodes/velocities"])),
+        eachcol(read(mesh_data["mesh/nodes/accelerations"])),
         )
         push!(
             nodes,

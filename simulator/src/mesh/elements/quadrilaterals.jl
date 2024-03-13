@@ -31,17 +31,19 @@ end
 
 
 """Load data for the quadrilaterals"""
-function load_quadrilaterals(input_data, simulation_data)
+function load_quadrilaterals(
+    mesh_data::HDF5, simulation_data::SimulationData
+)
     elements = Vector{Quadrilateral}()
-    if haskey(input_data, "mesh/quadrilaterals")
-        for connectivity in eachcol(input_data["mesh/quadrilaterals/connectivity"])
+    if haskey(mesh_data, "mesh/quadrilaterals")
+        for connectivity in eachcol(mesh_data["mesh/quadrilaterals/connectivity"])
             # start all these values as NaN to make this break if they are not initialized
             push!(elements, Quadrilateral(connectivity, Float64[], Float64[], NaN, NaN))
         end
     end
 
     # set the depending on the interpolation order of the elements
-    if simulation_data["mesh"]["interpolation_order"] == 1
+    if simulation_data.mesh.interpolation_order == 1
         nodes_per_element = 4
     else
         # TODO [implement higher order elements]
@@ -77,7 +79,8 @@ end
 # TODO [implement two dimensional elements]
 """Calculate and update areas of quadrilaterals"""
 function update_areas!(
-    elements_container::QuadrilateralsContainer, nodes_container::NodesContainer
+    elements_container::QuadrilateralsContainer, 
+    nodes_container::NodesContainer
 )
 end
 
@@ -85,7 +88,8 @@ end
 # TODO [implement two dimensional elements]
 # TODO [implement higher order elements]
 function update_shape_coeficients!(
-    elements_container::QuadrilateralsContainer, nodes_container::NodesContainer
+    elements_container::QuadrilateralsContainer, 
+    nodes_container::NodesContainer
 )
 end
 

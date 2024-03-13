@@ -1,19 +1,19 @@
 export Solver
-export SolverType, SolverPreconditioners
+export SolverType, PreconditionerType
 export load_solver
 
 @enum SolverType begin
     CONJUGATE_GRADIENT = 1
 end
 
-@enum SolverPreconditioners begin
+@enum PreconditionerType begin
     JACOBI = 1 # AKA DiagonalPreconditioner
 end
 
 """Solver holds data for matrices that are used to solve boundary problem"""
 mutable struct Solver
     type::SolverType
-    preconditioner_type::SolverPreconditioners
+    preconditioner_type::PreconditionerType
     steps_limit::Int64
     relative_tolerance::Float64
     absolute_tolerance::Float64
@@ -22,30 +22,15 @@ end
 
 
 """Load data for the solver"""
-function load_solver(simulation_parameters)
-    if simulation_parameters["solver"]["type"] == "Conjugate Gradient"
-        solver_type = CONJUGATE_GRADIENT::SolverType
-    else
-        # TODO [add solvers and preconditioner options]
-        ## add other options for solvers
-        throw("Not implemented yet other types of solvers")
-    end
-    if simulation_parameters["solver"]["preconditioner"] == "Jacobi"
-        preconditioner_type = JACOBI::SolverPreconditioners
-        preconditioners = Dict{String, DiagonalPreconditioner{Float64, Vector{Float64}}}()
-    else
-        # TODO [add solvers and preconditioner options]
-        ## add other options for preconditioners
-        throw("Not implemented yet other types of preconditioners")
-    end
-    
+function load_solver(simulation_data)
+    preconditioner = get_preconditioner(simulation_data.solver.preconditioner_type)
     return Solver(
-        solver_type,
-        preconditioner_type,
-        simulation_parameters["solver"]["steps_limit"],
-        simulation_parameters["solver"]["tolerance_relative"],
-        simulation_parameters["solver"]["tolerance_absolute"],
-        preconditioners
+        simulation_data.solver.type,
+        simulation_data.solver.preconditioner_type,
+        simulation_data.solver.steps_limit,
+        simulation_data.solver.tolerance_relative,
+        simulation_data.solver.tolerance_absolute,
+        preconditioner
     )
 end
 
@@ -64,9 +49,9 @@ end
 
 
 """Get the type of preconditioner selected in the simulation input options"""
-function get_solver_preconditioner(preconditioner)
+function get_solver_preconditioner_type(preconditioner)
     if preconditioner == "Jacobi"
-        preconditioner_type = JACOBI::SolverPreconditioners
+        preconditioner_type = JACOBI::PreconditionerType
     else
         # TODO [add solvers and preconditioner options]
         ## add other options for preconditioners
@@ -76,13 +61,26 @@ function get_solver_preconditioner(preconditioner)
 end
 
 
+"""Get an empty preconditioner"""
+function get_preconditioner(preconditioner_type::PreconditionerType)
+    if preconditioner_type == JACOBI::PreconditionerType
+        preconditioners = Dict{String, DiagonalPreconditioner{Float64, Vector{Float64}}}()
+    else
+        # TODO [add solvers and preconditioner options]
+        ## add other options for preconditioners
+        throw("Not implemented yet other types of preconditioners")
+    end
+    return preconditioners
+end
+
+
 """Update the preconditioner used to solve the equation for this variable"""
 function update_preconditioner!(
     solver::Solver, 
     lhs::SparseMatrixCSC{Float64, Int64},
     unknown::String
 )
-    if solver.preconditioner_type == JACOBI::SolverPreconditioners
+    if solver.preconditioner_type == JACOBI::PreconditionerType
         solver.preconditioners[unknown] = DiagonalPreconditioner(lhs)
     else
         # TODO [add solvers and preconditioner options]

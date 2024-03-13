@@ -123,7 +123,7 @@
 
 
     @testset "build condition whole schema" begin
-        conditions = WaveCore.ConditionsFileSchema.ConditionsSchema(
+        conditions = WaveCore.ConditionsFileSchema.ConditionsData(
             input_square_cavity_triangles.domain_conditions_data
         )
         @test isempty(conditions.initial) == false

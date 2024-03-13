@@ -4,7 +4,11 @@ abstract type Equation end
 """A generic single element"""
 abstract type ModelParameters end 
 
-"""Generic Wave model"""
-abstract type WaveModel end
+"""A generic Wave method (e.g. explicit implicit)"""
+abstract type SimulationMethod end
 
-export Equation, ModelParameters, WaveModel
+"""A generic Wave model"""
+abstract type SimulationModel end
+
+
+export Equation, ModelParameters, SimulationMethod, SimulationModel

@@ -1,12 +1,12 @@
-abstract type ValidatorSchema end
-abstract type ValidatorSection end
+abstract type DataSchema end
+abstract type DataSection end
 
 
 const VERSION_FIELD_NAME_PATTERN = r"^[0-9]+\.[0-9]+$"
 const UNKNOWN_FIELD_NAME_PATTERN = r"^[a-zA-Z]\w*$"
 const CASE_ALIAS_FIELD_NAME_PATTERN = r"^\w+$"
 
-export ValidatorSchema, ValidatorSection
+export DataSchema, DataSection
 export get_section_field, assert_only_supported_entries
 export field_match_pattern, field_less_than, field_greater_than
 export VERSION_FIELD_NAME_PATTERN, UNKNOWN_FIELD_NAME_PATTERN, CASE_ALIAS_FIELD_NAME_PATTERN

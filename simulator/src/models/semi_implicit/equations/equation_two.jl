@@ -3,11 +3,11 @@ struct EquationStepTwo <: Equation
     # common data ("base class" data)
     base::BaseModelEquation
 
-    function EquationStepTwo(solved_unknowns, simulation_parameters)   
+    function EquationStepTwo(solved_unknowns, simulation_data)   
         # TODO [move application responsabilities to the Julia]
         ## this should be in a section model in the input file
         assembler = Assembler(WaveCore.SYMMETRIC::MatrixType)
-        solver = load_solver(simulation_parameters)
+        solver = load_solver(simulation_data)
         members = EquationMembers()
 
         base = BaseModelEquation(

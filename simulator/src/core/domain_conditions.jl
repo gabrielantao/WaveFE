@@ -28,10 +28,10 @@ end
 
 
 """Load data for domain conditions needed to the simulation"""
-function load_domain_conditions(input_data, domain_conditions_data)
+function load_domain_conditions(mesh_data::HDF5, domain_conditions_data::ConditionsData)
     indices = Dict{Tuple{String, ConditionType}, Vector{Int64}}()
     values = Dict{Tuple{String, ConditionType}, Vector{Float64}}()
-    domain_conditions_groups = read(input_data["mesh/nodes/domain_condition_groups"])
+    domain_conditions_groups = read(mesh_data["mesh/nodes/domain_condition_groups"])
     # preallocate the vectors
     for condition_data in domain_conditions_data["boundary"]
         unknown = condition_data["unknown"]
@@ -90,11 +90,6 @@ function apply_domain_conditions_lhs!(
     unknown::String,
     lhs::SparseMatrixCSC{Float64, Int64},
 )
-    #logger.info("applying conditions to LHS")
-    # output_manager.write_debug(
-    #     f"{self.label}/{unknown}/lhs_condition_applied",
-    #     self.lhs_condition_applied[unknown],
-    # )
     for index in domain_conditions.indices[(unknown, FIRST::ConditionType)]
         lhs[:, index] .= 0.0
         lhs[index, :] .= 0.0
@@ -112,11 +107,6 @@ function apply_domain_conditions_rhs(
     assembled_lhs::SparseMatrixCSC{Float64, Int64},
     rhs::Vector{Float64},
 )
-    #logger.info("applying conditions to RHS")
-    # output_manager.write_debug(
-    #     f"{self.label}/{unknown}/rhs_condition_applied",
-    #     rhs_condition_applied,
-    # )
     # first condition application
     indices = domain_conditions.indices[(unknown, FIRST::ConditionType)]
     values = domain_conditions.values[(unknown, FIRST::ConditionType)]

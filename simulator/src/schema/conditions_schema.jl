@@ -1,9 +1,9 @@
 module ConditionsFileSchema
 using ..WaveCore
 
-export ConditionsSchema
+export ConditionsData
 
-struct GeneralSection <: ValidatorSection
+struct GeneralSection <: DataSection
     version::String
     description::String
 end
@@ -30,7 +30,7 @@ function validate_schema(section::GeneralSection)
 end
 
 
-struct InitialSection <: ValidatorSection
+struct InitialSection <: DataSection
     group_name::String
     unknown::String
     value::Float64
@@ -63,7 +63,7 @@ function validate_schema(section::InitialSection)
 end
 
 
-struct BoundarySection <: ValidatorSection
+struct BoundarySection <: DataSection
     group_name::String
     condition_type::ConditionType
     unknown::String
@@ -105,12 +105,12 @@ function validate_schema(section::BoundarySection)
 end
 
 
-struct ConditionsSchema <: ValidatorSchema
+struct ConditionsData <: DataSchema
     general::GeneralSection
     initial::Vector{InitialSection}
     boundary::Vector{BoundarySection}
 
-    function ConditionsSchema(data) 
+    function ConditionsData(data) 
         new(
             build_general_section(data["general"]),
             [build_initial_section(section) for section in data["initial"]],
@@ -118,7 +118,7 @@ struct ConditionsSchema <: ValidatorSchema
         )
     end
 
-    function validate_schema(schema::ConditionsSchema)
+    function validate_schema(schema::ConditionsData)
         @assert isempty(schema.initial) == false, "The initial conditions could not be empty"
         @assert isempty(schema.boundary) == false, "The boundary conditions could not be empty"
         validate_schema(schema.general)

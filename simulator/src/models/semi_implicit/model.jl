@@ -5,10 +5,9 @@ using Statistics: mean
 using SparseArrays
 using Preconditioners
 using IterativeSolvers
-using Logging, LoggingExtras
 
 # exported variables and methods
-export ModelSemiImplicit, run_iteration
+export ModelSemiImplicit, run_iteration, startup_model
 
 
 ###############################################
@@ -39,34 +38,19 @@ include("../../core/global_assembling.jl")
 Semi-implicit model
 TODO: include description here ....
 """
-struct ModelSemiImplicit <: WaveModel
+struct ModelSemiImplicit <: SimulationModel
     name::String
     unknonws::Vector{String}
     equations::Vector{Equation}
     unknowns_handler::UnknownsHandler
     additional_parameters::ModelSemiImplicitParameters
-    # TODO [implement model with heat transfer]
-    ## review if these parameters should be here or somewhere else
-    mesh::Mesh
-    domain_conditions::DomainConditions
-    output_handler::OutputHandler
-    logger::FileLogger
 
-    function ModelSemiImplicit(simulation_folder, input_data, simulation_data, domain_conditions_data)
-        # load the mesh and domain conditions (AKA boundary conditions)
-        mesh = WaveCore.load_mesh(input_data, simulation_data)
-        domain_conditions = WaveCore.load_domain_conditions(input_data, domain_conditions_data)
-        output_handler = WaveCore.load_output_handler(simulation_folder, simulation_data)
-        logger = FileLogger(joinpath(simulation_folder, CACHE_PATH, SIMULATOR_LOG_FILENAME))
-
+    function ModelSemiImplicit(simulation_data::SimulationData)
         # configure the additional model parameters
-        transient = simulation_data["simulation"]["transient"]
-        adimensionals = simulation_data["parameter"]
-        safety_Δt_factor = simulation_data["simulation"]["safety_dt_factor"]
         additional_parameters = ModelSemiImplicitParameters(
-            transient,
-            safety_Δt_factor,
-            adimensionals
+            simulation_data.simulation.transient,
+            simulation_data.simulation.safety_Δt_factor,
+            simulation_data.parameter.parameters
         )
 
         # define the unknowns for this model
@@ -85,36 +69,36 @@ struct ModelSemiImplicit <: WaveModel
         # load the initial values for the unknowns
         unknowns_default_values = Dict(unknown => 0.0 for unknown in all_solved_unknowns)
         unkowns_handler = WaveCore.load_unknowns_handler(
-            unknowns_default_values, 
-            input_data,
-            simulation_data,
-            domain_conditions_data,
+            unknowns_default_values, simulation_data
         )
-        # setup the boundary values for the unknowns
-        WaveCore.setup_boundary_values!(
-            domain_conditions, unkowns_handler
-        )
-
+ 
         new(
             MODEL_NAME, 
             MODEL_UNKNOWNS,
             equations,
             unkowns_handler, 
-            additional_parameters,
-            mesh,
-            domain_conditions,
-            output_handler,
-            logger
+            additional_parameters
         )
     end
 end
 
+"""Setup the model before to run the simulation"""
+function startup_model(simulation::Simulation)
+    # force to setup the boundary values for the unknowns for the first timestep
+    # before start the simulation 
+    WaveCore.setup_boundary_values!(
+        simulation.domain_conditions, simulation.model.unknowns_handler
+    )
+end
+
 
 """Run one iteration for this model"""
-function run_iteration(model::ModelSemiImplicit) 
+function run_iteration(
+    model::SimulationModel, mesh::Mesh, domain_conditions::DomainConditions
+) 
     # update elements internal data
     WaveCore.update_elements!(
-        model.mesh, 
+        mesh, 
         model.unknowns_handler, 
         model.additional_parameters
     )
@@ -125,18 +109,18 @@ function run_iteration(model::ModelSemiImplicit)
     # solve the sequence of registered equations for each variable
     for equation in model.equations
         ### ASSEMBLE THE EQUATION ###
-        if model.mesh.must_refresh
+        if mesh.must_refresh
             # for the current equation preallocate the assembled LHS if
             # mesh is marked as "must refresh" status (e.g. if it was remeshed)
             WaveCore.update_assembler_indices!(
                 equation.base.assembler, 
-                model.mesh
+                mesh
             )
         end
-        if model.mesh.must_refresh || model.mesh.nodes.moved
+        if mesh.must_refresh || mesh.nodes.moved
             equation.base.assembler.assembled_lhs = assemble_global_lhs(
                 equation, 
-                model.mesh,
+                mesh,
                 model.unknowns_handler,
                 model.additional_parameters
             )
@@ -144,7 +128,7 @@ function run_iteration(model::ModelSemiImplicit)
         # for this model always reassemble RHS
         assembled_rhs = assemble_global_rhs(
             equation, 
-            model.mesh,
+            mesh,
             model.unknowns_handler,
             model.additional_parameters
         )
@@ -153,12 +137,12 @@ function run_iteration(model::ModelSemiImplicit)
         # the domain conditions and solve could be done in parallel for each unknown
         for unknown in equation.base.solved_unknowns
             ### APPLY DOMAIN CONDITIONS ###
-            if model.mesh.must_refresh || model.mesh.nodes.moved
+            if mesh.must_refresh || mesh.nodes.moved
                 # it uses assembled_lhs as template for all variables so it needs to copy here 
                 # update the LHS matrix
                 equation.base.members.lhs[unknown] = copy(equation.base.assembler.assembled_lhs)
                 WaveCore.apply_domain_conditions_lhs!(
-                    model.domain_conditions, 
+                    domain_conditions, 
                     unknown, 
                     equation.base.members.lhs[unknown]
                 )
@@ -171,7 +155,7 @@ function run_iteration(model::ModelSemiImplicit)
             end
             # for this model always reapply the conditions for reassembled RHS
             equation.base.members.rhs[unknown] = WaveCore.apply_domain_conditions_rhs(
-                model.domain_conditions, 
+                domain_conditions, 
                 unknown, 
                 equation.base.assembler.assembled_lhs, 
                 assembled_rhs[unknown]
@@ -181,16 +165,17 @@ function run_iteration(model::ModelSemiImplicit)
             solve!(equation, unknown, model.unknowns_handler)
             # force the boundary conditions 
             WaveCore.setup_boundary_values!(
-                model.domain_conditions, model.unknowns_handler
+                domain_conditions, model.unknowns_handler
             )
         end
     end
 
     # do the updates for the mesh (e.g. movement, remesh, etc.)
-    WaveCore.update!(model.mesh)
+    WaveCore.update!(mesh)
     
     # TODO [general performance improvements]
     ## - it should check if it is diverging to abort simulation
+    # TODO [add validation cases for the semi implicit]
     ## - review the metrics to calculate convergence
     WaveCore.check_unknowns_convergence!(model.unknowns_handler)
 end

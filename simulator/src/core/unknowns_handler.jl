@@ -15,12 +15,9 @@ end
 
 
 """Load data for initial conditions needed to the simulation"""
-function load_unknowns_handler(
-    unknowns_default_values, 
-    input_data, 
-    simulation_data, 
-    domain_conditions_data
-)
+function load_unknowns_handler(unknowns_default_values, simulation_data)
+    # TODO: this should be done by the preprocessor !!!
+
     domain_conditions_groups = read(input_data["mesh/nodes/domain_condition_groups"])
     # preallocate with de default values chosen by the models
     values = Dict(unknown => fill(value, length(domain_conditions_groups)) for (unknown, value) in unknowns_default_values)
@@ -47,8 +44,8 @@ function load_unknowns_handler(
         values,
         old_values,
         Dict(unknown => false for unknown in all_solved_unknowns),
-        simulation_data["simulation"]["tolerance_relative"],
-        simulation_data["simulation"]["tolerance_absolute"]
+        simulation_data.simulation.tolerance_relative,
+        simulation_data.simulation.tolerance_absolute
     )
 end
 

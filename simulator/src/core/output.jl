@@ -13,25 +13,25 @@ end
 
 
 """Load data to create the output files handler for the simulation"""
-function load_output_handler(simulation_folder, simulation_data)
+function load_output_handler(cache_folder::String, simulation_data::SimulationData)
     # create the path for the results here if it do not exist
-    result_path = joinpath(simulation_folder, CACHE_PATH, RESULT_PATH)
+    result_path = joinpath(cache_folder, RESULT_PATH)
     if !isfile(result_path)
         mkpath(result_path)
     end
     result_file = h5open(joinpath(result_path, RESULT_FILENAME), "w")
     debug_file = h5open(joinpath(result_path, DEBUG_FILENAME), "w")
     result_file["version"] = RESULT_FILE_CURRENT_VERSION
-    result_file["description"] = simulation_data["general"]["description"]
+    result_file["description"] = simulation_data.general.description
     debug_file["version"] = DEBUG_FILE_CURRENT_VERSION
-    debug_file["description"] = simulation_data["general"]["description"]
+    debug_file["description"] = simulation_data.general.description
 
     return OutputHandler(
-        simulation_data["output"]["frequency"],
-        simulation_data["output"]["unknowns"],
-        simulation_data["output"]["save_result"],
-        simulation_data["output"]["save_numeric"],
-        simulation_data["output"]["save_debug"],
+        simulation_data.output.frequency,
+        simulation_data.output.unknowns,
+        simulation_data.output.save_result,
+        simulation_data.output.save_numeric,
+        simulation_data.output.save_debug,
         result_file,
         debug_file
     )
@@ -90,8 +90,6 @@ end
 
 """Close all output files"""
 function close_files(output_handler::OutputHandler)
-    # TODO [move application responsabilities to the Julia] 
-    ## should log println("CLOSING")
     close(output_handler.result_file)
     close(output_handler.debug_file)
 end
