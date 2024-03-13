@@ -1,6 +1,11 @@
+module ConditionsFileSchema
+using ..WaveCore
+
+export ConditionsSchema
+
 struct GeneralSection <: ValidatorSection
     version::String
-    brief_description::String
+    description::String
 end
 
 
@@ -18,9 +23,9 @@ end
 
 function validate_schema(section::GeneralSection)
     field_match_pattern(
-        VERSION_FIELD_NAME_PATTERN, 
+        "version",
         section.version, 
-        "version"
+        VERSION_FIELD_NAME_PATTERN, 
     )
 end
 
@@ -29,7 +34,7 @@ struct InitialSection <: ValidatorSection
     group_name::String
     unknown::String
     value::Float64
-    brief_description::String
+    description::String
 end
 
 
@@ -51,9 +56,9 @@ end
 
 function validate_schema(section::InitialSection)
     field_match_pattern(
-        UNKNOWN_FIELD_NAME_PATTERN, 
-        section.unknown, 
-        "unknown"
+        "unknown",
+        section.unknown,
+        UNKNOWN_FIELD_NAME_PATTERN
     )
 end
 
@@ -63,14 +68,14 @@ struct BoundarySection <: ValidatorSection
     condition_type::ConditionType
     unknown::String
     value::Float64
-    brief_description::String
+    description::String
 end
 
 
 function build_boundary_section(section_data)
     data = copy(section_data)
     group_name = get_section_field(data, "group_name", String)
-    condition_type = get_condition_type(
+    condition_type = WaveCore.get_condition_type(
         get_section_field(
             data,
             "condition_type",
@@ -79,23 +84,23 @@ function build_boundary_section(section_data)
     )
     unknown = get_section_field(data, "unknown", String)
     value = get_section_field(data, "value", Float64)
-    brief_description = get_section_field(data, "description", String, "")
+    description = get_section_field(data, "description", String, "")
     assert_only_supported_entries(data, "boundary")
     return BoundarySection(
         group_name,
         condition_type,
         unknown,
         value,
-        brief_description
+        description
     )
 end
 
 
 function validate_schema(section::BoundarySection)
     field_match_pattern(
-        UNKNOWN_FIELD_NAME_PATTERN, 
+        "unknown",
         section.unknown, 
-        "unknown"
+        UNKNOWN_FIELD_NAME_PATTERN
     )
 end
 
@@ -121,3 +126,5 @@ struct ConditionsSchema <: ValidatorSchema
         validate_schema(schema.boundary)
     end
 end
+
+end # module

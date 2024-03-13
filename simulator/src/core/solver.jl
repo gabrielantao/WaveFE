@@ -23,7 +23,7 @@ end
 
 """Load data for the solver"""
 function load_solver(simulation_parameters)
-    if simulation_parameters["solver"]["name"] == "Conjugate Gradient"
+    if simulation_parameters["solver"]["type"] == "Conjugate Gradient"
         solver_type = CONJUGATE_GRADIENT::SolverType
     else
         # TODO [add solvers and preconditioner options]
@@ -47,6 +47,32 @@ function load_solver(simulation_parameters)
         simulation_parameters["solver"]["tolerance_absolute"],
         preconditioners
     )
+end
+
+
+"""Get the type of solver selected in the simulation input options"""
+function get_solver_type(type)
+    if type == "Conjugate Gradient"
+        solver_type = CONJUGATE_GRADIENT::SolverType
+    else
+        # TODO [add solvers and preconditioner options]
+        ## add other options for solvers
+        throw("Not implemented yet other types of solvers")
+    end
+    return solver_type
+end
+
+
+"""Get the type of preconditioner selected in the simulation input options"""
+function get_solver_preconditioner(preconditioner)
+    if preconditioner == "Jacobi"
+        preconditioner_type = JACOBI::SolverPreconditioners
+    else
+        # TODO [add solvers and preconditioner options]
+        ## add other options for preconditioners
+        throw("Not implemented yet other types of preconditioners")
+    end
+    return preconditioner_type
 end
 
 

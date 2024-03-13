@@ -1,5 +1,5 @@
 [general]
-version = 1
+version = "1.0"
 title = "Square Cavity Re=100"
 description = "Cavity test case with Re = 100"
 alias = "cavity_re_100"
@@ -11,10 +11,10 @@ transient = false
 safety_dt_factor = 0.7
 
 [simulation.tolerance_relative]
-u_1 = 1e-6
-u_2 = 1e-6
-u_3 = 1e-6
-p =  1e-6
+u_1 = 1e-3
+u_2 = 1e-3
+u_3 = 1e-3
+p =  1e-2
 
 [simulation.tolerance_absolute]
 u_1 = 0.0
@@ -33,11 +33,11 @@ Ra = 1000.0
 Ri = 0.0
 
 [solver]
-name = "Conjugate Gradient"
+type = "Conjugate Gradient"
 preconditioner = "Jacobi"
 steps_limit = 10000
-tolerance_absolute = 0.0
 tolerance_relative = 1e-9
+tolerance_absolute = 0.0
 
 [output]
 frequency = 200

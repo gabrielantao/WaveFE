@@ -1,5 +1,5 @@
 [general]
-version = 1
+version = "1.0"
 title = "Square Cavity Re=100"
 description = "Cavity test case with Re = 100"
 alias = "cavity_re_100"
@@ -33,7 +33,7 @@ Ra = 1000.0
 Ri = 0.0
 
 [solver]
-name = "Conjugate Gradient"
+type = "Conjugate Gradient"
 preconditioner = "Jacobi"
 steps_limit = 10000
 tolerance_absolute = 0.0

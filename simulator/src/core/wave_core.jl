@@ -23,8 +23,10 @@ include("solver.jl")
 include("base_equation.jl")
 
 # not related directly with the simulation core
-include("../schema/schemas.jl")
-include("validator.jl")
+include("../schema/common.jl")
+include("../schema/conditions_schema.jl")
+include("../schema/simulation_schema.jl")
+#include("validator.jl")
 include("../models/register.jl")
 
 

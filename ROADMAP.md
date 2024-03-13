@@ -30,6 +30,7 @@ There are some features and improvements that could be implemented
 26. implement transient CBS 
 27. add validation cases for the semi implicit
 28. make the solver parallel
+29. integrate to Paraview
 
 # Descriptions
 ## implement one dimensional elements
@@ -39,4 +40,14 @@ description:
 requirements:
 steps do get done:
 
-## ...
+## integrate to Paraview
+tags: mesh, modeling
+complexity: ?/5
+description:
+### requirements
+it should:
+ - call a simulation from paraview
+ - visualize the result during the simulation or after that
+ - generate/read events/log during the simulation and show in GUI interface 
+### steps do get done:
+- add output for the paraview format

@@ -91,6 +91,7 @@ function load_mesh(input_data, simulation_data)
         throw("Not implemented tridimensional elements")
     end
     # get the interpolation order for the mesh
+    # TODO: this should use the get_interpolation_order
     if simulation_data["mesh"]["interpolation_order"] == 1
         interpolation_order = ORDER_ONE::InterpolationOrder
     elseif simulation_data["mesh"]["interpolation_order"] == 2
@@ -111,6 +112,20 @@ function load_mesh(input_data, simulation_data)
     )
 end
 
+
+"""Get the interpolation order for the mesh"""
+function get_interpolation_order(interpolation_number)
+    if interpolation_number == 1
+        interpolation_order = ORDER_ONE::InterpolationOrder
+    elseif interpolation_number== 2
+        interpolation_order = ORDER_TWO::InterpolationOrder
+    elseif interpolation_number == 3
+        interpolation_order = ORDER_THREE::InterpolationOrder
+    else
+        throw("Not implemented interpolation order $interpolation_number")
+    end
+    return interpolation_order
+end
 
 """Function to return reference to the elements containers used for the mesh"""
 function get_containers(mesh_elements::UniDimensionalElements)
