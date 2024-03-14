@@ -15,9 +15,17 @@ export run_simulation
 # general core files
 include("constants.jl")
 include("common.jl")
-include("method.jl")
-include("case.jl")
-include("simulation.jl")
+
+# the include file schemas and validators
+include("../schema/common.jl")
+include("../schema/conditions_schema.jl")
+include("../schema/simulation_schema.jl")
+#include("validator.jl")
+using .ConditionsFileSchema: ConditionsData
+using .SimulationFileSchema: SimulationData
+
+
+# the core functions
 include("unknowns_handler.jl")
 include("output.jl")
 include("domain_conditions.jl")
@@ -26,11 +34,10 @@ include("assembler.jl")
 include("solver.jl")
 include("base_equation.jl")
 
-# not related directly with the simulation core
-include("../schema/common.jl")
-include("../schema/conditions_schema.jl")
-include("../schema/simulation_schema.jl")
-#include("validator.jl")
+# the models, methods, case and simulation functions
+include("method.jl")
+include("case.jl")
+include("simulation.jl")
 include("../models/register.jl")
 
 

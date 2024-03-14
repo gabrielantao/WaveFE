@@ -32,7 +32,7 @@ end
 
 """Load data for the quadrilaterals"""
 function load_quadrilaterals(
-    mesh_data::HDF5, simulation_data::SimulationData
+    mesh_data::HDF5.File, simulation_data::SimulationData
 )
     elements = Vector{Quadrilateral}()
     if haskey(mesh_data, "mesh/quadrilaterals")
@@ -43,7 +43,7 @@ function load_quadrilaterals(
     end
 
     # set the depending on the interpolation order of the elements
-    if simulation_data.mesh.interpolation_order == 1
+    if simulation_data.mesh.interpolation_order == ORDER_ONE::InterpolationOrder
         nodes_per_element = 4
     else
         # TODO [implement higher order elements]

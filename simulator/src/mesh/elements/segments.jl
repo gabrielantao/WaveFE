@@ -31,7 +31,7 @@ end
 
 
 """Load data for the segments"""
-function load_segments(mesh_data::HDF5, simulation_data::SimulationData)
+function load_segments(mesh_data::HDF5.File, simulation_data::SimulationData)
     elements = Vector{Segment}()
     if haskey(mesh_data, "mesh/segments")
         connectivity_data = read(mesh_data["mesh/segments/connectivity"])
@@ -42,7 +42,7 @@ function load_segments(mesh_data::HDF5, simulation_data::SimulationData)
     end
 
     # set the depending on the interpolation order of the elements
-    if simulation_data.mesh.interpolation_order == 1
+    if simulation_data.mesh.interpolation_order == ORDER_ONE::InterpolationOrder
         nodes_per_element = 2
     else
         # TODO [implement higher order elements]

@@ -64,8 +64,8 @@
                 mesh.elements.triangles, 
                 mesh.nodes, 
                 get_unknowns(),
-                input_square_cavity_triangles.simulation_data["parameter"]["Re"], 
-                input_square_cavity_triangles.simulation_data["simulation"]["safety_dt_factor"]
+                input_square_cavity_triangles.simulation_data.parameter.parameters["Re"], 
+                input_square_cavity_triangles.simulation_data.simulation.safety_Δt_factor 
             )
             @test check_reference_csv(
                 "ref_mesh",

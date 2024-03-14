@@ -4,10 +4,10 @@ using .ModuleSemiImplicit
 
 
 """Get a registered model implemented in the directory models"""
-function build_model(simulation_data::SimulationData)
+function build_model(case::SimulationCase)
     model_name = simulation_data["simulation"]["model"]
     if model_name == ModuleSemiImplicit.MODEL_NAME
-        return ModelSemiImplicit(simulation_data)
+        return ModelSemiImplicit(case)
     # TODO [implement model with heat transfer]
     # TODO [implement model with chemical spiecies transfer]
     # TODO [implement model with porous media ]

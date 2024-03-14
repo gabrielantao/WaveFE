@@ -1,7 +1,5 @@
 # exported entities
 export Mesh
-export InterpolationOrder, Dimension
-
 
 # the abstract types used in this module...
 """A generic single element"""
@@ -22,20 +20,6 @@ include("./elements/segments.jl")
 include("./elements/triangles.jl")
 include("./elements/quadrilaterals.jl")
 include("./geometry.jl")
-
-
-@enum InterpolationOrder begin
-    ORDER_ONE = 1
-    ORDER_TWO = 2
-    ORDER_THREE = 3
-end
-
-
-@enum Dimension begin
-    UNIDIMENSIONAL = 1
-    BIDIMENSIONAL = 2
-    TRIDIMENSIONAL = 3
-end
 
 
 """This struct group the elements for a unidimension mesh"""
@@ -71,7 +55,7 @@ end
 
 
 """Import a mesh from files in cache path."""
-function load_mesh(mesh_data::HDF5, simulation_data::SimulationData)
+function load_mesh(mesh_data::HDF5.File, simulation_data::SimulationData)
     # initially it need to be set to refresh to force the
     # first calculations that depend on this 
     must_refresh = true
@@ -98,25 +82,11 @@ function load_mesh(mesh_data::HDF5, simulation_data::SimulationData)
         dimension, 
         nodes, 
         elements,
-        get_interpolation_order(simulation_data["mesh"]["interpolation_order"]),
+        simulation_data.mesh.interpolation_order,
         must_refresh
     )
 end
 
-
-"""Get the interpolation order for the mesh"""
-function get_interpolation_order(interpolation_number)
-    if interpolation_number == 1
-        interpolation_order = ORDER_ONE::InterpolationOrder
-    elseif interpolation_number== 2
-        interpolation_order = ORDER_TWO::InterpolationOrder
-    elseif interpolation_number == 3
-        interpolation_order = ORDER_THREE::InterpolationOrder
-    else
-        throw("Not implemented interpolation order $interpolation_number")
-    end
-    return interpolation_order
-end
 
 """Function to return reference to the elements containers used for the mesh"""
 function get_containers(mesh_elements::UniDimensionalElements)

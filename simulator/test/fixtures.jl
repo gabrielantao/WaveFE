@@ -1,3 +1,4 @@
+# TODO: this should be replaced by the SimulationCase
 struct InputDataFixture
     # brief description for the current fixture
     description::String
@@ -10,8 +11,8 @@ struct InputDataFixture
         new(
             description,
             h5open(joinpath(case_folder, WaveCore.SIMULATION_MESH_FILENAME), "r"),
-            TOML.parsefile(joinpath(case_folder, WaveCore.SIMULATION_INPUT_FILENAME)),
-            TOML.parsefile(joinpath(case_folder, WaveCore.DOMAIN_CONDITIONS_FILENAME))
+            WaveCore.SimulationData(TOML.parsefile(joinpath(case_folder, WaveCore.SIMULATION_INPUT_FILENAME))),
+            WaveCore.ConditionsData(TOML.parsefile(joinpath(case_folder, WaveCore.DOMAIN_CONDITIONS_FILENAME)))
         )
     end
 end

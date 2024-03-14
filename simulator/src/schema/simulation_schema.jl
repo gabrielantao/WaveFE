@@ -1,6 +1,7 @@
 module SimulationFileSchema
 using ..WaveCore
 
+export SimulationData
 
 struct GeneralSection <: DataSection
     version::String
@@ -56,9 +57,6 @@ function build_simulation_section(section_data)
     steps_limit = get_section_field(data, "steps_limit", Int64)
     transient = get_section_field(data, "transient", Bool)
     safety_Δt_factor = get_section_field(data, "safety_dt_factor", Float64)
-    # Dict(
-    #     field_name => get_section_field(data, field_name, Float64) for (field_name, _) in data
-    # )
     raw_tolerance_relative = pop!(data, "tolerance_relative", Dict{String, Float64}())
     raw_tolerance_absolute = pop!(data, "tolerance_absolute", Dict{String, Float64}())
     @assert isempty(raw_tolerance_relative) == false "tolerance_relative could not be empty"

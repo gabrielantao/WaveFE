@@ -27,7 +27,7 @@ end
 
 
 """Import data for nodes."""
-function load_nodes(mesh_data::HDF5)
+function load_nodes(mesh_data::HDF5.File)
     nodes = Vector{Node}()
     for (
         physical_group, 

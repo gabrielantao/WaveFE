@@ -45,33 +45,38 @@ struct ModelSemiImplicit <: SimulationModel
     unknowns_handler::UnknownsHandler
     additional_parameters::ModelSemiImplicitParameters
 
-    function ModelSemiImplicit(simulation_data::SimulationData)
+    function ModelSemiImplicit(case::SimulationCase)
         # configure the additional model parameters
         additional_parameters = ModelSemiImplicitParameters(
-            simulation_data.simulation.transient,
-            simulation_data.simulation.safety_Δt_factor,
-            simulation_data.parameter.parameters
+            case.simulation_data.simulation.transient,
+            case.simulation_data.simulation.safety_Δt_factor,
+            case.simulation_data.parameter.parameters
         )
 
         # define the unknowns for this model
         # velocities solved in the equation one and three depend on mesh dimension
-        unknowns_velocities = ["u_$i" for i in range(1, Int(mesh.dimension))]
+        dimension = read(case.mesh_data["mesh/dimension"])
+        unknowns_velocities = ["u_$i" for i in range(1, dimension)]
         unknown_pressure = ["p"]
         all_solved_unknowns = [unknowns_velocities; unknown_pressure]
 
         # build the equations used for this model
         equations = [
-            EquationStepOne(unknowns_velocities, simulation_data),
-            EquationStepTwo(unknown_pressure, simulation_data),
-            EquationStepThree(unknowns_velocities, simulation_data),
+            EquationStepOne(unknowns_velocities, case.simulation_data),
+            EquationStepTwo(unknown_pressure, case.simulation_data),
+            EquationStepThree(unknowns_velocities, case.simulation_data),
         ]
-
-        # load the initial values for the unknowns
-        unknowns_default_values = Dict(unknown => 0.0 for unknown in all_solved_unknowns)
-        unkowns_handler = WaveCore.load_unknowns_handler(
-            unknowns_default_values, simulation_data
-        )
  
+        # load the initial values for the unknowns
+        unknowns_default_values = Dict{String, Float64}(
+            unknown => 0.0 for unknown in all_solved_unknowns
+        )
+        unkowns_handler = WaveCore.load_unknowns_handler(
+            unknowns_default_values, 
+            case.mesh_data,
+            case.simulation_data,
+            case.domain_conditions_data 
+        )
         new(
             MODEL_NAME, 
             MODEL_UNKNOWNS,
@@ -83,18 +88,26 @@ struct ModelSemiImplicit <: SimulationModel
 end
 
 """Setup the model before to run the simulation"""
-function startup_model(simulation::Simulation)
+function startup_model(
+    model::ModelSemiImplicit, 
+    mesh::Mesh, 
+    domain_conditions::DomainConditions
+)
+    # TODO: think if it should set the initial values here
     # force to setup the boundary values for the unknowns for the first timestep
     # before start the simulation 
     WaveCore.setup_boundary_values!(
-        simulation.domain_conditions, simulation.model.unknowns_handler
+        domain_conditions, 
+        model.unknowns_handler
     )
 end
 
 
 """Run one iteration for this model"""
 function run_iteration(
-    model::SimulationModel, mesh::Mesh, domain_conditions::DomainConditions
+    model::ModelSemiImplicit, 
+    mesh::Mesh, 
+    domain_conditions::DomainConditions
 ) 
     # update elements internal data
     WaveCore.update_elements!(

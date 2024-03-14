@@ -51,8 +51,8 @@
     unknowns_handler = get_unknowns()
     model_parameters = ModelSemiImplicitParameters(
         false, 
-        input_square_cavity_triangles.simulation_data["simulation"]["safety_dt_factor"],
-        Dict("Re" => input_square_cavity_triangles.simulation_data["parameter"]["Re"])
+        input_square_cavity_triangles.simulation_data.simulation.safety_Δt_factor,
+        Dict("Re" => input_square_cavity_triangles.simulation_data.parameter.parameters["Re"])
     )
     # update the parameters for the elements 
     WaveCore.update_elements!(mesh, unknowns_handler, model_parameters)

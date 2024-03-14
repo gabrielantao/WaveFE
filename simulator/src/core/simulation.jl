@@ -1,3 +1,5 @@
+export Simulation
+
 """
 Simulation => Case + Method + Model + control data
 """
@@ -21,7 +23,7 @@ function build_simulation(folder::String)
     
     # TODO: log the case name and general data and folder before start
     # TODO: log the reading the input files and write message if break during validations
-    
+
     # import the case files
     case = load_simulation_case(folder)
 
@@ -49,7 +51,7 @@ end
 
 
 """Start the main loop"""
-function start(simulation::Simulation, show_progress::bool)
+function start(simulation::Simulation, show_progress::Bool)
     running = true
     success = false
     timestep_counter = 0
@@ -64,7 +66,7 @@ function start(simulation::Simulation, show_progress::bool)
 
     elapsed_time = @elapsed begin   
         # setup additional stuff before start the simulation
-        startup_model(simulation)
+        startup_model(simulation.model, simulation.mesh, simulation.domain_conditions)
         
         # write the output values for the initial time step
         write_result_data(

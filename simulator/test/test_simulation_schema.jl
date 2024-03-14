@@ -90,7 +90,7 @@
         for entry_data in valid_entries
             section = WaveCore.SimulationFileSchema.build_solver_section(entry_data)
             @test section.type == WaveCore.CONJUGATE_GRADIENT::SolverType
-            @test section.preconditioner == WaveCore.JACOBI::PreconditionerType
+            @test section.preconditioner_type == WaveCore.JACOBI::PreconditionerType
             @test section.steps_limit == pop!(entry_data, "steps_limit")
             @test section.tolerance_relative == pop!(entry_data, "tolerance_relative")
             @test section.tolerance_absolute == pop!(entry_data, "tolerance_absolute")
@@ -119,4 +119,11 @@
             WaveCore.SimulationFileSchema.validate_schema(section)
         end
     end
+
+    @testset "build simulation whole schema" begin
+        case_folder = joinpath(WAVE_SIMULATOR_TEST_DATA_PATH, "case_square_cavity") 
+        conditions = WaveCore.SimulationFileSchema.SimulationData(
+            TOML.parsefile(joinpath(case_folder, WaveCore.SIMULATION_INPUT_FILENAME))
+        )
+    end  
 end

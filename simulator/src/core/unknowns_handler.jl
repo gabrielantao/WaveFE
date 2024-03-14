@@ -15,20 +15,23 @@ end
 
 
 """Load data for initial conditions needed to the simulation"""
-function load_unknowns_handler(unknowns_default_values, simulation_data)
-    # TODO: this should be done by the preprocessor !!!
-
-    domain_conditions_groups = read(input_data["mesh/nodes/domain_condition_groups"])
+function load_unknowns_handler(
+    unknowns_default_values::Dict{String, Float64}, 
+    mesh_data::HDF5.File,
+    simulation_data::SimulationData,
+    domain_conditions_data::ConditionsData
+)
+    domain_conditions_groups = read(mesh_data["mesh/nodes/domain_condition_groups"])
     # preallocate with de default values chosen by the models
     values = Dict(unknown => fill(value, length(domain_conditions_groups)) for (unknown, value) in unknowns_default_values)
     old_values = Dict(unknown => fill(value, length(domain_conditions_groups)) for (unknown, value) in unknowns_default_values)
     # set initial conditions
     all_solved_unknowns = collect(keys(unknowns_default_values))
-    for condition_data in domain_conditions_data["initial"]
-        if condition_data["unknown"] in all_solved_unknowns
-            group_number = parse(Int64, condition_data["group_name"])
-            unknown = condition_data["unknown"]
-            value = condition_data["value"]
+    for condition_data in domain_conditions_data.initial
+        if condition_data.unknown in all_solved_unknowns
+            group_number = parse(Int64, condition_data.group_name)
+            unknown = condition_data.unknown
+            value = condition_data.value
             current_group_indices = findall(
                 domain_condition_group -> domain_condition_group == group_number, 
                 domain_conditions_groups
@@ -38,6 +41,7 @@ function load_unknowns_handler(unknowns_default_values, simulation_data)
         #else
             # TODO [implement validations and input versioning]
             ## log message this variable is not present in the model, ignored
+            ## this should be done by the validator (??)
         end
     end
     return UnknownsHandler(

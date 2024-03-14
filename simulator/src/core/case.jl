@@ -1,3 +1,5 @@
+export SimulationCase
+
 """
 The simulation case is responsable for:
 - import all files needed to run a simulation case (e.g. mesh, parameters, conditions)
@@ -8,7 +10,7 @@ struct SimulationCase
     folder::String
     # check if case changed compared to the cached inputs
     # case_changed::Bool 
-    mesh_data::HDF5
+    mesh_data::HDF5.File
     simulation_data::SimulationData
     domain_conditions_data::ConditionsData
 end
@@ -33,14 +35,13 @@ function load_simulation_case(folder::String)
     validate(domain_conditions_data)
 
     # TODO create the cache hre with the case ....
-    #cache_filepath = joinpath(folder, CACHE_PATH)
+    #cache_filepath = get_cache_folder(folder)
     
     return SimulationCase(
         folder,
         mesh_data,
         simulation_data,
-        domain_conditions_data,
-        logger
+        domain_conditions_data
     )
 end
 

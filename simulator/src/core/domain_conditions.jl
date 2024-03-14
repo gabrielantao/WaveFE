@@ -1,18 +1,4 @@
 export DomainConditions
-export ConditionType
-
-
-"""
-First type condtions specifies the values of variable applied at the boundary (AKA Dirichlet)
-Second type condtions specifies the values of the derivative applied at the boundary of the domain. (AKA  Neumann condition)
-"""
-@enum ConditionType begin
-    FIRST = 1
-    SECOND = 2
-    # TODO [implement other domain conditions]
-    ## maybe implement in the future the other conditions (Cauchy and Robin) with combination of these two others
-end
-
 
 """
 This struct holds data related to domain conditions
@@ -27,24 +13,27 @@ struct DomainConditions
 end
 
 
+# TODO: check the type received for the mesh
 """Load data for domain conditions needed to the simulation"""
-function load_domain_conditions(mesh_data::HDF5, domain_conditions_data::ConditionsData)
+function load_domain_conditions(
+    mesh_data::HDF5.File, domain_conditions_data::ConditionsData
+)
     indices = Dict{Tuple{String, ConditionType}, Vector{Int64}}()
     values = Dict{Tuple{String, ConditionType}, Vector{Float64}}()
     domain_conditions_groups = read(mesh_data["mesh/nodes/domain_condition_groups"])
     # preallocate the vectors
-    for condition_data in domain_conditions_data["boundary"]
-        unknown = condition_data["unknown"]
-        condition_type = get_condition_type(condition_data["condition_type"])
+    for condition_data in domain_conditions_data.boundary
+        unknown = condition_data.unknown
+        condition_type = condition_data.condition_type
         indices[(unknown, condition_type)] = Int64[]
         values[(unknown, condition_type)] = Float64[]
     end
     # get boundary conditions
-    for condition_data in domain_conditions_data["boundary"]
-        group_number = parse(Int64, condition_data["group_name"])
-        unknown = condition_data["unknown"]
-        value = condition_data["value"]
-        condition_type = get_condition_type(condition_data["condition_type"])
+    for condition_data in domain_conditions_data.boundary
+        group_number = parse(Int64, condition_data.group_name)
+        unknown = condition_data.unknown
+        value = condition_data.value
+        condition_type = condition_data.condition_type
         current_group_indices = findall(
             domain_condition_group -> domain_condition_group == group_number, 
             domain_conditions_groups
@@ -53,18 +42,6 @@ function load_domain_conditions(mesh_data::HDF5, domain_conditions_data::Conditi
         append!(values[(unknown, condition_type)], fill(value, length(current_group_indices)))
     end
     return DomainConditions(indices, values)
-end
-
-
-"""Auxiliary function to convert a type number of condition into the enum values"""
-function get_condition_type(condition_type_number)
-    if condition_type_number == 1
-        return FIRST::ConditionType
-    elseif condition_type_number == 2
-        return SECOND::ConditionType
-    else
-        throw("Not implement group number of type $condition_type_number")
-    end
 end
 
 

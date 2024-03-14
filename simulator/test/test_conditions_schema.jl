@@ -123,8 +123,9 @@
 
 
     @testset "build condition whole schema" begin
+        case_folder = joinpath(WAVE_SIMULATOR_TEST_DATA_PATH, "case_square_cavity") 
         conditions = WaveCore.ConditionsFileSchema.ConditionsData(
-            input_square_cavity_triangles.domain_conditions_data
+            TOML.parsefile(joinpath(case_folder, WaveCore.DOMAIN_CONDITIONS_FILENAME))
         )
         @test isempty(conditions.initial) == false
         @test isempty(conditions.boundary) == false

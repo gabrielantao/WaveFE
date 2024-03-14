@@ -1,14 +1,6 @@
 export Solver
-export SolverType, PreconditionerType
 export load_solver
 
-@enum SolverType begin
-    CONJUGATE_GRADIENT = 1
-end
-
-@enum PreconditionerType begin
-    JACOBI = 1 # AKA DiagonalPreconditioner
-end
 
 """Solver holds data for matrices that are used to solve boundary problem"""
 mutable struct Solver
@@ -32,32 +24,6 @@ function load_solver(simulation_data)
         simulation_data.solver.tolerance_absolute,
         preconditioner
     )
-end
-
-
-"""Get the type of solver selected in the simulation input options"""
-function get_solver_type(type)
-    if type == "Conjugate Gradient"
-        solver_type = CONJUGATE_GRADIENT::SolverType
-    else
-        # TODO [add solvers and preconditioner options]
-        ## add other options for solvers
-        throw("Not implemented yet other types of solvers")
-    end
-    return solver_type
-end
-
-
-"""Get the type of preconditioner selected in the simulation input options"""
-function get_solver_preconditioner_type(preconditioner)
-    if preconditioner == "Jacobi"
-        preconditioner_type = JACOBI::PreconditionerType
-    else
-        # TODO [add solvers and preconditioner options]
-        ## add other options for preconditioners
-        throw("Not implemented yet other types of preconditioners")
-    end
-    return preconditioner_type
 end
 
 
@@ -98,9 +64,6 @@ function calculate_solution(
     rhs::Vector{Float64},
     unknowns_handler::UnknownsHandler
 )
-    # logger.info(
-    #     f"solving variable {unknown_label}..."
-    # )
     # TODO [add solvers and preconditioner options]
     ## use the tolerance values in the solver
     if solver.type == WaveCore.CONJUGATE_GRADIENT::SolverType
