@@ -13,12 +13,10 @@ end
 
 
 """Load data to create the output files handler for the simulation"""
-function load_output_handler(cache_folder::String, simulation_data::SimulationData)
+function build_output_handler(cache_folder::String, simulation_data::SimulationData)
     # create the path for the results here if it do not exist
     result_path = joinpath(cache_folder, RESULT_PATH)
-    if !isfile(result_path)
-        mkpath(result_path)
-    end
+    mkpath(result_path)
     result_file = h5open(joinpath(result_path, RESULT_FILENAME), "w")
     debug_file = h5open(joinpath(result_path, DEBUG_FILENAME), "w")
     result_file["version"] = RESULT_FILE_CURRENT_VERSION

@@ -1,4 +1,4 @@
-@testset "condition schema validator" begin 
+@testset "condition schema validation" begin 
     @testset "build condition general section" begin
         # check valid entries
         valid_entries = [
@@ -122,10 +122,10 @@
     end  
 
 
-    @testset "build condition whole schema" begin
+    @testset "build condition data schema" begin
         case_folder = joinpath(WAVE_SIMULATOR_TEST_DATA_PATH, "case_square_cavity") 
-        conditions = WaveCore.ConditionsFileSchema.ConditionsData(
-            TOML.parsefile(joinpath(case_folder, WaveCore.DOMAIN_CONDITIONS_FILENAME))
+        conditions = WaveCore.ConditionsFileSchema.DomainConditionsData(
+            joinpath(case_folder, WaveCore.DOMAIN_CONDITIONS_FILENAME)
         )
         @test isempty(conditions.initial) == false
         @test isempty(conditions.boundary) == false

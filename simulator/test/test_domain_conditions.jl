@@ -1,5 +1,5 @@
 @testset "domain conditions" begin
-    domain_conditions = WaveCore.load_domain_conditions(
+    domain_conditions = WaveCore.build_domain_conditions(
         input_square_cavity_triangles.hdf_data, 
         input_square_cavity_triangles.domain_conditions_data
     )

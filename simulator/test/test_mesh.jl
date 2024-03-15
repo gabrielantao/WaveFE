@@ -5,7 +5,7 @@
     end
 
     @testset "mesh bidimensional" begin
-        mesh = WaveCore.load_mesh(
+        mesh = WaveCore.build_mesh(
             input_square_cavity_triangles.hdf_data, 
             input_square_cavity_triangles.simulation_data
         )

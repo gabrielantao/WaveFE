@@ -18,36 +18,41 @@ end
 
 """Build all components of the current simulation"""
 function build_simulation(folder::String)
-    # create the logger (to a log file)
-    logger = FileLogger(joinpath(cache_folder, SIMULATOR_LOG_FILENAME))
-    
+    # import the case files
+    case = build_simulation_case(folder)
+    # TODO: look for --force-rerun flag to decide if it should update these files and run anyway.
     # TODO: log the case name and general data and folder before start
     # TODO: log the reading the input files and write message if break during validations
 
-    # import the case files
-    case = load_simulation_case(folder)
+    # TODO [add validation cases for the semi implicit]
+    ## maybe this logger should be global 
+    # create the logger (to a log file)
+    logger = FileLogger(joinpath(get_cache_folder(case), LOG_FILENAME))
 
     # TODO [implement explicit method]
     ## implement data and functions for the explicit method and select the case here
     method = SemiImplicitMethod()
 
     # load the mesh and domain conditions (AKA boundary conditions)
-    mesh = load_mesh(case.mesh_data, case.simulation_data)
-    domain_conditions = load_domain_conditions(
+    mesh = build_mesh(case.mesh_data, case.simulation_data)
+    domain_conditions = build_domain_conditions(
         case.mesh_data, case.domain_conditions_data
     )
 
     # load and create the output handler and 
-    output_handler = load_output_handler(get_cache_folder(case), case.simulation_data)
+    output_handler = build_output_handler(get_cache_folder(case), case.simulation_data)
     
     # get the model based in the simulation model defined in input file
-    model = build_model(case.simulation_data)
+    model = build_model(case)
 
+    # do the logical validations for the inputs
+    # TODO: maybe this validation should depend on model's data (e.g. which variables the model has)
+    #validate(simulation_data)
+    #validate(domain_conditions_data)
     return Simulation(
         case, method, model, mesh, domain_conditions, output_handler, logger
     )
 end
-
 
 
 """Start the main loop"""
@@ -104,9 +109,11 @@ function start(simulation::Simulation, show_progress::Bool)
         end
     end # elapsed macro
 
-    # TODO should log  finhish and closing output files
+    # TODO [preprocessing data for simulator]
+    ## should log  finhish and closing output files
     finish!(progress_bar)
     write_additional_data(simulation.output_handler, success, timestep_counter, elapsed_time)
     close_files(simulation.output_handler)
-    # TODO: close the file logger file
+    # TODO [preprocessing data for simulator]
+    ## close the file logger file
 end

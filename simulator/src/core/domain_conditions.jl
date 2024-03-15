@@ -15,8 +15,8 @@ end
 
 # TODO: check the type received for the mesh
 """Load data for domain conditions needed to the simulation"""
-function load_domain_conditions(
-    mesh_data::HDF5.File, domain_conditions_data::ConditionsData
+function build_domain_conditions(
+    mesh_data::HDF5.File, domain_conditions_data::DomainConditionsData
 )
     indices = Dict{Tuple{String, ConditionType}, Vector{Int64}}()
     values = Dict{Tuple{String, ConditionType}, Vector{Float64}}()

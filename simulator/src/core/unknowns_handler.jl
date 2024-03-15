@@ -19,7 +19,7 @@ function load_unknowns_handler(
     unknowns_default_values::Dict{String, Float64}, 
     mesh_data::HDF5.File,
     simulation_data::SimulationData,
-    domain_conditions_data::ConditionsData
+    domain_conditions_data::DomainConditionsData
 )
     domain_conditions_groups = read(mesh_data["mesh/nodes/domain_condition_groups"])
     # preallocate with de default values chosen by the models

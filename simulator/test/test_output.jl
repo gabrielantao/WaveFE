@@ -1,6 +1,6 @@
 @testset "output simulation data" begin
     output_cache_folder = joinpath(WAVE_SIMULATOR_TEST_PATH, "ref_output", WaveCore.CACHE_PATH)
-    output_handler = WaveCore.load_output_handler(
+    output_handler = WaveCore.build_output_handler(
         output_cache_folder,
         input_square_cavity_triangles.simulation_data
     )

@@ -1,6 +1,7 @@
 module WaveCore
 
 using TOML
+using Gmsh
 using HDF5
 using ProgressMeter
 using SparseArrays
@@ -20,8 +21,9 @@ include("common.jl")
 include("../schema/common.jl")
 include("../schema/conditions_schema.jl")
 include("../schema/simulation_schema.jl")
-#include("validator.jl")
-using .ConditionsFileSchema: ConditionsData
+include("../schema/mesh_schema.jl")
+#include("validation.jl")
+using .ConditionsFileSchema: DomainConditionsData
 using .SimulationFileSchema: SimulationData
 
 

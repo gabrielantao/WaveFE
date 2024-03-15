@@ -1,7 +1,7 @@
 module ConditionsFileSchema
 using ..WaveCore
 
-export ConditionsData
+export DomainConditionsData
 
 struct GeneralSection <: DataSection
     version::String
@@ -105,12 +105,13 @@ function validate_schema(section::BoundarySection)
 end
 
 
-struct ConditionsData <: DataSchema
+struct DomainConditionsData <: DataSchema
     general::GeneralSection
     initial::Vector{InitialSection}
     boundary::Vector{BoundarySection}
 
-    function ConditionsData(data) 
+    function DomainConditionsData(folder::String) 
+        data = WaveCore.TOML.parsefile(folder)
         new(
             build_general_section(data["general"]),
             [build_initial_section(section) for section in data["initial"]],
@@ -118,7 +119,7 @@ struct ConditionsData <: DataSchema
         )
     end
 
-    function validate_schema(schema::ConditionsData)
+    function validate_schema(schema::DomainConditionsData)
         @assert isempty(schema.initial) == false, "The initial conditions could not be empty"
         @assert isempty(schema.boundary) == false, "The boundary conditions could not be empty"
         validate_schema(schema.general)

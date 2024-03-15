@@ -1,4 +1,4 @@
-@testset "simulation schema validator" begin
+@testset "simulation schema validation" begin
     @testset "build simulation general section" begin
         valid_entries = [
             Dict(
@@ -120,10 +120,10 @@
         end
     end
 
-    @testset "build simulation whole schema" begin
+    @testset "build simulation data schema" begin
         case_folder = joinpath(WAVE_SIMULATOR_TEST_DATA_PATH, "case_square_cavity") 
         conditions = WaveCore.SimulationFileSchema.SimulationData(
-            TOML.parsefile(joinpath(case_folder, WaveCore.SIMULATION_INPUT_FILENAME))
+            joinpath(case_folder, WaveCore.SIMULATION_FILENAME)
         )
     end  
 end

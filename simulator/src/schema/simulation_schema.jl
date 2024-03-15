@@ -230,7 +230,8 @@ struct SimulationData <: DataSchema
     solver::SolverSection
     output::OutputSection
 
-    function SimulationData(data) 
+    function SimulationData(folder::String) 
+        data = WaveCore.TOML.parsefile(folder)
         new(
             build_general_section(data["general"]),
             build_simulation_section(data["simulation"]),
