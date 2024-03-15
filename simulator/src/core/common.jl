@@ -117,3 +117,19 @@ function get_interpolation_order(interpolation_number)
     end
     return interpolation_order
 end
+
+
+
+"""Get the mesh dimension"""
+function get_dimension_number(dimension_number)
+    if dimension_number == 1
+        dimension = UNIDIMENSIONAL::Dimension
+    elseif dimension_number== 2
+        dimension = BIDIMENSIONAL::Dimension
+    elseif dimension_number == 3
+        dimension = TRIDIMENSIONAL::Dimension
+    else
+        throw("Invalid dimension $dimension_number it should be 1, 2 or 3")
+    end
+    return dimension
+end

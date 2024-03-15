@@ -2,7 +2,7 @@
 
 julia_version = "1.10.2"
 manifest_format = "2.0"
-project_hash = "f8d2e6ee2c048653fb3cc2c03f71f7450fac3315"
+project_hash = "94a09643efb6e598839219debf0e910117067001"
 
 [[deps.AMD]]
 deps = ["LinearAlgebra", "SparseArrays", "SuiteSparse_jll"]
@@ -36,6 +36,12 @@ version = "0.3.9"
 
 [[deps.Base64]]
 uuid = "2a0f44e3-6c83-55bd-87e4-b1978d98bd5f"
+
+[[deps.BinaryProvider]]
+deps = ["Libdl", "Logging", "SHA"]
+git-tree-sha1 = "ecdec412a9abc8db54c0efc5548c64dfce072058"
+uuid = "b99e7846-7c00-51b0-8f62-c81ae34c0232"
+version = "0.5.10"
 
 [[deps.CodeTracking]]
 deps = ["InteractiveUtils", "UUIDs"]
@@ -138,6 +144,12 @@ deps = ["Statistics"]
 git-tree-sha1 = "335bfdceacc84c5cdf16aadc768aa5ddfc5383cc"
 uuid = "53c48c17-4a7d-5ca2-90c5-79b7896eea93"
 version = "0.8.4"
+
+[[deps.Gmsh]]
+deps = ["BinaryProvider", "Libdl"]
+git-tree-sha1 = "1204b5592a195d71569889c29670c72ca9118a87"
+uuid = "705231aa-382f-11e9-3f0c-b7cb4346fdeb"
+version = "0.1.1"
 
 [[deps.HDF5]]
 deps = ["Compat", "HDF5_jll", "Libdl", "MPIPreferences", "Mmap", "Preferences", "Printf", "Random", "Requires", "UUIDs"]

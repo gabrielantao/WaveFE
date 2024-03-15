@@ -31,6 +31,10 @@ There are some features and improvements that could be implemented
 27. add validation cases for the semi implicit
 28. make the solver parallel
 29. integrate to Paraview
+30. preprocessing data for simulator
+31. study and implement how to run not adimensional models
+32. create benchmarks for the simulator
+
 
 # Descriptions
 ## implement one dimensional elements
