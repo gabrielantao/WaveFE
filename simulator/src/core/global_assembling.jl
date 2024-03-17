@@ -53,9 +53,6 @@ function assemble_global_lhs(
             equation.base.assembler.lhs_indices_i, equation.base.assembler.lhs_indices_j
         )
             if i < j
-                if !(lhs[j, i] ≈ 0.0)
-                    println("$i $j lhs[i,j]=$(lhs[i, j]) lhs[j,i]=$(lhs[j, i])")
-                end
                 lhs[j, i] = lhs[i, j]
             end
         end

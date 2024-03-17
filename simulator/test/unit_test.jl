@@ -78,7 +78,7 @@ include("utils.jl")
 include("fixtures.jl")
 
 # unit test list
-include("test_input.jl")
+include("test_simulation_case.jl")
 include("test_nodes.jl")
 include("test_segments.jl")
 include("test_triangles.jl")
@@ -92,6 +92,7 @@ include("test_output.jl")
 include("test_schemas.jl")
 include("test_simulation_schema.jl")
 include("test_conditions_schema.jl")
+include("test_mesh_data.jl")
 
 # model specific elemental assemblers
 include("models/test_semi_implicit.jl")

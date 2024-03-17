@@ -16,17 +16,18 @@ end
 
 """Create the simulation case based on data from input files"""
 function build_simulation_case(folder::String)
-    # define the input file paths
-    simulation_filepath = joinpath(abspath(folder), SIMULATION_FILENAME)
-    domain_conditions_filepath = joinpath(abspath(folder), DOMAIN_CONDITIONS_FILENAME)
-    mesh_filepath = joinpath(abspath(folder), MESH_FILENAME)
-    
     # load the data from input files
-    simulation_data = SimulationData(simulation_filepath)
+    simulation_filepath = joinpath(abspath(folder), SIMULATION_FILENAME)
+    simulation_data = load_simulation_data(simulation_filepath)
+    domain_conditions_filepath = joinpath(abspath(folder), DOMAIN_CONDITIONS_FILENAME)
     domain_conditions_data = load_domain_conditions_data(domain_conditions_filepath)
+    mesh_filepath = joinpath(abspath(folder), simulation_data.mesh.filename)
     mesh_data = load_mesh_data(mesh_filepath)
     
-    # calculate the input data hashs
+    # calculate the input data hash
+    # TODO [add validation cases for the semi implicit] 
+    ## review this hash this should be the SHA
+    ## investigate why this is generate different values
     current_simulation_data_hash = hash(simulation_data)
     current_domain_conditions_data = hash(domain_conditions_data)
     current_mesh_data_hash = hash(mesh_data)
@@ -44,9 +45,9 @@ function build_simulation_case(folder::String)
         ## think about it, maybe the improvements may be negligible         
         input_modified = !all(
             [
-                current_simulation_data_hash == cached_data["simulation"],
-                current_domain_conditions_data == cached_data["domain_conditions"],
-                current_mesh_data_hash == cached_data["mesh"] 
+                string(current_simulation_data_hash) == cached_data["simulation"],
+                string(current_domain_conditions_data) == cached_data["domain_conditions"],
+                string(current_mesh_data_hash) == cached_data["mesh"] 
             ]
         )
     end
@@ -57,17 +58,18 @@ function build_simulation_case(folder::String)
         ## maybe it could use BSON to serialize data to make fast rerun
         ## then take advantage of previouslly preprocessed input in the cache
         ## think about it, maybe the improvements may be negligible  
-        cached_data = Dict{String, UInt64}(
-            "simulation" => current_simulation_data_hash,
-            "domain_conditions" => current_domain_conditions_data,
-            "mesh" => current_mesh_data_hash
+        cached_data = Dict{String, String}(
+            "simulation" => string(current_simulation_data_hash),
+            "domain_conditions" => string(current_domain_conditions_data),
+            "mesh" => string(current_mesh_data_hash)
         )
+
         open(cached_data_filepath, "w") do io
-            mv(simulation_filepath, cache_folder, force=true)
-            mv(domain_conditions_filepath, cache_folder, force=true)
-            mv(mesh_filepath, cache_folder, force=true)
             TOML.print(io, cached_data)
         end
+        cp(simulation_filepath, joinpath(cache_folder, SIMULATION_FILENAME), force=true)
+        cp(domain_conditions_filepath, joinpath(cache_folder, DOMAIN_CONDITIONS_FILENAME), force=true)
+        cp(mesh_filepath, joinpath(cache_folder, simulation_data.mesh.filename), force=true)
     end
     return SimulationCase(
         folder, 

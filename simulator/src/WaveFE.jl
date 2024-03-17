@@ -18,6 +18,10 @@ function parse_commandline()
             help = "define if log level" 
             arg_type = Int
             default = 1
+        "--force-rerun", "-f"    
+            help = "force the rerun even if input files haven't changed" 
+            arg_type = Int
+            default = 1
         "folder"
             help = "path folder for simulation files"
             required = true

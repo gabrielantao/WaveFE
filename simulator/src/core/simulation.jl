@@ -20,12 +20,12 @@ end
 function build_simulation(folder::String)
     # import the case files
     case = build_simulation_case(folder)
-    # TODO: look for --force-rerun flag to decide if it should update these files and run anyway.
-    # TODO: log the case name and general data and folder before start
-    # TODO: log the reading the input files and write message if break during validations
-
+    
     # TODO [add validation cases for the semi implicit]
+    ## log the case name and general data and folder before start
+    ## log the reading the input files and write message if break during validations
     ## maybe this logger should be global 
+    
     # create the logger (to a log file)
     logger = FileLogger(joinpath(get_cache_folder(case), LOG_FILENAME))
 

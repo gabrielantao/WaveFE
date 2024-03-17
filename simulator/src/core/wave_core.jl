@@ -23,8 +23,8 @@ include("../schema/conditions_schema.jl")
 include("../schema/simulation_schema.jl")
 include("../schema/mesh_schema.jl")
 #include("validation.jl")
-using .ConditionsFileSchema: DomainConditionsData
-using .SimulationFileSchema: SimulationData
+using .ConditionsFileSchema: DomainConditionsData, load_domain_conditions_data
+using .SimulationFileSchema: SimulationData, load_simulation_data
 
 
 # the core functions
@@ -46,7 +46,12 @@ include("../models/register.jl")
 """Main function of the Wave simulator that runs the simulation"""
 function run_simulation(parsed_args)
     simulation = build_simulation(parsed_args["folder"])
-    start(simulation, parsed_args["show-progress"])
+    if parsed_args["force-rerun"] || simulation.case.has_changed
+        start(simulation, parsed_args["show-progress"])
+    #else
+        # TODO [add validation cases for the semi implicit]
+        ## add log info here saying that it will not run
+    end
 end
 
 end # module
