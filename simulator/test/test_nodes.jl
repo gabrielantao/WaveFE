@@ -1,6 +1,6 @@
 @testset "nodes" begin
     # load the elements for the mesh 
-    nodes = WaveCore.load_nodes(input_square_cavity_triangles.hdf_data)
+    nodes = WaveCore.load_nodes(case_square_cavity_triangles.mesh_data)
     
     @testset "nodes loaded" begin
         @test WaveCore.get_total_nodes(nodes) == 2601
@@ -18,7 +18,7 @@
         # this must break because this mesh is bidimensional!
         @test_throws BoundsError WaveCore.get_positions_z(nodes, [1, 53, 52])
 
-        domain_condition_groups = read(input_square_cavity_triangles.hdf_data["mesh/nodes/domain_condition_groups"])
+        domain_condition_groups = case_square_cavity_triangles.mesh_data.nodes.physical_groups.groups
         @test WaveCore.get_domain_condition_groups(nodes) == domain_condition_groups
     end
     

@@ -16,11 +16,11 @@ end
 # TODO: check the type received for the mesh
 """Load data for domain conditions needed to the simulation"""
 function build_domain_conditions(
-    mesh_data::HDF5.File, domain_conditions_data::DomainConditionsData
+    mesh_data::MeshData, domain_conditions_data::DomainConditionsData
 )
     indices = Dict{Tuple{String, ConditionType}, Vector{Int64}}()
     values = Dict{Tuple{String, ConditionType}, Vector{Float64}}()
-    domain_conditions_groups = read(mesh_data["mesh/nodes/domain_condition_groups"])
+    domain_conditions_groups = mesh_data.nodes.physical_groups.groups
     # preallocate the vectors
     for condition_data in domain_conditions_data.boundary
         unknown = condition_data.unknown

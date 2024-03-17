@@ -15,7 +15,7 @@ export Equation, ModelParameters, SimulationMethod, SimulationModel
 export ConditionType
 export SolverType, PreconditionerType
 export MatrixType
-export InterpolationOrder, Dimension
+export InterpolationOrder, Dimension, ElementType
 
 
 """
@@ -63,6 +63,17 @@ end
     UNIDIMENSIONAL = 1
     BIDIMENSIONAL = 2
     TRIDIMENSIONAL = 3
+end
+
+"""Element type used to import elements from the mesh"""
+@enum ElementType begin
+    SEGMENT = 1
+    TRIANGLE = 2
+    QUADRILATERAL = 3
+    TETRAHEDRON = 4
+    PYRAMID = 5
+    PRISM = 6
+    HEXAHEDRON = 7
 end
 
 
@@ -119,7 +130,6 @@ function get_interpolation_order(interpolation_number)
 end
 
 
-
 """Get the mesh dimension"""
 function get_dimension_number(dimension_number)
     if dimension_number == 1
@@ -132,4 +142,19 @@ function get_dimension_number(dimension_number)
         throw("Invalid dimension $dimension_number it should be 1, 2 or 3")
     end
     return dimension
+end
+
+
+"""Get the type of the element from the mesh"""
+function get_element_type(name::String)
+    type_map = Dict{String, ElementType}(
+        "Segment" => SEGMENT::ElementType,
+        "Triangle" => TRIANGLE::ElementType,
+        "Quadrangle" => QUADRILATERAL::ElementType,
+        "Tetrahedron" => TETRAHEDRON::ElementType,
+        "Hexahedron" => HEXAHEDRON::ElementType,
+        "Pyramid" => PYRAMID::ElementType,
+        "Prism" => PRISM::ElementType
+    )
+    return type_map[split(name)[1]]
 end

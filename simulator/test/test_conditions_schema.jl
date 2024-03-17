@@ -124,7 +124,7 @@
 
     @testset "build condition data schema" begin
         case_folder = joinpath(WAVE_SIMULATOR_TEST_DATA_PATH, "case_square_cavity") 
-        conditions = WaveCore.ConditionsFileSchema.DomainConditionsData(
+        conditions = WaveCore.ConditionsFileSchema.load_domain_conditions_data(
             joinpath(case_folder, WaveCore.DOMAIN_CONDITIONS_FILENAME)
         )
         @test isempty(conditions.initial) == false

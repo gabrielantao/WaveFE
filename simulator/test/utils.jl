@@ -1,8 +1,3 @@
-@enum ReferenceFileFormat begin
-    CSV = 1
-    TXT = 2
-    BSON = 3
-end
 
 
 # TODO [implement better debugging tools]
@@ -16,18 +11,6 @@ function check_reference_data(test_folder_name, filename, obtained)
 end
 
 
-function get_reference_data_format(filename)
-    extension = splitext(filename)[1]
-    if extension == "csv"
-        return CSV::ReferenceFileFormat
-    elseif extension == "txt"
-        return TXT::ReferenceFileFormat
-    elseif extension == "bson"
-        return BSON::ReferenceFileFormat
-    else
-        throw("Format file $extension not supported as reference data format")
-    end
-end
 
 # transform a e.g. Vector{Vector{Float64}} into a matrix for the tests
 to_matrix(data) = reduce(vcat, transpose(data))

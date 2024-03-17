@@ -1,5 +1,5 @@
 @testset "solver" begin
-    solver = WaveCore.load_solver(input_square_cavity_triangles.simulation_data)
+    solver = WaveCore.load_solver(case_square_cavity_triangles.simulation_data)
 
     function get_unknowns(timestep)
         # get the reference data to build a LHS matrix fixture 

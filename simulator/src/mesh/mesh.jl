@@ -57,33 +57,31 @@ end
 # TODO: remember to change the name of the function to build_mesh
 # and use the mesh_data::MeshData instead
 """Import a mesh from files in cache path."""
-function build_mesh(mesh_data::HDF5.File, simulation_data::SimulationData)
+function build_mesh(mesh_data::MeshData, simulation_data::SimulationData)
     # initially it need to be set to refresh to force the
     # first calculations that depend on this 
     must_refresh = true
     nodes = load_nodes(mesh_data)
     # get the dimension of the mesh
-    if read(mesh_data["mesh/dimension"]) == 1
-        dimension = UNIDIMENSIONAL::Dimension
+    if mesh_data.dimension == UNIDIMENSIONAL::Dimension
         elements = UniDimensionalElements(
-            load_segments(mesh_data, simulation_data)
+            load_segments(mesh_data)
         )
-    elseif read(mesh_data["mesh/dimension"]) == 2
-        dimension = BIDIMENSIONAL::Dimension
+    elseif mesh_data.dimension == BIDIMENSIONAL::Dimension
         elements = BiDimensionalElements(
-            load_triangles(mesh_data, simulation_data), 
-            load_quadrilaterals(mesh_data, simulation_data)
+            load_triangles(mesh_data), 
+            load_quadrilaterals(mesh_data)
         )
-    elseif read(mesh_data["mesh/dimension"]) == 3
-        dimension = TRIDIMENSIONAL::Dimension
+    elseif mesh_data.dimension == TRIDIMENSIONAL::Dimension
         # TODO [implement three dimensional elements]
         throw("Not implemented tridimensional elements")
     end
 
     return Mesh(
-        dimension, 
+        mesh_data.dimension, 
         nodes, 
         elements,
+        # TODO: this should come from the imported mesh data
         simulation_data.mesh.interpolation_order,
         must_refresh
     )

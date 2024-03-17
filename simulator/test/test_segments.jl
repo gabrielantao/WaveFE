@@ -1,8 +1,7 @@
 @testset "elements segments" begin 
     # load the elements for the mesh 
     segments = WaveCore.load_segments(
-        input_square_cavity_triangles.hdf_data, 
-        input_square_cavity_triangles.simulation_data
+        case_square_cavity_triangles.mesh_data, 
     )
 
     # TODO [implement one dimensional elements]

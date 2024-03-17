@@ -2,6 +2,7 @@ module WaveUnitTests
 using ReTest
 using TOML
 using HDF5
+using BSON
 using ReferenceTests
 using ArgParse
 using DelimitedFiles

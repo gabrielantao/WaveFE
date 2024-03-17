@@ -20,6 +20,7 @@ end
 
 struct ElementTypeData
     name::String
+    type::ElementType
     dimension::Dimension
     interpolation_order::InterpolationOrder
     nodes_per_element::Int64
@@ -28,7 +29,7 @@ end
 
 
 struct ElementsData
-    element_type::ElementTypeData
+    element_type_data::ElementTypeData
     total_elements::Int64
     connectivity::Matrix{Int64}
 end
@@ -38,43 +39,46 @@ struct MeshData
     dimension::Dimension
     nodes::NodeData
     elements::Vector{ElementsData}
+end
 
-    function MeshData(mesh_filepath::String)
-        # ensure the file exists otherwise Gmsh assumes we want to start a new model
-        if !isfile(mesh_filepath)
-            throw("The mesh file does not exist:\n$mesh_filepath")
-        end
-    
-        Gmsh.initialize()
-        Gmsh.gmsh.open(mesh_filepath)
-        dimension = Int64(gmsh.model.getDimension())
-        if splitext(mesh_filepath)[1] == ".geo"
-            gmsh.option.setNumber("Mesh.SaveAll", 1)
-            gmsh.model.mesh.generate(dimension)
-        end
-    
-        gmsh.model.mesh.renumberNodes()
-        gmsh.model.mesh.renumberElements()
-    
-        # get nodes and elements
-        nodes = load_nodes_data()
-        elements = load_mesh_elements(dimension) 
-    
-        Gmsh.gmsh.finalize()
-        new(
-            get_dimension_number(dimension),
-            nodes,
-            elements,
-        )
+
+function load_mesh_data(mesh_filepath::String)
+    # ensure the file exists otherwise Gmsh assumes we want to start a new model
+    if !isfile(mesh_filepath)
+        throw("The mesh file does not exist:\n$mesh_filepath")
     end
+
+    Gmsh.initialize()
+    Gmsh.gmsh.open(mesh_filepath)
+    dimension = Int64(gmsh.model.getDimension())
+    if splitext(mesh_filepath)[1] == ".geo"
+        gmsh.option.setNumber("Mesh.SaveAll", 1)
+        gmsh.model.mesh.generate(dimension)
+    end
+
+    gmsh.model.mesh.renumberNodes()
+    gmsh.model.mesh.renumberElements()
+
+    # get nodes and elements
+    nodes = load_nodes_data()
+    elements = load_mesh_elements(dimension) 
+
+    Gmsh.gmsh.finalize()
+    return MeshData(
+        get_dimension_number(dimension),
+        nodes,
+        elements,
+    )
 end
 
 
 """Convert data for the Gmsh element type into a ElementData struct"""
 function parse_element_type_data(element_type)
     properties = gmsh.model.mesh.getElementProperties(element_type)
+    name = properties[1]
     return ElementTypeData(
-        properties[1],
+        name,
+        get_element_type(name),
         get_dimension_number(properties[2]), 
         get_interpolation_order(properties[3]),
         Int64(properties[4]),

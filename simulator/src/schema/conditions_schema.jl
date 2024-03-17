@@ -1,7 +1,7 @@
 module ConditionsFileSchema
 using ..WaveCore
 
-export DomainConditionsData
+export DomainConditionsData, load_domain_conditions_data
 
 struct GeneralSection <: DataSection
     version::String
@@ -108,24 +108,26 @@ end
 struct DomainConditionsData <: DataSchema
     general::GeneralSection
     initial::Vector{InitialSection}
-    boundary::Vector{BoundarySection}
+    boundary::Vector{BoundarySection}    
+end
 
-    function DomainConditionsData(folder::String) 
-        data = WaveCore.TOML.parsefile(folder)
-        new(
-            build_general_section(data["general"]),
-            [build_initial_section(section) for section in data["initial"]],
-            [build_boundary_section(section) for section in data["boundary"]]
-        )
-    end
 
-    function validate_schema(schema::DomainConditionsData)
-        @assert isempty(schema.initial) == false, "The initial conditions could not be empty"
-        @assert isempty(schema.boundary) == false, "The boundary conditions could not be empty"
-        validate_schema(schema.general)
-        validate_schema(schema.initial)
-        validate_schema(schema.boundary)
-    end
+function load_domain_conditions_data(folder::String) 
+    data = WaveCore.TOML.parsefile(folder)
+    return DomainConditionsData(
+        build_general_section(data["general"]),
+        [build_initial_section(section) for section in data["initial"]],
+        [build_boundary_section(section) for section in data["boundary"]]
+    )
+end
+
+
+function validate_schema(schema::DomainConditionsData)
+    @assert isempty(schema.initial) == false, "The initial conditions could not be empty"
+    @assert isempty(schema.boundary) == false, "The boundary conditions could not be empty"
+    validate_schema(schema.general)
+    validate_schema(schema.initial)
+    validate_schema(schema.boundary)
 end
 
 end # module

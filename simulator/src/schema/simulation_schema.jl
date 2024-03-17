@@ -1,7 +1,7 @@
 module SimulationFileSchema
 using ..WaveCore
 
-export SimulationData
+export SimulationData, load_simulation_data
 
 struct GeneralSection <: DataSection
     version::String
@@ -229,27 +229,29 @@ struct SimulationData <: DataSchema
     parameter::ParameterSection
     solver::SolverSection
     output::OutputSection
+end
 
-    function SimulationData(folder::String) 
-        data = WaveCore.TOML.parsefile(folder)
-        new(
-            build_general_section(data["general"]),
-            build_simulation_section(data["simulation"]),
-            build_mesh_section(data["mesh"]),
-            build_parameter_section(data["parameter"]),
-            build_solver_section(data["solver"]),
-            build_output_section(data["output"]),
-        )
-    end
 
-    function validate_schema(schema::SimulationData)
-        validate_schema(schema.general)
-        validate_schema(schema.simulation)
-        validate_schema(schema.mesh)
-        validate_schema(schema.parameter)
-        validate_schema(schema.solver)
-        validate_schema(schema.output)
-    end
+function load_simulation_data(folder::String) 
+    data = WaveCore.TOML.parsefile(folder)
+    return SimulationData(
+        build_general_section(data["general"]),
+        build_simulation_section(data["simulation"]),
+        build_mesh_section(data["mesh"]),
+        build_parameter_section(data["parameter"]),
+        build_solver_section(data["solver"]),
+        build_output_section(data["output"]),
+    )
+end
+
+
+function validate_schema(schema::SimulationData)
+    validate_schema(schema.general)
+    validate_schema(schema.simulation)
+    validate_schema(schema.mesh)
+    validate_schema(schema.parameter)
+    validate_schema(schema.solver)
+    validate_schema(schema.output)
 end
 
 

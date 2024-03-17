@@ -1,9 +1,9 @@
 @testset "unknowns handler data" begin
     unknowns_handler = WaveCore.load_unknowns_handler(
         Dict("u_1" => 0.0, "u_2" => 0.0, "p" => 0.0001),
-        input_square_cavity_triangles.hdf_data, 
-        input_square_cavity_triangles.simulation_data,
-        input_square_cavity_triangles.domain_conditions_data
+        case_square_cavity_triangles.mesh_data, 
+        case_square_cavity_triangles.simulation_data,
+        case_square_cavity_triangles.domain_conditions_data
     )
 
     @testset "import unknowns data" begin

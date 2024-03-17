@@ -1,11 +1,9 @@
 @testset "domain conditions" begin
     domain_conditions = WaveCore.build_domain_conditions(
-        input_square_cavity_triangles.hdf_data, 
-        input_square_cavity_triangles.domain_conditions_data
+        case_square_cavity_triangles.mesh_data, 
+        case_square_cavity_triangles.domain_conditions_data
     )
-    total_nodes = length(
-        read(input_square_cavity_triangles.hdf_data["mesh/nodes/domain_condition_groups"])
-    )
+    total_nodes = case_square_cavity_triangles.mesh_data.nodes.total_nodes
     unknowns_handler = UnknownsHandler(
         Dict("u_1" => zeros(total_nodes), "u_2" => zeros(total_nodes), "p" => fill(0.0001, total_nodes)),
         Dict("u_1" => zeros(total_nodes), "u_2" => zeros(total_nodes), "p" => fill(0.0001, total_nodes)),

@@ -23,8 +23,8 @@ function build_simulation_case(folder::String)
     
     # load the data from input files
     simulation_data = SimulationData(simulation_filepath)
-    domain_conditions_data = DomainConditionsData(domain_conditions_filepath)
-    mesh_data = MeshData(mesh_filepath)
+    domain_conditions_data = load_domain_conditions_data(domain_conditions_filepath)
+    mesh_data = load_mesh_data(mesh_filepath)
     
     # calculate the input data hashs
     current_simulation_data_hash = hash(simulation_data)

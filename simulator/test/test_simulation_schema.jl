@@ -122,7 +122,7 @@
 
     @testset "build simulation data schema" begin
         case_folder = joinpath(WAVE_SIMULATOR_TEST_DATA_PATH, "case_square_cavity") 
-        conditions = WaveCore.SimulationFileSchema.SimulationData(
+        conditions = WaveCore.SimulationFileSchema.load_simulation_data(
             joinpath(case_folder, WaveCore.SIMULATION_FILENAME)
         )
     end  

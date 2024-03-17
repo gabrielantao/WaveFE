@@ -17,11 +17,11 @@ end
 """Load data for initial conditions needed to the simulation"""
 function load_unknowns_handler(
     unknowns_default_values::Dict{String, Float64}, 
-    mesh_data::HDF5.File,
+    mesh_data::MeshData,
     simulation_data::SimulationData,
     domain_conditions_data::DomainConditionsData
 )
-    domain_conditions_groups = read(mesh_data["mesh/nodes/domain_condition_groups"])
+    domain_conditions_groups = mesh_data.nodes.physical_groups.groups
     # preallocate with de default values chosen by the models
     values = Dict(unknown => fill(value, length(domain_conditions_groups)) for (unknown, value) in unknowns_default_values)
     old_values = Dict(unknown => fill(value, length(domain_conditions_groups)) for (unknown, value) in unknowns_default_values)
