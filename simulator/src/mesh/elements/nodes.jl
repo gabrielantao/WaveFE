@@ -3,19 +3,17 @@ export Node, NodesContainer
 
 
 struct Node
-    # physical group used internally by the models 
-    # (e.g. to set properties for elements)
-    physical_group::Int64
-    # geometrical group used internally by the models 
-    # (e.g. to move group of elements) 
-    geometrical_group::Int64
-    # groups used to defined domain conditions
-    domain_condition_group::Int64
-    
     # kinematics properties
     position::Vector{Float64}
     velocity::Vector{Float64}
     acceleration::Vector{Float64}
+
+    # geometrical group used internally by the models 
+    # (e.g. to move group of elements) 
+    geometrical_group::Int64
+    # physical group used internally by the models 
+    # (e.g. to set properties for elements and define boundary conditions)
+    physical_group::Int64
 end
 
 
@@ -27,32 +25,29 @@ end
 
 
 """Import data for nodes."""
-function load_nodes(input_data)
+function load_nodes(mesh_data::MeshData)
     nodes = Vector{Node}()
     for (
-        physical_group, 
-        geometrical_group, 
-        domain_condition_group, 
         position, 
-        velocity, 
-        acceleration
+        geometrical_group, 
+        physical_group, 
         ) in zip(
-        read(input_data["mesh/nodes/physical_groups"]),
-        read(input_data["mesh/nodes/geometrical_groups"]),
-        read(input_data["mesh/nodes/domain_condition_groups"]),
-        eachcol(read(input_data["mesh/nodes/positions"])),
-        eachcol(read(input_data["mesh/nodes/velocities"])),
-        eachcol(read(input_data["mesh/nodes/accelerations"])),
+            eachcol(mesh_data.nodes.positions),
+            mesh_data.nodes.geometrical_groups.groups,
+            mesh_data.nodes.physical_groups.groups,
         )
+        # TODO [implement mesh movement]
+        ## put the velocity and acceleration for the mesh movement
+        velocity = zeros(length(position))
+        acceleration = zeros(length(position))
         push!(
             nodes,
             Node(
-                physical_group,
-                geometrical_group,
-                domain_condition_group,
                 position,
                 velocity,
                 acceleration,
+                geometrical_group,
+                physical_group,
             )
         )
     end
@@ -75,6 +70,12 @@ end
 """Return the total of nodes in the container"""
 function get_nodes(nodes_container::NodesContainer)
     return nodes_container.series
+end
+
+
+"""Get a matrix with all nodes positions"""
+function get_all_positions(nodes_container::NodesContainer)
+    return reduce(hcat, [node.position for node in get_nodes(nodes_container)])
 end
 
 
@@ -104,7 +105,7 @@ end
 
 """Get the vector with domain conditions list for all nodes"""
 function get_domain_condition_groups(nodes::NodesContainer)
-    return [node.domain_condition_group for node in nodes.series]
+    return [node.physical_group for node in nodes.series]
 end
 
 

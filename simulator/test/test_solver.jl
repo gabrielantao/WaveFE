@@ -1,5 +1,5 @@
 @testset "solver" begin
-    solver = WaveCore.load_solver(input_square_cavity_triangles.simulation_data)
+    solver = WaveCore.load_solver(case_square_cavity_triangles.simulation_data)
 
     function get_unknowns(timestep)
         # get the reference data to build a LHS matrix fixture 
@@ -37,7 +37,7 @@
 
     @testset "import solver data" begin
         @test solver.type == WaveCore.CONJUGATE_GRADIENT::SolverType
-        @test solver.preconditioner_type == WaveCore.JACOBI::SolverPreconditioners
+        @test solver.preconditioner_type == WaveCore.JACOBI::PreconditionerType
         @test solver.steps_limit == 10000
         @test solver.relative_tolerance ≈ 1e-8
         @test solver.absolute_tolerance ≈ 0.0

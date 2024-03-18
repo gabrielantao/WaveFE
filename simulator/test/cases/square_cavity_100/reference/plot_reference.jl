@@ -43,7 +43,7 @@ function plot_ghia_et_al_result()
         case_folder_name, 
     )
     input_data = h5open(
-        joinpath(case_filepath, WaveCore.CACHE_PATH, WaveCore.SIMULATION_MESH_FILENAME), "r"
+        joinpath(case_filepath, WaveCore.CACHE_PATH, WaveCore.MESH_FILENAME), "r"
     )
     result_data = h5open(
         joinpath(case_filepath, WaveCore.CACHE_PATH, WaveCore.RESULT_PATH, WaveCore.RESULT_FILENAME), "r"

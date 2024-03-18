@@ -22,6 +22,7 @@ end
 
 """A triangle element container"""
 mutable struct TrianglesContainer <: ElementsContainer
+    name::String
     nodes_per_element::Int64
     series::Vector{Triangle}
     # TODO [implement group of elements]
@@ -31,25 +32,20 @@ end
 
 
 """Load data for the triangles"""
-function load_triangles(input_data, simulation_data)
+function load_triangles(mesh_data::MeshData)
     elements = Vector{Triangle}()
-    if haskey(input_data, "mesh/triangles")
-        connectivity_data = read(input_data["mesh/triangles/connectivity"])
-        for connectivity in eachcol(connectivity_data)
-            # start all these values as NaN to make this break if they are not initialized
-            push!(elements, Triangle(connectivity, Float64[], Float64[], NaN, NaN))
+    nodes_per_element = 3
+    for elements_data in mesh_data.elements
+        if elements_data.element_type_data.type == TRIANGLE::ElementType
+            for connectivity in eachcol(elements_data.connectivity)
+                # start all these values as NaN to make this break if they are not initialized
+                push!(elements, Triangle(connectivity, Float64[], Float64[], NaN, NaN))
+            end
+            nodes_per_element = elements_data.element_type_data.nodes_per_element
         end
     end
-
-    # set the depending on the interpolation order of the elements
-    if simulation_data["mesh"]["interpolation_order"] == 1
-        nodes_per_element = 3
-    else
-        # TODO [implement higher order elements]
-        throw("Higher order elements not implemented")
-    end
-
     return TrianglesContainer(
+        "triangles",
         nodes_per_element,
         elements
     )

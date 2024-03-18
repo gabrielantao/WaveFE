@@ -25,15 +25,12 @@
         )
     end
 
-    mesh = WaveCore.load_mesh(
-        input_square_cavity_triangles.hdf_data, 
-        input_square_cavity_triangles.simulation_data
-    )
+    mesh = WaveCore.build_mesh(case_square_cavity_triangles.mesh_data)
     unknowns_handler = get_unknowns()
     model_parameters = ModelSemiImplicitParameters(
         false, 
-        input_square_cavity_triangles.simulation_data["simulation"]["safety_dt_factor"],
-        Dict("Re" => input_square_cavity_triangles.simulation_data["parameter"]["Re"])
+        case_square_cavity_triangles.simulation_data.simulation.safety_Δt_factor,
+        Dict("Re" => case_square_cavity_triangles.simulation_data.parameter.parameters["Re"])
     )
     # update the parameters for the elements 
     WaveCore.update_elements!(mesh, unknowns_handler, model_parameters)
@@ -41,7 +38,7 @@
     
     @testset "assemble equation 1" begin
         equation_one = EquationStepOne(
-            ["u_1", "u_2"], input_square_cavity_triangles.simulation_data
+            ["u_1", "u_2"], case_square_cavity_triangles.simulation_data
         )
         @testset "assemble triangle 1" begin
             result_u_1 = Vector{Vector{Float64}}()
@@ -67,7 +64,7 @@
 
     @testset "assemble equation 2" begin
         equation_two = EquationStepTwo(
-            ["p"], input_square_cavity_triangles.simulation_data
+            ["p"], case_square_cavity_triangles.simulation_data
         )
         @testset "assemble triangle 2" begin
             result = Vector{Vector{Float64}}()
@@ -86,7 +83,7 @@
 
     @testset "assemble equation 3" begin
         equation_three = EquationStepThree(
-            ["u_1", "u_2"], input_square_cavity_triangles.simulation_data
+            ["u_1", "u_2"], case_square_cavity_triangles.simulation_data
         )
         @testset "assemble triangle 3" begin
             result_u_1 = Vector{Vector{Float64}}()

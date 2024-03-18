@@ -1,11 +1,4 @@
 export Assembler
-export MatrixType
-
-@enum MatrixType begin
-    DIAGONAL = 1
-    SYMMETRIC = 2
-    DENSE = 3
-end
 
 
 """It holds data for the assembler"""
@@ -74,6 +67,7 @@ function get_local_indices_iterator(lhs_type::MatrixType, nodes_per_element::Int
         throw("Not implemented special matrix type to be assembled")
     end
 end
+
 
 """Get the global indices depending on the type of matrix assembled"""
 function get_global_indices(

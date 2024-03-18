@@ -1,7 +1,6 @@
 @testset "elements quadrilaterals" begin 
     quadrilaterals = WaveCore.load_quadrilaterals(
-        input_square_cavity_triangles.hdf_data, 
-        input_square_cavity_triangles.simulation_data
+        case_square_cavity_triangles.mesh_data
     )
 
     # TODO [implement two dimensional elements]

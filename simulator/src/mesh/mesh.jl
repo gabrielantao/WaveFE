@@ -1,7 +1,5 @@
 # exported entities
 export Mesh
-export InterpolationOrder, Dimension
-
 
 # the abstract types used in this module...
 """A generic single element"""
@@ -22,20 +20,6 @@ include("./elements/segments.jl")
 include("./elements/triangles.jl")
 include("./elements/quadrilaterals.jl")
 include("./geometry.jl")
-
-
-@enum InterpolationOrder begin
-    ORDER_ONE = 1
-    ORDER_TWO = 2
-    ORDER_THREE = 3
-end
-
-
-@enum Dimension begin
-    UNIDIMENSIONAL = 1
-    BIDIMENSIONAL = 2
-    TRIDIMENSIONAL = 3
-end
 
 
 """This struct group the elements for a unidimension mesh"""
@@ -61,7 +45,6 @@ mutable struct Mesh
     dimension::Dimension
     nodes::NodesContainer
     elements::ElementsSet
-    interpolation_order::InterpolationOrder
 
     # if the mesh was refreshed (remeshed)
     # this can trigger the assembler redo:
@@ -71,42 +54,30 @@ end
 
 
 """Import a mesh from files in cache path."""
-function load_mesh(input_data, simulation_data)
-    nodes = load_nodes(input_data)
-    # get the dimension of the mesh
-    if read(input_data["mesh/dimension"]) == 1
-        dimension = UNIDIMENSIONAL::Dimension
-        elements = UniDimensionalElements(
-            load_segments(input_data, simulation_data)
-        )
-    elseif read(input_data["mesh/dimension"]) == 2
-        dimension = BIDIMENSIONAL::Dimension
-        elements = BiDimensionalElements(
-            load_triangles(input_data, simulation_data), 
-            load_quadrilaterals(input_data, simulation_data)
-        )
-    elseif read(input_data["mesh/dimension"]) == 3
-        dimension = TRIDIMENSIONAL::Dimension
-        # TODO [implement three dimensional elements]
-        throw("Not implemented tridimensional elements")
-    end
-    # get the interpolation order for the mesh
-    if simulation_data["mesh"]["interpolation_order"] == 1
-        interpolation_order = ORDER_ONE::InterpolationOrder
-    elseif simulation_data["mesh"]["interpolation_order"] == 2
-        interpolation_order = ORDER_TWO::InterpolationOrder
-    elseif simulation_data["mesh"]["interpolation_order"] == 3
-        interpolation_order = ORDER_THREE::InterpolationOrder
-    end
+function build_mesh(mesh_data::MeshData)
     # initially it need to be set to refresh to force the
     # first calculations that depend on this 
     must_refresh = true
+    nodes = load_nodes(mesh_data)
+    # get the dimension of the mesh
+    if mesh_data.dimension == UNIDIMENSIONAL::Dimension
+        elements = UniDimensionalElements(
+            load_segments(mesh_data)
+        )
+    elseif mesh_data.dimension == BIDIMENSIONAL::Dimension
+        elements = BiDimensionalElements(
+            load_triangles(mesh_data), 
+            load_quadrilaterals(mesh_data)
+        )
+    elseif mesh_data.dimension == TRIDIMENSIONAL::Dimension
+        # TODO [implement three dimensional elements]
+        throw("Not implemented tridimensional elements")
+    end
 
     return Mesh(
-        dimension, 
+        mesh_data.dimension, 
         nodes, 
         elements,
-        interpolation_order,
         must_refresh
     )
 end
@@ -120,9 +91,19 @@ end
 
 """Function to return reference to the elements containers used for the mesh"""
 function get_containers(mesh_elements::BiDimensionalElements)
-    return [mesh_elements.triangles, mesh_elements.quadrilaterals]
+    containers = Vector{ElementsContainer}()
+    for element_container in [mesh_elements.triangles, mesh_elements.quadrilaterals]
+        if has_elements(element_container)
+            push!(containers, element_container)
+        end
+    end
+    return containers
 end
 
+
+function has_elements(element_container::ElementsContainer)
+    return get_total_elements(element_container) > 0
+end
 
 # TODO [implement three dimensional elements]
 # """Function to return reference to the elements containers used for the mesh"""
@@ -140,6 +121,12 @@ end
 """Return the elements in the container"""
 function get_elements(element_container::ElementsContainer)
     return element_container.series
+end
+
+
+"""Get the connectivity matrix for all elements in a container"""
+function get_connectivity_matrix(element_container::ElementsContainer)
+    return reduce(hcat, [element.connectivity for element in get_elements(element_container)])
 end
 
 

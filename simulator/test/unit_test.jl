@@ -2,6 +2,7 @@ module WaveUnitTests
 using ReTest
 using TOML
 using HDF5
+using BSON
 using ReferenceTests
 using ArgParse
 using DelimitedFiles
@@ -22,7 +23,7 @@ include("../src/models/semi_implicit/equations/equation_two.jl")
 include("../src/models/semi_implicit/equations/equation_three.jl")
 include("../src/core/global_assembling.jl")
 
-const WAVE_SIMULATOR_TEST_PATH = joinpath(ENV["PIXI_PACKAGE_ROOT"], "simulator", "test")
+const WAVE_SIMULATOR_TEST_PATH = joinpath(ENV["PIXI_PROJECT_ROOT"], "simulator", "test")
 const WAVE_SIMULATOR_TEST_DATA_PATH = joinpath(WAVE_SIMULATOR_TEST_PATH, "data")
 
 
@@ -77,7 +78,7 @@ include("utils.jl")
 include("fixtures.jl")
 
 # unit test list
-include("test_input.jl")
+include("test_simulation_case.jl")
 include("test_nodes.jl")
 include("test_segments.jl")
 include("test_triangles.jl")
@@ -88,6 +89,10 @@ include("test_unknowns_handler.jl")
 include("test_solver.jl")
 include("test_global_assembling.jl")
 include("test_output.jl")
+include("test_schemas.jl")
+include("test_simulation_schema.jl")
+include("test_conditions_schema.jl")
+include("test_mesh_data.jl")
 
 # model specific elemental assemblers
 include("models/test_semi_implicit.jl")

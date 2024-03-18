@@ -1,8 +1,7 @@
 @testset "elements triangles" begin 
     # load the elements for the mesh 
     triangles = WaveCore.load_triangles(
-        input_square_cavity_triangles.hdf_data, 
-        input_square_cavity_triangles.simulation_data
+        case_square_cavity_triangles.mesh_data
     )
 
     @testset "triangles loaded" begin

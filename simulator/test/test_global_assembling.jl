@@ -44,15 +44,12 @@
         return read(data["/t_1/step $step/rhs_assembled"])
     end
 
-    mesh = WaveCore.load_mesh(
-        input_square_cavity_triangles.hdf_data, 
-        input_square_cavity_triangles.simulation_data
-    )
+    mesh = WaveCore.build_mesh(case_square_cavity_triangles.mesh_data)
     unknowns_handler = get_unknowns()
     model_parameters = ModelSemiImplicitParameters(
         false, 
-        input_square_cavity_triangles.simulation_data["simulation"]["safety_dt_factor"],
-        Dict("Re" => input_square_cavity_triangles.simulation_data["parameter"]["Re"])
+        case_square_cavity_triangles.simulation_data.simulation.safety_Δt_factor,
+        Dict("Re" => case_square_cavity_triangles.simulation_data.parameter.parameters["Re"])
     )
     # update the parameters for the elements 
     WaveCore.update_elements!(mesh, unknowns_handler, model_parameters)
@@ -68,7 +65,7 @@
 
     @testset "diagonal LHS matrix" begin
         equation_one = EquationStepOne(
-            ["u_1", "u_2"], input_square_cavity_triangles.simulation_data
+            ["u_1", "u_2"], case_square_cavity_triangles.simulation_data
         )
         # if mesh must refresh it must update the assembler indices
         WaveCore.update_assembler_indices!(equation_one.base.assembler, mesh)
@@ -98,7 +95,7 @@
 
     @testset "symmetric LHS matrix" begin
         equation_two = EquationStepTwo(
-            ["p"], input_square_cavity_triangles.simulation_data
+            ["p"], case_square_cavity_triangles.simulation_data
         )
         # if mesh must refresh it must update the assembler indices
         WaveCore.update_assembler_indices!(equation_two.base.assembler, mesh)
@@ -129,7 +126,7 @@
 
     @testset "RHS vector" begin
         equation_one = EquationStepOne(
-            ["u_1", "u_2"], input_square_cavity_triangles.simulation_data
+            ["u_1", "u_2"], case_square_cavity_triangles.simulation_data
         )
         assembled_rhs = assemble_global_rhs(
             equation_one, 

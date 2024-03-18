@@ -5,10 +5,7 @@
     end
 
     @testset "mesh bidimensional" begin
-        mesh = WaveCore.load_mesh(
-            input_square_cavity_triangles.hdf_data, 
-            input_square_cavity_triangles.simulation_data
-        )
+        mesh = WaveCore.build_mesh(case_square_cavity_triangles.mesh_data)
 
         function get_unknowns()
             # get the reference data to build a LHS matrix fixture 
@@ -27,18 +24,18 @@
         
         # check mesh proeprties
         @test mesh.dimension == WaveCore.BIDIMENSIONAL::Dimension
-        @test mesh.interpolation_order == WaveCore.ORDER_ONE::InterpolationOrder
         @test mesh.must_refresh == true
 
         # check baseic nodes and elements properties
+        # this case the get_containers return just the triangles container
+        # 
         @test WaveCore.get_total_nodes(mesh.nodes) == 2601
-        triangles, quadrilaterals = WaveCore.get_containers(mesh.elements)
-        @test triangles isa WaveCore.TrianglesContainer || quadrilaterals isa WaveCore.QuadrilateralsContainer
+        element_containers = WaveCore.get_containers(mesh.elements)
+        @test length(element_containers) == 1 
+        triangles = element_containers[1]
+        @test triangles isa WaveCore.TrianglesContainer
         @test WaveCore.get_total_elements(triangles) == 5000
         @test triangles.nodes_per_element == 3
-        @test WaveCore.get_total_elements(quadrilaterals) == 0
-        @test quadrilaterals.nodes_per_element == 4
-
 
         @testset "calculate triangles properties" begin
             WaveCore.update_areas!(mesh.elements.triangles, mesh.nodes)
@@ -64,8 +61,8 @@
                 mesh.elements.triangles, 
                 mesh.nodes, 
                 get_unknowns(),
-                input_square_cavity_triangles.simulation_data["parameter"]["Re"], 
-                input_square_cavity_triangles.simulation_data["simulation"]["safety_dt_factor"]
+                case_square_cavity_triangles.simulation_data.parameter.parameters["Re"], 
+                case_square_cavity_triangles.simulation_data.simulation.safety_Δt_factor 
             )
             @test check_reference_csv(
                 "ref_mesh",

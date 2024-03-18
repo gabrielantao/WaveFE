@@ -1,8 +1,8 @@
 @testset "output simulation data" begin
-    output_folder = joinpath(WAVE_SIMULATOR_TEST_PATH, "ref_output")
-    output_handler = WaveCore.load_output_handler(
-        output_folder,
-        input_square_cavity_triangles.simulation_data
+    output_cache_folder = joinpath(WAVE_SIMULATOR_TEST_PATH, "ref_output", WaveCore.CACHE_PATH)
+    output_handler = WaveCore.build_output_handler(
+        output_cache_folder,
+        case_square_cavity_triangles.simulation_data
     )
     unknowns_handler = WaveCore.UnknownsHandler(
         Dict("u_1" => fill(1.0, 3), "u_2" => fill(2.0, 3), "p" => fill(3.0, 3)),
@@ -16,11 +16,11 @@
     # write some debug data
     output_handler.debug_file["some_debug_data"] = fill(4.0, 5)
     WaveCore.close_files(output_handler)
-
-    result_path = joinpath(output_folder, WaveCore.CACHE_PATH, WaveCore.RESULT_PATH)
+    
+    result_path = joinpath(output_cache_folder, WaveCore.RESULT_PATH)
     result_file = h5open(joinpath(result_path, WaveCore.RESULT_FILENAME), "r")
     debug_file = h5open(joinpath(result_path, WaveCore.DEBUG_FILENAME), "r")
-    
+
     # check basic data
     @test read(result_file["version"]) == "1.0"
     @test read(result_file["description"]) == "Cavity test case with Re = 100"
@@ -32,7 +32,7 @@
     @test read(result_file["result/u_1/t_100"]) ≈ [1.0, 1.0, 1.0]
     @test read(result_file["result/u_2/t_100"]) ≈ [2.0, 2.0, 2.0]
     # should not save the unknonw p because in the simulation file it's not set in the
-    # section "output" of the example simulation.toml (imported by fixture input_square_cavity_triangles)
+    # section "output" of the example simulation.toml (imported by fixture case_square_cavity_triangles)
     # as unknonws that should be written in the result files
     @test haskey(result_file, "result/p/t_100") == false
 
@@ -47,7 +47,7 @@
     @test read(result_file["total_elapsed_time"]) == 1000.0
 
     # clean up the files
-    rm(output_folder, force=true, recursive=true)
+    rm(output_cache_folder, force=true, recursive=true)
 
     # TODO [implement mesh movement]
     ## test the function write_mesh_data()

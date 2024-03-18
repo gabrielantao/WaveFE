@@ -1,11 +1,9 @@
 @testset "domain conditions" begin
-    domain_conditions = WaveCore.load_domain_conditions(
-        input_square_cavity_triangles.hdf_data, 
-        input_square_cavity_triangles.domain_conditions_data
+    domain_conditions = WaveCore.build_domain_conditions(
+        case_square_cavity_triangles.mesh_data, 
+        case_square_cavity_triangles.domain_conditions_data
     )
-    total_nodes = length(
-        read(input_square_cavity_triangles.hdf_data["mesh/nodes/domain_condition_groups"])
-    )
+    total_nodes = case_square_cavity_triangles.mesh_data.nodes.total_nodes
     unknowns_handler = UnknownsHandler(
         Dict("u_1" => zeros(total_nodes), "u_2" => zeros(total_nodes), "p" => fill(0.0001, total_nodes)),
         Dict("u_1" => zeros(total_nodes), "u_2" => zeros(total_nodes), "p" => fill(0.0001, total_nodes)),
@@ -110,6 +108,43 @@
             "ref_domain_conditions",
             "apply_rhs_u_1.csv", 
             rhs
+        )
+    end
+
+    @testset "boundary conditions ambiguity" begin
+        duplicated_domain_conditions_data = deepcopy(
+            case_square_cavity_triangles.domain_conditions_data
+        )
+        # duplicate the first boundary condition then it should fail
+        push!(
+            duplicated_domain_conditions_data.boundary,
+            duplicated_domain_conditions_data.boundary[1],
+        )
+        @test_throws AssertionError WaveCore.build_domain_conditions(
+            case_square_cavity_triangles.mesh_data, 
+            duplicated_domain_conditions_data
+        )
+
+    end
+
+
+    @testset "invalid boundary condition mesh group" begin
+        invalid_boundary_conditions_group =[
+            WaveCore.ConditionsFileSchema.BoundarySection(
+                "group name that is not in mesh",
+                WaveCore.FIRST::ConditionType,
+                "u_1",
+                0.0,
+                "some description"
+            )
+        ]
+        @test_throws AssertionError WaveCore.build_domain_conditions(
+            case_square_cavity_triangles.mesh_data, 
+            WaveCore.ConditionsFileSchema.DomainConditionsData(
+                case_square_cavity_triangles.domain_conditions_data.general,
+                case_square_cavity_triangles.domain_conditions_data.initial,
+                invalid_boundary_conditions_group
+            )
         )
     end
 end

@@ -22,6 +22,7 @@ end
 
 """An segment element group"""
 mutable struct SegmentsContainer <: ElementsContainer
+    name::String
     nodes_per_element::Int64
     series::Vector{Segment}
     # TODO [implement group of elements]
@@ -31,25 +32,20 @@ end
 
 
 """Load data for the segments"""
-function load_segments(input_data, simulation_data)
+function load_segments(mesh_data::MeshData)
     elements = Vector{Segment}()
-    if haskey(input_data, "mesh/segments")
-        connectivity_data = read(input_data["mesh/segments/connectivity"])
-        for connectivity in eachcol(connectivity_data)
-            # start all these values as NaN to make this break if they are not initialized
-            push!(elements, Segment(connectivity, Float64[], Float64[], NaN, NaN))
+    nodes_per_element = 2
+    for elements_data in mesh_data.elements
+        if elements_data.element_type_data.type == SEGMENT::ElementType
+            for connectivity in eachcol(elements_data.connectivity)
+                # start all these values as NaN to make this break if they are not initialized
+                push!(elements, Segment(connectivity, Float64[], Float64[], NaN, NaN))
+            end
+            nodes_per_element = elements_data.element_type_data.nodes_per_element
         end
     end
-
-    # set the depending on the interpolation order of the elements
-    if simulation_data["mesh"]["interpolation_order"] == 1
-        nodes_per_element = 2
-    else
-        # TODO [implement higher order elements]
-        throw("Higher order elements not implemented")
-    end
-
     return SegmentsContainer(
+        "segments",
         nodes_per_element,
         elements
     )
@@ -88,7 +84,8 @@ end
 # TODO [implement one dimensional elements]
 # TODO [implement higher order elements]
 function update_shape_coeficients!(
-    elements_container::SegmentsContainer, nodes_container::NodesContainer
+    elements_container::SegmentsContainer, 
+    nodes_container::NodesContainer
 )
 end
 
