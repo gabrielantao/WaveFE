@@ -44,11 +44,7 @@ function build_simulation(folder::String)
     
     # get the model based in the simulation model defined in input file
     model = build_model(case)
-
-    # do the logical validations for the inputs
-    # TODO: maybe this validation should depend on model's data (e.g. which variables the model has)
-    #validate(simulation_data)
-    #validate(domain_conditions_data)
+    
     return Simulation(
         case, method, model, mesh, domain_conditions, output_handler, logger
     )

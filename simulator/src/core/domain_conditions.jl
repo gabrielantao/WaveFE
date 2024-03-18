@@ -20,13 +20,26 @@ function build_domain_conditions(
 )
     indices = Dict{Tuple{String, ConditionType}, Vector{Int64}}()
     values = Dict{Tuple{String, ConditionType}, Vector{Float64}}()
+
+    # check duplicated conditions 
+    unique_boundary_conditions = Set()
+    for condition_data in domain_conditions_data.boundary
+        duplicated_condition_group_error = "The boundary condition for group '$(condition_data.group_name)', type $(condition_data.condition_type) and unknown $(condition_data.unknown) was defined twice; eliminate the ambiguity."
+        condition_tuple = (condition_data.group_name, condition_data.condition_type, condition_data.unknown)
+        @assert !(condition_tuple in unique_boundary_conditions) duplicated_condition_group_error
+        push!(unique_boundary_conditions, condition_tuple)
+    end
+
     # preallocate the vectors
     for condition_data in domain_conditions_data.boundary
+        condition_group_error = "The boundary condition for group '$(condition_data.group_name)' is not defined in mesh file."
+        @assert (condition_data.group_name in keys(mesh_data.nodes.physical_groups.names)) condition_group_error
         unknown = condition_data.unknown
         condition_type = condition_data.condition_type
         indices[(unknown, condition_type)] = Int64[]
         values[(unknown, condition_type)] = Float64[]
     end
+
     # get boundary conditions
     for condition_data in domain_conditions_data.boundary
         group_number = mesh_data.nodes.physical_groups.names[condition_data.group_name]
@@ -119,3 +132,4 @@ function calculate_rhs_offset_values(
     offset[indices] .= 0.0
     return offset
 end
+

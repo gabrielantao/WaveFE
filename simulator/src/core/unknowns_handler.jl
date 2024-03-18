@@ -15,18 +15,30 @@ end
 
 
 """Load data for initial conditions needed to the simulation"""
-function load_unknowns_handler(
+function build_unknowns_handler(
     unknowns_default_values::Dict{String, Float64}, 
     mesh_data::MeshData,
     simulation_data::SimulationData,
     domain_conditions_data::DomainConditionsData
 )
+    # check duplicated conditions 
+    unique_boundary_conditions = Set()
+    for condition_data in domain_conditions_data.initial
+        duplicated_condition_group_error = "The initial condition for group '$(condition_data.group_name)' and unknown $(condition_data.unknown) was defined twice; eliminate the ambiguity."
+        condition_tuple = (condition_data.group_name, condition_data.unknown)
+        @assert !(condition_tuple in unique_boundary_conditions) duplicated_condition_group_error
+        push!(unique_boundary_conditions, condition_tuple)
+    end
+
     # preallocate with de default values chosen by the models
     values = Dict(unknown => fill(value, mesh_data.nodes.total_nodes) for (unknown, value) in unknowns_default_values)
     old_values = Dict(unknown => fill(value, mesh_data.nodes.total_nodes) for (unknown, value) in unknowns_default_values)
+    
     # set initial conditions
     all_solved_unknowns = collect(keys(unknowns_default_values))
     for condition_data in domain_conditions_data.initial
+        condition_group_error = "The initial condition for group '$(condition_data.group_name)' is not defined in mesh file."
+        @assert (condition_data.group_name in keys(mesh_data.nodes.physical_groups.names)) condition_group_error
         if condition_data.unknown in all_solved_unknowns
             group_number = mesh_data.nodes.physical_groups.names[condition_data.group_name]
             unknown = condition_data.unknown
@@ -41,6 +53,7 @@ function load_unknowns_handler(
             # TODO [implement validations and input versioning]
             ## log message this variable is not present in the model, ignored
             ## this should be done by the validator (??)
+            ## do the same for the tolerance (set default values if tolerances are not in the file)
         end
     end
     return UnknownsHandler(

@@ -110,4 +110,41 @@
             rhs
         )
     end
+
+    @testset "boundary conditions ambiguity" begin
+        duplicated_domain_conditions_data = deepcopy(
+            case_square_cavity_triangles.domain_conditions_data
+        )
+        # duplicate the first boundary condition then it should fail
+        push!(
+            duplicated_domain_conditions_data.boundary,
+            duplicated_domain_conditions_data.boundary[1],
+        )
+        @test_throws AssertionError WaveCore.build_domain_conditions(
+            case_square_cavity_triangles.mesh_data, 
+            duplicated_domain_conditions_data
+        )
+
+    end
+
+
+    @testset "invalid boundary condition mesh group" begin
+        invalid_boundary_conditions_group =[
+            WaveCore.ConditionsFileSchema.BoundarySection(
+                "group name that is not in mesh",
+                WaveCore.FIRST::ConditionType,
+                "u_1",
+                0.0,
+                "some description"
+            )
+        ]
+        @test_throws AssertionError WaveCore.build_domain_conditions(
+            case_square_cavity_triangles.mesh_data, 
+            WaveCore.ConditionsFileSchema.DomainConditionsData(
+                case_square_cavity_triangles.domain_conditions_data.general,
+                case_square_cavity_triangles.domain_conditions_data.initial,
+                invalid_boundary_conditions_group
+            )
+        )
+    end
 end

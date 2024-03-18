@@ -71,7 +71,7 @@ struct ModelSemiImplicit <: SimulationModel
             unknown => 0.0 for unknown in unknowns_velocities
         )
         unknowns_default_values["p"] = 0.0001
-        unkowns_handler = WaveCore.load_unknowns_handler(
+        unkowns_handler = WaveCore.build_unknowns_handler(
             unknowns_default_values, 
             case.mesh_data,
             case.simulation_data,
