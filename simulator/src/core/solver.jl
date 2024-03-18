@@ -81,7 +81,8 @@ function calculate_solution(
         throw("Not implemented yet other types of solvers")
     end
     
-    # TODO: log the status of solver inside this function
+    # TODO [add validation cases for the semi implicit]
+    ## log the status of solver inside this function
     #       catch convergence log by doing log=true and save data (NUMERIC)
     # TODO [implement better debugging tools]
     ## write numeric for each dimension here.  

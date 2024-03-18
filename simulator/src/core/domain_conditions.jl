@@ -13,7 +13,6 @@ struct DomainConditions
 end
 
 
-# TODO: check the type received for the mesh
 """Load data for domain conditions needed to the simulation"""
 function build_domain_conditions(
     mesh_data::MeshData, domain_conditions_data::DomainConditionsData

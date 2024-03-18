@@ -53,8 +53,6 @@ mutable struct Mesh
 end
 
 
-# TODO: remember to change the name of the function to build_mesh
-# and use the mesh_data::MeshData instead
 """Import a mesh from files in cache path."""
 function build_mesh(mesh_data::MeshData)
     # initially it need to be set to refresh to force the

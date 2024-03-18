@@ -36,7 +36,7 @@ include("../../core/global_assembling.jl")
 
 """
 Semi-implicit model
-TODO: include description here ....
+# TODO [add basic documentation]
 """
 struct ModelSemiImplicit <: SimulationModel
     name::String
@@ -93,9 +93,6 @@ function startup_model(
     mesh::Mesh, 
     domain_conditions::DomainConditions
 )
-    # TODO: think if it should set the initial values here
-    # force to setup the boundary values for the unknowns for the first timestep
-    # before start the simulation 
     WaveCore.setup_boundary_values!(
         domain_conditions, 
         model.unknowns_handler

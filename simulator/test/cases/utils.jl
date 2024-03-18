@@ -117,7 +117,8 @@ macro test_case(case)
         @testset "$($case.group_name)/$($case.folder)" begin
             run_validation_case($case)
             check_reference($case)
-            # TODO: call hook function (e.g. to plot figures, move files, clean up, etc.)
+            # TODO [implement better debugging tools]
+            ## call hook function (e.g. to plot figures, move files, clean up, etc.)
         end
     end
 end
