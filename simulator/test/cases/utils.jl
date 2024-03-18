@@ -11,6 +11,7 @@ function run_validation_case(case::ValidationCase)
     simulation_args = Dict(
         "log-level" => PARSED_ARGS["log-level"],
         "show-progress" => true,
+        "force-rerun" => true,
         "folder" => joinpath(WAVE_SIMULATOR_TEST_CASE_PATH, case.folder)
     )
     run_simulation(simulation_args)

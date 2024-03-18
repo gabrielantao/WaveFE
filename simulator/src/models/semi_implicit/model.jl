@@ -55,8 +55,7 @@ struct ModelSemiImplicit <: SimulationModel
 
         # define the unknowns for this model
         # velocities solved in the equation one and three depend on mesh dimension
-        dimension = read(case.mesh_data["mesh/dimension"])
-        unknowns_velocities = ["u_$i" for i in range(1, dimension)]
+        unknowns_velocities = ["u_$i" for i in range(1, Int64(case.mesh_data.dimension))]
         unknown_pressure = ["p"]
         all_solved_unknowns = [unknowns_velocities; unknown_pressure]
 
@@ -69,8 +68,9 @@ struct ModelSemiImplicit <: SimulationModel
  
         # load the initial values for the unknowns
         unknowns_default_values = Dict{String, Float64}(
-            unknown => 0.0 for unknown in all_solved_unknowns
+            unknown => 0.0 for unknown in unknowns_velocities
         )
+        unknowns_default_values["p"] = 0.0001
         unkowns_handler = WaveCore.load_unknowns_handler(
             unknowns_default_values, 
             case.mesh_data,
@@ -107,7 +107,8 @@ end
 function run_iteration(
     model::ModelSemiImplicit, 
     mesh::Mesh, 
-    domain_conditions::DomainConditions
+    domain_conditions::DomainConditions,
+    output_handler::OutputHandler
 ) 
     # update elements internal data
     WaveCore.update_elements!(
@@ -185,7 +186,7 @@ function run_iteration(
 
     # do the updates for the mesh (e.g. movement, remesh, etc.)
     WaveCore.update!(mesh)
-    
+
     # TODO [general performance improvements]
     ## - it should check if it is diverging to abort simulation
     # TODO [add validation cases for the semi implicit]

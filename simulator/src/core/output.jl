@@ -66,9 +66,30 @@ function write_result_data(
 end
 
 
-# TODO [implement mesh movement]
-## write in the file the movement of mesh in each step
-function write_mesh_data()
+"""Write the topological data for the mesh to the output file"""
+function write_mesh_data(
+    output_handler::OutputHandler, 
+    mesh::Mesh, 
+    current_step::Int64,
+    force_write::Bool=false
+)   
+    # TODO [implement mesh movement]
+    ## - put here a "save_intermediate_mesh" in the schema
+    ##   and use it here instead of save_intermediate_result
+    ## - maybe it need to save the groups and other data for the nodes
+    save_current_timestep = current_step % output_handler.save_frequency == 0
+    if force_write || (output_handler.save_intermediate_result && save_current_timestep)
+        path = "mesh/nodes/positions/t_$current_step"
+        output_handler.result_file[path] = get_all_positions(mesh.nodes)
+        # write elements connectivity
+        for element_container in get_containers(mesh.elements)
+            path = "mesh/$(element_container.name)/connectivity/t_$current_step"
+            connectivity = get_connectivity_matrix(element_container)
+            output_handler.result_file[path] = connectivity
+            # TODO [implement group of elements]
+            ## maybe it will output the groups for the elements
+        end
+    end
 end
 
 

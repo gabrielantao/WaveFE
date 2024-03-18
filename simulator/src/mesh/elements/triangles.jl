@@ -22,6 +22,7 @@ end
 
 """A triangle element container"""
 mutable struct TrianglesContainer <: ElementsContainer
+    name::String
     nodes_per_element::Int64
     series::Vector{Triangle}
     # TODO [implement group of elements]
@@ -44,6 +45,7 @@ function load_triangles(mesh_data::MeshData)
         end
     end
     return TrianglesContainer(
+        "triangles",
         nodes_per_element,
         elements
     )

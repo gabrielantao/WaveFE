@@ -20,8 +20,7 @@ function parse_commandline()
             default = 1
         "--force-rerun", "-f"    
             help = "force the rerun even if input files haven't changed" 
-            arg_type = Int
-            default = 1
+            action = :store_true
         "folder"
             help = "path folder for simulation files"
             required = true

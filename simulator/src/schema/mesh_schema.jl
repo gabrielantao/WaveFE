@@ -1,11 +1,11 @@
 struct GeometricalGroupsData
-    names::Dict{Int64, String}
+    names::Dict{String, Int64}
     groups::Vector{Int64}
 end
 
 
 struct PhysicalGroupsData
-    names::Dict{Int64, String}
+    names::Dict{String, Int64}
     groups::Vector{Int64}
 end
 
@@ -61,7 +61,7 @@ function load_mesh_data(mesh_filepath::String)
     Gmsh.gmsh.model.mesh.renumberElements()
 
     # get nodes and elements
-    nodes = load_nodes_data()
+    nodes = load_nodes_data(dimension)
     elements = load_elements_data(dimension) 
 
     Gmsh.gmsh.finalize()
@@ -89,7 +89,7 @@ end
 
 
 """Get data for the nodes groups"""
-function load_nodes_data()
+function load_nodes_data(dimension)
     _, positions, _ = Gmsh.gmsh.model.mesh.getNodes()
     # the Gmsh API returns a multiple of 3 when importing the nodes positions
     # so it must assert if this is always true
@@ -101,7 +101,7 @@ function load_nodes_data()
     physical_groups = load_physical_groups_data(total_nodes)
     return NodeData(
         total_nodes,
-        positions,
+        positions[1:dimension, :],
         geometrical_groups,
         physical_groups
     )
@@ -137,7 +137,7 @@ end
 function load_geometrical_groups_data(total_nodes::Int64)
     # keep the mapping for the node group id to its name and
     # keep a list of groups for each node in the mesh
-    groups_names = Dict{Int64, String}()
+    groups_names = Dict{String, Int64}()
     groups = zeros(Int64, total_nodes)
     return GeometricalGroupsData(groups_names, groups)
 end
@@ -147,16 +147,16 @@ end
 function load_physical_groups_data(total_nodes::Int64)
     # keep the mapping for the node group id to its name and
     # keep a list of groups for each node in the mesh
-    groups_names = Dict{Int64, String}()
+    groups_names = Dict{String, Int64}()
     groups = zeros(Int64, total_nodes)
     # get all the groups, no matter the dimensions of entity
     for (dimension, physical_tag) in Gmsh.gmsh.model.getPhysicalGroups()
         @assert physical_tag ≥ 0 "All physical groups must be ≥ 0"
-        group_name = Gmsh.gmsh.model.getPhysicalName(dimension, physical_tag)
-        @assert !(physical_tag in keys(groups_names)) "The names of physical groups $group_name should be unique"
         if physical_tag > 0
+            group_name = Gmsh.gmsh.model.getPhysicalName(dimension, physical_tag)
+            @assert !(physical_tag in values(groups_names)) "The names of physical groups $group_name should be unique"
             @assert isempty(group_name) == false "All physical group must have a name to identify the domain conditions"
-            groups_names[physical_tag] = group_name
+            groups_names[group_name] = physical_tag
             # get all node tags for each entity and set then to the groups numbers vector
             # only if they are greater than the values that was already set for a specific node
             for entity_tag in Gmsh.gmsh.model.getEntitiesForPhysicalGroup(dimension, physical_tag)

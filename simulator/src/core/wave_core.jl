@@ -29,9 +29,9 @@ using .SimulationFileSchema: SimulationData, load_simulation_data
 
 # the core functions
 include("unknowns_handler.jl")
-include("output.jl")
 include("domain_conditions.jl")
 include("../mesh/mesh.jl")
+include("output.jl")
 include("assembler.jl")
 include("solver.jl")
 include("base_equation.jl")

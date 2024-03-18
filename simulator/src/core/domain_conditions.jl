@@ -20,7 +20,6 @@ function build_domain_conditions(
 )
     indices = Dict{Tuple{String, ConditionType}, Vector{Int64}}()
     values = Dict{Tuple{String, ConditionType}, Vector{Float64}}()
-    domain_conditions_groups = mesh_data.nodes.physical_groups.groups
     # preallocate the vectors
     for condition_data in domain_conditions_data.boundary
         unknown = condition_data.unknown
@@ -30,13 +29,13 @@ function build_domain_conditions(
     end
     # get boundary conditions
     for condition_data in domain_conditions_data.boundary
-        group_number = parse(Int64, condition_data.group_name)
+        group_number = mesh_data.nodes.physical_groups.names[condition_data.group_name]
         unknown = condition_data.unknown
         value = condition_data.value
         condition_type = condition_data.condition_type
         current_group_indices = findall(
             domain_condition_group -> domain_condition_group == group_number, 
-            domain_conditions_groups
+            mesh_data.nodes.physical_groups.groups
         )
         append!(indices[(unknown, condition_type)], current_group_indices)
         append!(values[(unknown, condition_type)], fill(value, length(current_group_indices)))

@@ -22,6 +22,7 @@ end
 
 """An segment element group"""
 mutable struct SegmentsContainer <: ElementsContainer
+    name::String
     nodes_per_element::Int64
     series::Vector{Segment}
     # TODO [implement group of elements]
@@ -44,6 +45,7 @@ function load_segments(mesh_data::MeshData)
         end
     end
     return SegmentsContainer(
+        "segments",
         nodes_per_element,
         elements
     )

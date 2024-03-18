@@ -21,20 +21,19 @@ function load_unknowns_handler(
     simulation_data::SimulationData,
     domain_conditions_data::DomainConditionsData
 )
-    domain_conditions_groups = mesh_data.nodes.physical_groups.groups
     # preallocate with de default values chosen by the models
-    values = Dict(unknown => fill(value, length(domain_conditions_groups)) for (unknown, value) in unknowns_default_values)
-    old_values = Dict(unknown => fill(value, length(domain_conditions_groups)) for (unknown, value) in unknowns_default_values)
+    values = Dict(unknown => fill(value, mesh_data.nodes.total_nodes) for (unknown, value) in unknowns_default_values)
+    old_values = Dict(unknown => fill(value, mesh_data.nodes.total_nodes) for (unknown, value) in unknowns_default_values)
     # set initial conditions
     all_solved_unknowns = collect(keys(unknowns_default_values))
     for condition_data in domain_conditions_data.initial
         if condition_data.unknown in all_solved_unknowns
-            group_number = parse(Int64, condition_data.group_name)
+            group_number = mesh_data.nodes.physical_groups.names[condition_data.group_name]
             unknown = condition_data.unknown
             value = condition_data.value
             current_group_indices = findall(
                 domain_condition_group -> domain_condition_group == group_number, 
-                domain_conditions_groups
+                mesh_data.nodes.physical_groups.groups
             )
             values[unknown][current_group_indices] .= value
             old_values[unknown][current_group_indices] .= value

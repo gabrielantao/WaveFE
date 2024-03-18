@@ -61,8 +61,9 @@ function start(simulation::Simulation, show_progress::Bool)
     success = false
     timestep_counter = 0
     simulation_data = simulation.case.simulation_data
+    total_step_limits = simulation_data.simulation.steps_limit
     progress_bar = Progress(
-        simulation_data.simulation.steps_limit, 
+        total_step_limits, 
         desc=simulation_data.general.alias, 
         enabled=show_progress,
         barglyphs=BarGlyphs('|','█', ['▁' ,'▂' ,'▃' ,'▄' ,'▅' ,'▆', '▇'],' ','|',),
@@ -73,10 +74,15 @@ function start(simulation::Simulation, show_progress::Bool)
         # setup additional stuff before start the simulation
         startup_model(simulation.model, simulation.mesh, simulation.domain_conditions)
         
-        # write the output values for the initial time step
+        # write the output values and the mesh for the initial time step
         write_result_data(
             simulation.output_handler, 
             simulation.model.unknowns_handler, 
+            timestep_counter
+        )
+        write_mesh_data(
+            simulation.output_handler, 
+            simulation.mesh, 
             timestep_counter
         )
 
@@ -88,7 +94,10 @@ function start(simulation::Simulation, show_progress::Bool)
             # run the function that make one iteration for the model
             # and check if the simulation has converged
             run_iteration(
-                simulation.model, simulation.mesh, simulation.domain_conditions
+                simulation.model, 
+                simulation.mesh, 
+                simulation.domain_conditions,
+                simulation.output_handler
             )
             success = all(values(simulation.model.unknowns_handler.converged))
             if success || timestep_counter == total_step_limits

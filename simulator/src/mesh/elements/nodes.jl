@@ -14,7 +14,6 @@ struct Node
     # physical group used internally by the models 
     # (e.g. to set properties for elements and define boundary conditions)
     physical_group::Int64
-    
 end
 
 
@@ -71,6 +70,12 @@ end
 """Return the total of nodes in the container"""
 function get_nodes(nodes_container::NodesContainer)
     return nodes_container.series
+end
+
+
+"""Get a matrix with all nodes positions"""
+function get_all_positions(nodes_container::NodesContainer)
+    return reduce(hcat, [node.position for node in get_nodes(nodes_container)])
 end
 
 

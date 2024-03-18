@@ -22,6 +22,7 @@ end
 
 """A quadrilaterals element container"""
 mutable struct QuadrilateralsContainer <: ElementsContainer
+    name::String
     nodes_per_element::Int64
     series::Vector{Quadrilateral}
     # TODO [implement group of elements]
@@ -45,6 +46,7 @@ function load_quadrilaterals(mesh_data::MeshData)
         end
     end
     return QuadrilateralsContainer(
+        "quadrilaterals",
         nodes_per_element,
         elements
     )

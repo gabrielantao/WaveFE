@@ -8,7 +8,7 @@ struct EquationStepThree <: Equation
     function EquationStepThree(solved_unknowns, simulation_data)   
         # TODO [move application responsabilities to the Julia]
         ## this should be in a section model in the input file
-        use_lumped_mass = !simulation_data.simulation.transient == false
+        use_lumped_mass = simulation_data.simulation.transient == false
         lhs_type = use_lumped_mass ? WaveCore.DIAGONAL::MatrixType : WaveCore.SYMMETRIC::MatrixType
         assembler = Assembler(lhs_type)
         solver = load_solver(simulation_data)

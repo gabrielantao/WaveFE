@@ -96,9 +96,19 @@ end
 
 """Function to return reference to the elements containers used for the mesh"""
 function get_containers(mesh_elements::BiDimensionalElements)
-    return [mesh_elements.triangles, mesh_elements.quadrilaterals]
+    containers = Vector{ElementsContainer}()
+    for element_container in [mesh_elements.triangles, mesh_elements.quadrilaterals]
+        if has_elements(element_container)
+            push!(containers, element_container)
+        end
+    end
+    return containers
 end
 
+
+function has_elements(element_container::ElementsContainer)
+    return get_total_elements(element_container) > 0
+end
 
 # TODO [implement three dimensional elements]
 # """Function to return reference to the elements containers used for the mesh"""
@@ -116,6 +126,12 @@ end
 """Return the elements in the container"""
 function get_elements(element_container::ElementsContainer)
     return element_container.series
+end
+
+
+"""Get the connectivity matrix for all elements in a container"""
+function get_connectivity_matrix(element_container::ElementsContainer)
+    return reduce(hcat, [element.connectivity for element in get_elements(element_container)])
 end
 
 
