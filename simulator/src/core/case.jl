@@ -21,7 +21,7 @@ function build_simulation_case(folder::String)
     simulation_data = load_simulation_data(simulation_filepath)
     domain_conditions_filepath = joinpath(abspath(folder), DOMAIN_CONDITIONS_FILENAME)
     domain_conditions_data = load_domain_conditions_data(domain_conditions_filepath)
-    mesh_filepath = joinpath(abspath(folder), simulation_data.mesh.filename)
+    mesh_filepath = joinpath(abspath(folder), simulation_data.simulation.mesh)
     mesh_data = load_mesh_data(mesh_filepath)
     
     # calculate the input data hash
@@ -69,7 +69,7 @@ function build_simulation_case(folder::String)
         end
         cp(simulation_filepath, joinpath(cache_folder, SIMULATION_FILENAME), force=true)
         cp(domain_conditions_filepath, joinpath(cache_folder, DOMAIN_CONDITIONS_FILENAME), force=true)
-        cp(mesh_filepath, joinpath(cache_folder, simulation_data.mesh.filename), force=true)
+        cp(mesh_filepath, joinpath(cache_folder, simulation_data.simulation.mesh), force=true)
     end
     return SimulationCase(
         folder, 

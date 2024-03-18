@@ -9,6 +9,7 @@ model = "CBS semi-implicit"
 steps_limit = 1500
 transient = false
 safety_dt_factor = 0.7
+mesh = "square_cavity.msh"
 
 [simulation.tolerance_relative]
 u_1 = 1e-3
@@ -21,10 +22,6 @@ u_1 = 0.0
 u_2 = 0.0
 u_3 = 0.0
 p = 0.0
-
-[mesh]
-filename = "square_cavity.msh"
-interpolation_order = 1
 
 [parameter]
 Re = 100.0
@@ -43,5 +40,6 @@ tolerance_absolute = 0.0
 frequency = 200
 save_result = true
 save_numeric = true
+save_mesh = true
 save_debug = true
 unknowns = ["u_1", "u_2", "p"]

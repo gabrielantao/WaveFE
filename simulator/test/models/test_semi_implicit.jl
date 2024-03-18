@@ -25,10 +25,7 @@
         )
     end
 
-    mesh = WaveCore.build_mesh(
-        case_square_cavity_triangles.mesh_data, 
-        case_square_cavity_triangles.simulation_data
-    )
+    mesh = WaveCore.build_mesh(case_square_cavity_triangles.mesh_data)
     unknowns_handler = get_unknowns()
     model_parameters = ModelSemiImplicitParameters(
         false, 

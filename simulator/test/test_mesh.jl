@@ -5,10 +5,7 @@
     end
 
     @testset "mesh bidimensional" begin
-        mesh = WaveCore.build_mesh(
-            case_square_cavity_triangles.mesh_data, 
-            case_square_cavity_triangles.simulation_data
-        )
+        mesh = WaveCore.build_mesh(case_square_cavity_triangles.mesh_data)
 
         function get_unknowns()
             # get the reference data to build a LHS matrix fixture 
@@ -27,7 +24,6 @@
         
         # check mesh proeprties
         @test mesh.dimension == WaveCore.BIDIMENSIONAL::Dimension
-        @test mesh.interpolation_order == WaveCore.ORDER_ONE::InterpolationOrder
         @test mesh.must_refresh == true
 
         # check baseic nodes and elements properties

@@ -34,7 +34,7 @@ function build_simulation(folder::String)
     method = SemiImplicitMethod()
 
     # load the mesh and domain conditions (AKA boundary conditions)
-    mesh = build_mesh(case.mesh_data, case.simulation_data)
+    mesh = build_mesh(case.mesh_data)
     domain_conditions = build_domain_conditions(
         case.mesh_data, case.domain_conditions_data
     )

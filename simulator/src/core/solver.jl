@@ -50,7 +50,8 @@ function update_preconditioner!(
         solver.preconditioners[unknown] = DiagonalPreconditioner(lhs)
     else
         # TODO [add solvers and preconditioner options]
-        ## select the preconditioner to be used here
+        ## - select the preconditioner to be used here
+        ## - add message for list of available options
         throw("Not implemented yet other types of preconditioners")
     end
 end
@@ -75,7 +76,8 @@ function calculate_solution(
         )
     else
         # TODO [add solvers and preconditioner options]
-        ## add more options of solvers options 
+        ## - add more options of solvers options 
+        ## - add message for list of available options
         throw("Not implemented yet other types of solvers")
     end
     

@@ -37,6 +37,5 @@
     @test mesh_data.elements[1].element_type_data.name == "Triangle 3"
     @test mesh_data.elements[1].element_type_data.type == WaveCore.TRIANGLE::ElementType
     @test mesh_data.elements[1].element_type_data.dimension == WaveCore.BIDIMENSIONAL::Dimension
-    @test mesh_data.elements[1].element_type_data.interpolation_order == WaveCore.ORDER_ONE::InterpolationOrder
     @test mesh_data.elements[1].element_type_data.nodes_per_element == 3
 end

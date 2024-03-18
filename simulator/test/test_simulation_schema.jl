@@ -31,6 +31,7 @@
                 "steps_limit" => 1000, 
                 "transient" => false, 
                 "safety_dt_factor" => 0.5,
+                "mesh" => "some_filename.msh",
                 "tolerance_relative" => Dict{String, Float64}("u_1" => 1.0e-2, "p" => 2.0e-2),
                 "tolerance_absolute" => Dict{String, Float64}("u_1" => 0.0, "p" => 3.0)
             )
@@ -41,24 +42,9 @@
             @test section.steps_limit == pop!(entry_data, "steps_limit")
             @test section.transient == pop!(entry_data, "transient")
             @test section.safety_Δt_factor == pop!(entry_data, "safety_dt_factor")
+            @test section.mesh == pop!(entry_data, "mesh")
             @test section.tolerance_relative == Dict{String, Float64}("u_1" => 1.0e-2, "p" => 2.0e-2)
             @test section.tolerance_absolute == Dict{String, Float64}("u_1" => 0.0, "p" => 3.0)
-            WaveCore.SimulationFileSchema.validate_schema(section)
-        end
-    end
-
-
-    @testset "build mesh section" begin
-        valid_entries = [
-            Dict(
-                "filename" => "my_mesh.msh", 
-                "interpolation_order" => 1
-            )
-        ]
-        for entry_data in valid_entries
-            section = WaveCore.SimulationFileSchema.build_mesh_section(entry_data)
-            @test section.filename == pop!(entry_data, "filename")
-            @test section.interpolation_order == WaveCore.ORDER_ONE::InterpolationOrder
             WaveCore.SimulationFileSchema.validate_schema(section)
         end
     end
@@ -105,6 +91,7 @@
                 "frequency" => 100, 
                 "save_result" => true,
                 "save_numeric" => false,
+                "save_mesh" => true,
                 "save_debug" => false,
                 "unknowns" => ["u_1", "p"]
             )
@@ -114,6 +101,7 @@
             @test section.frequency == pop!(entry_data, "frequency")
             @test section.save_result == pop!(entry_data, "save_result")
             @test section.save_numeric == pop!(entry_data, "save_numeric")
+            @test section.save_mesh == pop!(entry_data, "save_mesh")
             @test section.save_debug == pop!(entry_data, "save_debug")
             @test section.unknowns == pop!(entry_data, "unknowns")
             WaveCore.SimulationFileSchema.validate_schema(section)

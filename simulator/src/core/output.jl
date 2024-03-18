@@ -5,6 +5,7 @@ struct OutputHandler
     saved_unknowns::Vector{String}
     save_intermediate_result::Bool
     save_intermediate_numeric::Bool
+    save_intermediate_mesh::Bool
     save_debug::Bool
     result_file::HDF5.File
     debug_file::HDF5.File
@@ -29,6 +30,7 @@ function build_output_handler(cache_folder::String, simulation_data::SimulationD
         simulation_data.output.unknowns,
         simulation_data.output.save_result,
         simulation_data.output.save_numeric,
+        simulation_data.output.save_mesh,
         simulation_data.output.save_debug,
         result_file,
         debug_file
@@ -74,11 +76,9 @@ function write_mesh_data(
     force_write::Bool=false
 )   
     # TODO [implement mesh movement]
-    ## - put here a "save_intermediate_mesh" in the schema
-    ##   and use it here instead of save_intermediate_result
-    ## - maybe it need to save the groups and other data for the nodes
+    ## maybe it need to save the groups and other data for the nodes
     save_current_timestep = current_step % output_handler.save_frequency == 0
-    if force_write || (output_handler.save_intermediate_result && save_current_timestep)
+    if force_write || (output_handler.save_intermediate_mesh && save_current_timestep)
         path = "mesh/nodes/positions/t_$current_step"
         output_handler.result_file[path] = get_all_positions(mesh.nodes)
         # write elements connectivity

@@ -45,7 +45,6 @@ mutable struct Mesh
     dimension::Dimension
     nodes::NodesContainer
     elements::ElementsSet
-    interpolation_order::InterpolationOrder
 
     # if the mesh was refreshed (remeshed)
     # this can trigger the assembler redo:
@@ -57,7 +56,7 @@ end
 # TODO: remember to change the name of the function to build_mesh
 # and use the mesh_data::MeshData instead
 """Import a mesh from files in cache path."""
-function build_mesh(mesh_data::MeshData, simulation_data::SimulationData)
+function build_mesh(mesh_data::MeshData)
     # initially it need to be set to refresh to force the
     # first calculations that depend on this 
     must_refresh = true
@@ -81,8 +80,6 @@ function build_mesh(mesh_data::MeshData, simulation_data::SimulationData)
         mesh_data.dimension, 
         nodes, 
         elements,
-        # TODO: this should come from the imported mesh data
-        simulation_data.mesh.interpolation_order,
         must_refresh
     )
 end

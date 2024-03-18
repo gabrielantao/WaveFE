@@ -46,6 +46,7 @@ struct SimulationSection <: DataSection
     steps_limit::Int64
     transient::Bool
     safety_Δt_factor::Float64
+    mesh::String
     tolerance_relative::Dict{String, Float64}
     tolerance_absolute::Dict{String, Float64}
 end
@@ -57,6 +58,7 @@ function build_simulation_section(section_data)
     steps_limit = get_section_field(data, "steps_limit", Int64)
     transient = get_section_field(data, "transient", Bool)
     safety_Δt_factor = get_section_field(data, "safety_dt_factor", Float64)
+    mesh = get_section_field(data, "mesh", String)
     raw_tolerance_relative = pop!(data, "tolerance_relative", Dict{String, Float64}())
     raw_tolerance_absolute = pop!(data, "tolerance_absolute", Dict{String, Float64}())
     @assert isempty(raw_tolerance_relative) == false "tolerance_relative could not be empty"
@@ -74,6 +76,7 @@ function build_simulation_section(section_data)
         steps_limit,
         transient,
         safety_Δt_factor,
+        mesh,
         tolerance_relative,
         tolerance_absolute
     )
@@ -91,34 +94,6 @@ function validate_schema(section::SimulationSection)
     for (field_name, field_value) in section.tolerance_absolute
         field_greater_than("tolerance_absolute/$field_name", field_value, 0.0)
     end
-end
-
-
-struct MeshSection <: DataSection
-    filename::String
-    interpolation_order::InterpolationOrder
-end
-
-
-function build_mesh_section(section_data)
-    data = copy(section_data)
-    filename = get_section_field(data, "filename", String)
-    interpolation_order = WaveCore.get_interpolation_order(
-        get_section_field(
-            data,
-            "interpolation_order",
-            Int64
-        )
-    )
-    assert_only_supported_entries(data, "mesh")
-    return MeshSection(
-        filename,
-        interpolation_order
-    )
-end
-
-
-function validate_schema(section::MeshSection)
 end
 
 
@@ -191,6 +166,7 @@ struct OutputSection <: DataSection
     frequency::Int64
     save_result::Bool
     save_numeric::Bool
+    save_mesh::Bool
     save_debug::Bool
     unknowns::Vector{String}
 end
@@ -201,11 +177,12 @@ function build_output_section(section_data)
     frequency = get_section_field(data, "frequency", Int64)
     save_result = get_section_field(data, "save_result", Bool)
     save_numeric = get_section_field(data, "save_numeric", Bool)
+    save_mesh = get_section_field(data, "save_mesh", Bool)
     save_debug = get_section_field(data, "save_debug", Bool)
     unknowns = get_section_field(data, "unknowns", Vector{String})
     assert_only_supported_entries(data, "output")
     return OutputSection(
-        frequency, save_result, save_numeric, save_debug, unknowns
+        frequency, save_result, save_numeric, save_mesh, save_debug, unknowns
     )
 end
 
@@ -225,7 +202,6 @@ end
 struct SimulationData <: DataSchema
     general::GeneralSection
     simulation::SimulationSection
-    mesh::MeshSection
     parameter::ParameterSection
     solver::SolverSection
     output::OutputSection
@@ -237,7 +213,6 @@ function load_simulation_data(folder::String)
     return SimulationData(
         build_general_section(data["general"]),
         build_simulation_section(data["simulation"]),
-        build_mesh_section(data["mesh"]),
         build_parameter_section(data["parameter"]),
         build_solver_section(data["solver"]),
         build_output_section(data["output"]),
@@ -248,7 +223,6 @@ end
 function validate_schema(schema::SimulationData)
     validate_schema(schema.general)
     validate_schema(schema.simulation)
-    validate_schema(schema.mesh)
     validate_schema(schema.parameter)
     validate_schema(schema.solver)
     validate_schema(schema.output)
