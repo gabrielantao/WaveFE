@@ -31,14 +31,15 @@
         @test mesh.must_refresh == true
 
         # check baseic nodes and elements properties
+        # this case the get_containers return just the triangles container
+        # 
         @test WaveCore.get_total_nodes(mesh.nodes) == 2601
-        triangles, quadrilaterals = WaveCore.get_containers(mesh.elements)
-        @test triangles isa WaveCore.TrianglesContainer || quadrilaterals isa WaveCore.QuadrilateralsContainer
+        element_containers = WaveCore.get_containers(mesh.elements)
+        @test length(element_containers) == 1 
+        triangles = element_containers[1]
+        @test triangles isa WaveCore.TrianglesContainer
         @test WaveCore.get_total_elements(triangles) == 5000
         @test triangles.nodes_per_element == 3
-        @test WaveCore.get_total_elements(quadrilaterals) == 0
-        @test quadrilaterals.nodes_per_element == 4
-
 
         @testset "calculate triangles properties" begin
             WaveCore.update_areas!(mesh.elements.triangles, mesh.nodes)

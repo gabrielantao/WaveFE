@@ -9,7 +9,7 @@
 
     # rewrite the files
     case_folder = joinpath(WAVE_SIMULATOR_TEST_PATH, "dummy_case")
-    case = WaveCore.build_simulation_case(case_folder)
+    case = WaveCore.build_simulation_case(case_folder)  
     # clean up the files
     rm(joinpath(case_folder, WaveCore.CACHE_PATH), force=true, recursive=true)
 end

@@ -1,6 +1,6 @@
 # project specific
 scripts/
-simulator/test/cases/*/cache/result/*.hdf5
+simulator/test/cases/*/cache/*
 experiments/
 
 # environments and IDE local files

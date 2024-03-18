@@ -6,18 +6,20 @@
 
     # check nodes values
     @test mesh_data.nodes.total_nodes == 2129
-    @test size(mesh_data.nodes.positions) == (3, 2129)
+    @test size(mesh_data.nodes.positions) == (2, 2129)
     @test check_reference_csv(
         "ref_mesh_data",
         "positions.csv", 
-        [[x, y, z] for (x, y, z) in eachcol(mesh_data.nodes.positions)]
+        [[x, y] for (x, y) in eachcol(mesh_data.nodes.positions)]
     )
     @test check_reference_csv(
         "ref_mesh_data",
         "geometrical_groups.csv", 
         mesh_data.nodes.geometrical_groups.groups
     )
-    @test mesh_data.nodes.physical_groups.names == Dict(2 => "no-slip", 3 => "reference", 1 => "top")
+    @test mesh_data.nodes.physical_groups.names == Dict(
+        "top" => 1, "no-slip" => 2, "reference" => 3
+    )
     @test check_reference_csv(
         "ref_mesh_data",
         "physical_groups.csv", 
