@@ -28,7 +28,7 @@ function parse_commandline()
             help = "force regenerate the reference test results"
             action = :store_true
         "--log-level", "-L"    
-            help = "define if log level" 
+            help = "define the log level" 
             arg_type = Int
             default = 1
         "test-name"

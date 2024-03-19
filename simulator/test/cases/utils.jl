@@ -8,13 +8,21 @@ end
 
 """Run a validation case"""
 function run_validation_case(case::ValidationCase)
+    case_folder = joinpath(WAVE_SIMULATOR_TEST_CASE_PATH, case.folder)
     simulation_args = Dict(
         "log-level" => PARSED_ARGS["log-level"],
         "show-progress" => true,
         "force-rerun" => true,
-        "folder" => joinpath(WAVE_SIMULATOR_TEST_CASE_PATH, case.folder)
+        "folder" => case_folder
     )
     run_simulation(simulation_args)
+    if PARSED_ARGS["regenerate-result"]
+        cp(
+            joinpath(case_folder, WaveCore.CACHE_PATH, WaveCore.RESULT_PATH, WaveCore.RESULT_FILENAME), 
+            joinpath(case_folder, WaveCore.REFERENCE_PATH, WaveCore.RESULT_FILENAME), 
+            force=true
+        )
+    end
 end
 
 

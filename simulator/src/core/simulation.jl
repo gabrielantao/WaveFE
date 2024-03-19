@@ -68,7 +68,9 @@ function start(simulation::Simulation, show_progress::Bool)
 
     elapsed_time = @elapsed begin   
         # setup additional stuff before start the simulation
-        startup_model(simulation.model, simulation.mesh, simulation.domain_conditions)
+        startup_model(
+            simulation.model, simulation.mesh, simulation.domain_conditions
+        )
         
         # write the output values and the mesh for the initial time step
         write_result_data(

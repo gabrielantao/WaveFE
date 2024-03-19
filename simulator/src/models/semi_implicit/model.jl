@@ -128,14 +128,19 @@ function run_iteration(
                 mesh
             )
         end
-        if mesh.must_refresh || mesh.nodes.moved
-            equation.base.assembler.assembled_lhs = assemble_global_lhs(
-                equation, 
-                mesh,
-                model.unknowns_handler,
-                model.additional_parameters
-            )
-        end
+        
+        # TODO [general performance improvements]
+        ## this call for LHS assembler could be done only if the mesh has updated
+        ## the previous implementation used `if mesh.must_refresh || mesh.nodes.moved`
+        ## but this breaks the simulation. Investigate if this is possible and if it can 
+        ## improve the performance once it doens't need to redo this to obtain the same saved result
+        equation.base.assembler.assembled_lhs = assemble_global_lhs(
+            equation, 
+            mesh,
+            model.unknowns_handler,
+            model.additional_parameters
+        )
+        
         # for this model always reassemble RHS
         assembled_rhs = assemble_global_rhs(
             equation, 
@@ -148,22 +153,27 @@ function run_iteration(
         # the domain conditions and solve could be done in parallel for each unknown
         for unknown in equation.base.solved_unknowns
             ### APPLY DOMAIN CONDITIONS ###
-            if mesh.must_refresh || mesh.nodes.moved
-                # it uses assembled_lhs as template for all variables so it needs to copy here 
-                # update the LHS matrix
-                equation.base.members.lhs[unknown] = copy(equation.base.assembler.assembled_lhs)
-                WaveCore.apply_domain_conditions_lhs!(
-                    domain_conditions, 
-                    unknown, 
-                    equation.base.members.lhs[unknown]
-                )
-                # use the new built LHS to update the solver perconditioner
-                WaveCore.update_preconditioner!(
-                    equation.base.solver, 
-                    equation.base.members.lhs[unknown], 
-                    unknown
-                )
-            end
+            
+            # TODO [general performance improvements]
+            ## these calls for LHS and update preconditioner could be done only if the mesh has updated
+            ## the previous implementation used `if mesh.must_refresh || mesh.nodes.moved`
+            ## but this breaks the simulation. Investigate if this is possible and if it can 
+            ## improve the performance once it doens't need to redo this to obtain the same saved result
+
+            # it uses assembled_lhs as template for all variables so it needs to copy here 
+            # update the LHS matrix
+            equation.base.members.lhs[unknown] = copy(equation.base.assembler.assembled_lhs)
+            WaveCore.apply_domain_conditions_lhs!(
+                domain_conditions, 
+                unknown, 
+                equation.base.members.lhs[unknown]
+            )
+            # use the new built LHS to update the solver perconditioner
+            WaveCore.update_preconditioner!(
+                equation.base.solver, 
+                equation.base.members.lhs[unknown], 
+                unknown
+            )
             # for this model always reapply the conditions for reassembled RHS
             equation.base.members.rhs[unknown] = WaveCore.apply_domain_conditions_rhs(
                 domain_conditions, 
