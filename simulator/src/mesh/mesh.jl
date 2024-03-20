@@ -130,21 +130,21 @@ function get_connectivity_matrix(element_container::ElementsContainer)
 end
 
 
-"""Update (move) mesh nodes when a dynamic mesh is used"""
+"""Update the elements calculated properties"""
 function update_elements!(
     mesh::Mesh,
     unknowns_handler::UnknownsHandler,
     model_parameters::ModelParameters
 )
-    if mesh.must_refresh || mesh.nodes.moved
-        for element_container in get_containers(mesh.elements)
-            update_properties!(
-                element_container, 
-                mesh.nodes,
-                unknowns_handler,
-                model_parameters
-            ) 
-        end
+    # it must be updated every timestep regardless mesh updated or nodes moved
+    for element_container in get_containers(mesh.elements)
+        update_properties!(
+            element_container, 
+            mesh.nodes,
+            unknowns_handler,
+            model_parameters,
+            mesh.must_refresh || mesh.nodes.moved
+        ) 
     end
 end
 

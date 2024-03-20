@@ -77,10 +77,13 @@ function update_properties!(
     elements_container::TrianglesContainer, 
     nodes_container::NodesContainer,
     unknowns_handler::UnknownsHandler,
-    model_parameters::ModelParameters
+    model_parameters::ModelParameters,
+    must_update_geometry::Bool
 )
-    update_areas!(elements_container, nodes_container)
-    update_shape_coeficients!(elements_container, nodes_container)
+    if must_update_geometry
+        update_areas!(elements_container, nodes_container)
+        update_shape_coeficients!(elements_container, nodes_container)
+    end
 
     update_local_time_interval!(
         elements_container, 

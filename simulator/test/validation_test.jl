@@ -4,6 +4,7 @@ using ReferenceTests
 using ArgParse
 using HDF5
 using DelimitedFiles
+using Interpolations
 
 const WAVE_SIMULATOR_TEST_PATH = joinpath(ENV["PIXI_PROJECT_ROOT"], "simulator", "test")
 const WAVE_SIMULATOR_TEST_CASE_PATH = joinpath(WAVE_SIMULATOR_TEST_PATH, "cases")
@@ -28,7 +29,7 @@ function parse_commandline()
             help = "force regenerate the reference test results"
             action = :store_true
         "--log-level", "-L"    
-            help = "define if log level" 
+            help = "define the log level" 
             arg_type = Int
             default = 1
         "test-name"

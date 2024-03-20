@@ -58,17 +58,21 @@ function start(simulation::Simulation, show_progress::Bool)
     timestep_counter = 0
     simulation_data = simulation.case.simulation_data
     total_step_limits = simulation_data.simulation.steps_limit
+    alias = simulation_data.general.alias * " " ^ (MAXIMUM_LENGTH_ALIAS - length(simulation_data.general.alias))
     progress_bar = Progress(
         total_step_limits, 
-        desc=simulation_data.general.alias, 
+        desc=alias, 
         enabled=show_progress,
+        barlen=PROGESS_BAR_LENGTH,
         barglyphs=BarGlyphs('|','█', ['▁' ,'▂' ,'▃' ,'▄' ,'▅' ,'▆', '▇'],' ','|',),
         color=:white
     )  
 
     elapsed_time = @elapsed begin   
         # setup additional stuff before start the simulation
-        startup_model(simulation.model, simulation.mesh, simulation.domain_conditions)
+        startup_model(
+            simulation.model, simulation.mesh, simulation.domain_conditions
+        )
         
         # write the output values and the mesh for the initial time step
         write_result_data(

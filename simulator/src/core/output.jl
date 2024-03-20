@@ -9,7 +9,6 @@ struct OutputHandler
     save_debug::Bool
     result_file::HDF5.File
     debug_file::HDF5.File
-    
 end
 
 

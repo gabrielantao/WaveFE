@@ -8,13 +8,21 @@ end
 
 """Run a validation case"""
 function run_validation_case(case::ValidationCase)
+    case_folder = joinpath(WAVE_SIMULATOR_TEST_CASE_PATH, case.folder)
     simulation_args = Dict(
         "log-level" => PARSED_ARGS["log-level"],
         "show-progress" => true,
         "force-rerun" => true,
-        "folder" => joinpath(WAVE_SIMULATOR_TEST_CASE_PATH, case.folder)
+        "folder" => case_folder
     )
     run_simulation(simulation_args)
+    if PARSED_ARGS["regenerate-result"]
+        cp(
+            joinpath(case_folder, WaveCore.CACHE_PATH, WaveCore.RESULT_PATH, WaveCore.RESULT_FILENAME), 
+            joinpath(case_folder, WaveCore.REFERENCE_PATH, WaveCore.RESULT_FILENAME), 
+            force=true
+        )
+    end
 end
 
 
@@ -105,23 +113,3 @@ function check_reference(case::ValidationCase)
         )
     end
 end
-
-
-"""
-Macro to run the checking step for a validation case
-The tests are reached by using Regex due the ReTest mechanism
-https://juliatesting.github.io/ReTest.jl/dev/#Filtering    
-"""
-macro test_case(case)
-    quote
-        @testset "$($case.group_name)/$($case.folder)" begin
-            run_validation_case($case)
-            check_reference($case)
-            # TODO [implement better debugging tools]
-            ## call hook function (e.g. to plot figures, move files, clean up, etc.)
-        end
-    end
-end
-
-# register the macro as a testset macro
-@testset_macro @test_case
