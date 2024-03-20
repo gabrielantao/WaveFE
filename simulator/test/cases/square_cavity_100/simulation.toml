@@ -6,16 +6,16 @@ alias = "cavity_re_100"
 
 [simulation]
 model = "CBS semi-implicit"
-steps_limit = 1500
+steps_limit = 600
 transient = false
 safety_dt_factor = 0.7
 mesh = "square_cavity.msh"
 
 [simulation.tolerance_relative]
-u_1 = 1e-3
-u_2 = 1e-3
-u_3 = 1e-3
-p =  1e-2
+u_1 = 9e-5
+u_2 = 9e-5
+u_3 = 9e-5
+p =  5e-4
 
 [simulation.tolerance_absolute]
 u_1 = 0.0
@@ -32,8 +32,8 @@ Ri = 0.0
 [solver]
 type = "Conjugate Gradient"
 preconditioner = "Jacobi"
-steps_limit = 10000
-tolerance_relative = 1e-9
+steps_limit = 5000
+tolerance_relative = 1e-5
 tolerance_absolute = 0.0
 
 [output]
