@@ -142,7 +142,8 @@ function update_elements!(
             element_container, 
             mesh.nodes,
             unknowns_handler,
-            model_parameters
+            model_parameters,
+            mesh.must_refresh || mesh.nodes.moved
         ) 
     end
 end

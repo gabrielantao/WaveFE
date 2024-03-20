@@ -34,7 +34,7 @@ There are some features and improvements that could be implemented
 30. preprocessing data for simulator
 31. study and implement how to run not adimensional models
 32. create benchmarks for the simulator
-
+33. implement subgroups of Gmsh physical groups
 
 # Descriptions
 ## implement one dimensional elements

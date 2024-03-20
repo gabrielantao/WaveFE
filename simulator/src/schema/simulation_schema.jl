@@ -38,6 +38,7 @@ function validate_schema(section::GeneralSection)
         section.alias, 
         CASE_ALIAS_FIELD_NAME_PATTERN
     )
+    @assert length(section.alias) ≤ WaveCore.MAXIMUM_LENGTH_ALIAS "The length of the alias must be smaller than 40 characteres."
 end
 
 

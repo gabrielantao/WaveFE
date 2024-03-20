@@ -134,6 +134,8 @@ function run_iteration(
         ## the previous implementation used `if mesh.must_refresh || mesh.nodes.moved`
         ## but this breaks the simulation. Investigate if this is possible and if it can 
         ## improve the performance once it doens't need to redo this to obtain the same saved result
+        ## One should try to move the dependency of Δt in the LHS to the RHS 
+        ## then LHS will depend only on the geometrical data
         equation.base.assembler.assembled_lhs = assemble_global_lhs(
             equation, 
             mesh,

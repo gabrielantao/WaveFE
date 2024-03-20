@@ -58,10 +58,12 @@ function start(simulation::Simulation, show_progress::Bool)
     timestep_counter = 0
     simulation_data = simulation.case.simulation_data
     total_step_limits = simulation_data.simulation.steps_limit
+    alias = simulation_data.general.alias * " " ^ (MAXIMUM_LENGTH_ALIAS - length(simulation_data.general.alias))
     progress_bar = Progress(
         total_step_limits, 
-        desc=simulation_data.general.alias, 
+        desc=alias, 
         enabled=show_progress,
+        barlen=PROGESS_BAR_LENGTH,
         barglyphs=BarGlyphs('|','█', ['▁' ,'▂' ,'▃' ,'▄' ,'▅' ,'▆', '▇'],' ','|',),
         color=:white
     )  
