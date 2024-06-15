@@ -83,4 +83,13 @@ end
         check_reference(case)
         check_ghia_reference(case)
     end
+
+    @testset "rectangular_channel" begin
+        case = ValidationCase(
+            ModuleSemiImplicit.MODEL_NAME, "rectangular_channel", ["u_1", "u_2"]
+        )
+        run_validation_case(case)
+        check_reference(case)
+        check_ghia_reference(case)
+    end
 end
