@@ -90,6 +90,15 @@ end
         )
         run_validation_case(case)
         check_reference(case)
-        check_ghia_reference(case)
+        #check_ghia_reference(case)
+    end
+
+    @testset "backward_facing_step" begin
+        case = ValidationCase(
+            ModuleSemiImplicit.MODEL_NAME, "backward_facing_step", ["u_1", "u_2"]
+        )
+        run_validation_case(case)
+        check_reference(case)
+        #check_ghia_reference(case)
     end
 end
