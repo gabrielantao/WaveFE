@@ -30,7 +30,7 @@ for condition_class in ["initial", "boundary"]
             Dict(
                 "description" => "$(condition_class) value for inlet point $(index)", 
                 "group_name" => "inlet_$index",
-                "value" => 1.0,#inlet_points[20-index, 2], 
+                "value" => inlet_points[20-index, 2], 
                 "unknown" => "u_1", 
             )
         )
@@ -71,7 +71,7 @@ for condition_class in ["initial", "boundary"]
         Dict(
             "description" => "$(condition_class) value for the outlet",
             "group_name" => "outlet",
-            "value" => 0.0001, 
+            "value" => 0.0, 
             "unknown" => "p", 
         )
     )

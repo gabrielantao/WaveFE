@@ -112,7 +112,6 @@ Line(21) = {21, 22};
 Line(22) = {22, 23};
 //+
 Line(23) = {23, 24};
-
 //+
 Line(24) = {24, 25};
 //+
@@ -181,3 +180,25 @@ Physical Point("inlet_17", 53) = {18};
 Physical Point("inlet_18", 54) = {19};
 //+
 Physical Point("inlet_19", 55) = {20};
+//+
+Line(35) = {22, 34};
+//+
+Line(36) = {24, 33};
+//+
+Line(37) = {25, 32};
+//+
+Line(38) = {26, 31};
+//+
+Line(39) = {27, 30};
+//+
+Curve {35, 36, 37, 38, 39} In Surface {1};
+//+
+Physical Curve("geom_4_00", 56) = {35};
+//+
+Physical Curve("geom_4_88", 57) = {36};
+//+
+Physical Curve("geom_6_11", 58) = {37};
+//+
+Physical Curve("geom_8_17", 59) = {38};
+//+
+Physical Curve("geom_14_29", 60) = {39};

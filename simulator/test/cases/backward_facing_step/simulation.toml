@@ -6,7 +6,7 @@ alias = "step_re_229"
 
 [simulation]
 model = "CBS semi-implicit"
-steps_limit = 1000
+steps_limit = 600
 transient = false
 safety_dt_factor = 0.7
 mesh = "backward_facing_step.msh"
