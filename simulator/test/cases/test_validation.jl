@@ -1,5 +1,6 @@
-include("square_cavity_100/ghia_reference.jl")
-include("rectangular_channel/channel_reference.jl")
+include("backward_facing_step/reference/step_reference.jl")
+include("square_cavity_100/reference/ghia_reference.jl")
+include("rectangular_channel/reference/channel_reference.jl")
 
 
 @testset "validation model semi implicit" begin
@@ -39,7 +40,7 @@ include("rectangular_channel/channel_reference.jl")
         )
         run_validation_case(case)
         check_reference(case)
-        channel_reference(case)
+        check_channel_reference(case)
     end
 
     @testset "backward_facing_step" begin
@@ -48,6 +49,6 @@ include("rectangular_channel/channel_reference.jl")
         )
         run_validation_case(case)
         check_reference(case)
-        #check_ghia_reference(case)
+        check_step_reference(case)
     end
 end

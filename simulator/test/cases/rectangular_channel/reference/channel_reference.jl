@@ -7,7 +7,7 @@ Nithiarasu, P. and Lewis, Roland and Seetharamu, K.N.
 Fundamentals of the finite element method for heat and mass transfer. 
 2nd edition, pag 221, Figure 7.21
 """
-function channel_reference(case::ValidationCase, tolerance::Float64=0.05)
+function check_channel_reference(case::ValidationCase, tolerance::Float64=0.05)
     case_folder = joinpath(WAVE_SIMULATOR_TEST_CASE_PATH, case.folder)
     result_filepath = joinpath(case_folder, WaveCore.CACHE_PATH, WaveCore.RESULT_PATH, WaveCore.RESULT_FILENAME)
 
