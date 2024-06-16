@@ -1,0 +1,456 @@
+[general]
+version = "1.0"
+description = "Backward-facing step case 2D"
+
+[[initial]]
+group_name = "inlet_1"
+unknown = "u_1"
+value = 0.08038541
+description = "initial value for inlet point 1"
+[[initial]]
+group_name = "inlet_1"
+unknown = "u_2"
+value = 0.0
+description = "initial value for inlet point 1"
+[[initial]]
+group_name = "inlet_2"
+unknown = "u_1"
+value = 0.16970275
+description = "initial value for inlet point 2"
+[[initial]]
+group_name = "inlet_2"
+unknown = "u_2"
+value = 0.0
+description = "initial value for inlet point 2"
+[[initial]]
+group_name = "inlet_3"
+unknown = "u_1"
+value = 0.37289942
+description = "initial value for inlet point 3"
+[[initial]]
+group_name = "inlet_3"
+unknown = "u_2"
+value = 0.0
+description = "initial value for inlet point 3"
+[[initial]]
+group_name = "inlet_4"
+unknown = "u_1"
+value = 0.56046537
+description = "initial value for inlet point 4"
+[[initial]]
+group_name = "inlet_4"
+unknown = "u_2"
+value = 0.0
+description = "initial value for inlet point 4"
+[[initial]]
+group_name = "inlet_5"
+unknown = "u_1"
+value = 0.87084263
+description = "initial value for inlet point 5"
+[[initial]]
+group_name = "inlet_5"
+unknown = "u_2"
+value = 0.0
+description = "initial value for inlet point 5"
+[[initial]]
+group_name = "inlet_6"
+unknown = "u_1"
+value = 1.06510798
+description = "initial value for inlet point 6"
+[[initial]]
+group_name = "inlet_6"
+unknown = "u_2"
+value = 0.0
+description = "initial value for inlet point 6"
+[[initial]]
+group_name = "inlet_7"
+unknown = "u_1"
+value = 1.21918004
+description = "initial value for inlet point 7"
+[[initial]]
+group_name = "inlet_7"
+unknown = "u_2"
+value = 0.0
+description = "initial value for inlet point 7"
+[[initial]]
+group_name = "inlet_8"
+unknown = "u_1"
+value = 1.3040318
+description = "initial value for inlet point 8"
+[[initial]]
+group_name = "inlet_8"
+unknown = "u_2"
+value = 0.0
+description = "initial value for inlet point 8"
+[[initial]]
+group_name = "inlet_9"
+unknown = "u_1"
+value = 1.35092328
+description = "initial value for inlet point 9"
+[[initial]]
+group_name = "inlet_9"
+unknown = "u_2"
+value = 0.0
+description = "initial value for inlet point 9"
+[[initial]]
+group_name = "inlet_10"
+unknown = "u_1"
+value = 1.35538892
+description = "initial value for inlet point 10"
+[[initial]]
+group_name = "inlet_10"
+unknown = "u_2"
+value = 0.0
+description = "initial value for inlet point 10"
+[[initial]]
+group_name = "inlet_11"
+unknown = "u_1"
+value = 1.37995084
+description = "initial value for inlet point 11"
+[[initial]]
+group_name = "inlet_11"
+unknown = "u_2"
+value = 0.0
+description = "initial value for inlet point 11"
+[[initial]]
+group_name = "inlet_12"
+unknown = "u_1"
+value = 1.38218402
+description = "initial value for inlet point 12"
+[[initial]]
+group_name = "inlet_12"
+unknown = "u_2"
+value = 0.0
+description = "initial value for inlet point 12"
+[[initial]]
+group_name = "inlet_13"
+unknown = "u_1"
+value = 1.35762201
+description = "initial value for inlet point 13"
+[[initial]]
+group_name = "inlet_13"
+unknown = "u_2"
+value = 0.0
+description = "initial value for inlet point 13"
+[[initial]]
+group_name = "inlet_14"
+unknown = "u_1"
+value = 1.26607152
+description = "initial value for inlet point 14"
+[[initial]]
+group_name = "inlet_14"
+unknown = "u_2"
+value = 0.0
+description = "initial value for inlet point 14"
+[[initial]]
+group_name = "inlet_15"
+unknown = "u_1"
+value = 1.11646518
+description = "initial value for inlet point 15"
+[[initial]]
+group_name = "inlet_15"
+unknown = "u_2"
+value = 0.0
+description = "initial value for inlet point 15"
+[[initial]]
+group_name = "inlet_16"
+unknown = "u_1"
+value = 0.77482713
+description = "initial value for inlet point 16"
+[[initial]]
+group_name = "inlet_16"
+unknown = "u_2"
+value = 0.0
+description = "initial value for inlet point 16"
+[[initial]]
+group_name = "inlet_17"
+unknown = "u_1"
+value = 0.56716419
+description = "initial value for inlet point 17"
+[[initial]]
+group_name = "inlet_17"
+unknown = "u_2"
+value = 0.0
+description = "initial value for inlet point 17"
+[[initial]]
+group_name = "inlet_18"
+unknown = "u_1"
+value = 0.29251403
+description = "initial value for inlet point 18"
+[[initial]]
+group_name = "inlet_18"
+unknown = "u_2"
+value = 0.0
+description = "initial value for inlet point 18"
+[[initial]]
+group_name = "inlet_19"
+unknown = "u_1"
+value = 0.10271492
+description = "initial value for inlet point 19"
+[[initial]]
+group_name = "inlet_19"
+unknown = "u_2"
+value = 0.0
+description = "initial value for inlet point 19"
+[[initial]]
+group_name = "no-slip"
+unknown = "u_1"
+value = 0.0
+description = "initial value for no-slip walls"
+[[initial]]
+group_name = "no-slip"
+unknown = "u_2"
+value = 0.0
+description = "initial value for no-slip walls"
+[[initial]]
+group_name = "outlet"
+unknown = "p"
+value = 0.0
+description = "initial value for the outlet"
+
+[[boundary]]
+group_name = "inlet_1"
+condition_type = 1
+unknown = "u_1"
+value = 0.08038541
+description = "boundary value for inlet point 1"
+[[boundary]]
+group_name = "inlet_1"
+condition_type = 1
+unknown = "u_2"
+value = 0.0
+description = "boundary value for inlet point 1"
+[[boundary]]
+group_name = "inlet_2"
+condition_type = 1
+unknown = "u_1"
+value = 0.16970275
+description = "boundary value for inlet point 2"
+[[boundary]]
+group_name = "inlet_2"
+condition_type = 1
+unknown = "u_2"
+value = 0.0
+description = "boundary value for inlet point 2"
+[[boundary]]
+group_name = "inlet_3"
+condition_type = 1
+unknown = "u_1"
+value = 0.37289942
+description = "boundary value for inlet point 3"
+[[boundary]]
+group_name = "inlet_3"
+condition_type = 1
+unknown = "u_2"
+value = 0.0
+description = "boundary value for inlet point 3"
+[[boundary]]
+group_name = "inlet_4"
+condition_type = 1
+unknown = "u_1"
+value = 0.56046537
+description = "boundary value for inlet point 4"
+[[boundary]]
+group_name = "inlet_4"
+condition_type = 1
+unknown = "u_2"
+value = 0.0
+description = "boundary value for inlet point 4"
+[[boundary]]
+group_name = "inlet_5"
+condition_type = 1
+unknown = "u_1"
+value = 0.87084263
+description = "boundary value for inlet point 5"
+[[boundary]]
+group_name = "inlet_5"
+condition_type = 1
+unknown = "u_2"
+value = 0.0
+description = "boundary value for inlet point 5"
+[[boundary]]
+group_name = "inlet_6"
+condition_type = 1
+unknown = "u_1"
+value = 1.06510798
+description = "boundary value for inlet point 6"
+[[boundary]]
+group_name = "inlet_6"
+condition_type = 1
+unknown = "u_2"
+value = 0.0
+description = "boundary value for inlet point 6"
+[[boundary]]
+group_name = "inlet_7"
+condition_type = 1
+unknown = "u_1"
+value = 1.21918004
+description = "boundary value for inlet point 7"
+[[boundary]]
+group_name = "inlet_7"
+condition_type = 1
+unknown = "u_2"
+value = 0.0
+description = "boundary value for inlet point 7"
+[[boundary]]
+group_name = "inlet_8"
+condition_type = 1
+unknown = "u_1"
+value = 1.3040318
+description = "boundary value for inlet point 8"
+[[boundary]]
+group_name = "inlet_8"
+condition_type = 1
+unknown = "u_2"
+value = 0.0
+description = "boundary value for inlet point 8"
+[[boundary]]
+group_name = "inlet_9"
+condition_type = 1
+unknown = "u_1"
+value = 1.35092328
+description = "boundary value for inlet point 9"
+[[boundary]]
+group_name = "inlet_9"
+condition_type = 1
+unknown = "u_2"
+value = 0.0
+description = "boundary value for inlet point 9"
+[[boundary]]
+group_name = "inlet_10"
+condition_type = 1
+unknown = "u_1"
+value = 1.35538892
+description = "boundary value for inlet point 10"
+[[boundary]]
+group_name = "inlet_10"
+condition_type = 1
+unknown = "u_2"
+value = 0.0
+description = "boundary value for inlet point 10"
+[[boundary]]
+group_name = "inlet_11"
+condition_type = 1
+unknown = "u_1"
+value = 1.37995084
+description = "boundary value for inlet point 11"
+[[boundary]]
+group_name = "inlet_11"
+condition_type = 1
+unknown = "u_2"
+value = 0.0
+description = "boundary value for inlet point 11"
+[[boundary]]
+group_name = "inlet_12"
+condition_type = 1
+unknown = "u_1"
+value = 1.38218402
+description = "boundary value for inlet point 12"
+[[boundary]]
+group_name = "inlet_12"
+condition_type = 1
+unknown = "u_2"
+value = 0.0
+description = "boundary value for inlet point 12"
+[[boundary]]
+group_name = "inlet_13"
+condition_type = 1
+unknown = "u_1"
+value = 1.35762201
+description = "boundary value for inlet point 13"
+[[boundary]]
+group_name = "inlet_13"
+condition_type = 1
+unknown = "u_2"
+value = 0.0
+description = "boundary value for inlet point 13"
+[[boundary]]
+group_name = "inlet_14"
+condition_type = 1
+unknown = "u_1"
+value = 1.26607152
+description = "boundary value for inlet point 14"
+[[boundary]]
+group_name = "inlet_14"
+condition_type = 1
+unknown = "u_2"
+value = 0.0
+description = "boundary value for inlet point 14"
+[[boundary]]
+group_name = "inlet_15"
+condition_type = 1
+unknown = "u_1"
+value = 1.11646518
+description = "boundary value for inlet point 15"
+[[boundary]]
+group_name = "inlet_15"
+condition_type = 1
+unknown = "u_2"
+value = 0.0
+description = "boundary value for inlet point 15"
+[[boundary]]
+group_name = "inlet_16"
+condition_type = 1
+unknown = "u_1"
+value = 0.77482713
+description = "boundary value for inlet point 16"
+[[boundary]]
+group_name = "inlet_16"
+condition_type = 1
+unknown = "u_2"
+value = 0.0
+description = "boundary value for inlet point 16"
+[[boundary]]
+group_name = "inlet_17"
+condition_type = 1
+unknown = "u_1"
+value = 0.56716419
+description = "boundary value for inlet point 17"
+[[boundary]]
+group_name = "inlet_17"
+condition_type = 1
+unknown = "u_2"
+value = 0.0
+description = "boundary value for inlet point 17"
+[[boundary]]
+group_name = "inlet_18"
+condition_type = 1
+unknown = "u_1"
+value = 0.29251403
+description = "boundary value for inlet point 18"
+[[boundary]]
+group_name = "inlet_18"
+condition_type = 1
+unknown = "u_2"
+value = 0.0
+description = "boundary value for inlet point 18"
+[[boundary]]
+group_name = "inlet_19"
+condition_type = 1
+unknown = "u_1"
+value = 0.10271492
+description = "boundary value for inlet point 19"
+[[boundary]]
+group_name = "inlet_19"
+condition_type = 1
+unknown = "u_2"
+value = 0.0
+description = "boundary value for inlet point 19"
+[[boundary]]
+group_name = "no-slip"
+condition_type = 1
+unknown = "u_1"
+value = 0.0
+description = "boundary value for no-slip walls"
+[[boundary]]
+group_name = "no-slip"
+condition_type = 1
+unknown = "u_2"
+value = 0.0
+description = "boundary value for no-slip walls"
+[[boundary]]
+group_name = "outlet"
+condition_type = 1
+unknown = "p"
+value = 0.0
+description = "boundary value for the outlet"
