@@ -123,8 +123,8 @@ end
 
 
 function validate_schema(schema::DomainConditionsData)
-    @assert isempty(schema.initial) == false, "The initial conditions could not be empty"
-    @assert isempty(schema.boundary) == false, "The boundary conditions could not be empty"
+    @assert isempty(schema.initial) == false "The initial conditions could not be empty"
+    @assert isempty(schema.boundary) == false "The boundary conditions could not be empty"
     validate_schema(schema.general)
     validate_schema(schema.initial)
     validate_schema(schema.boundary)

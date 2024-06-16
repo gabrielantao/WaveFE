@@ -30,7 +30,7 @@ function parse_commandline()
 end
 
 
-# call the main function of the simulator
+# register the main function of the simulator
 main() = run_simulation(parse_commandline())
 
 end # module
