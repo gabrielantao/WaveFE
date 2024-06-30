@@ -3,55 +3,55 @@ version = "1.0"
 description = "Basic rectangular channel with semicircle obstacle."
 
 [[initial]]
-description = "define initial velocity x values for all nodes"
+description = "define initial velocity x values for inlet nodes"
 group_name =  "inlet"
 value = 1.0
 unknown = "u_1"
 
 [[initial]]
-description = "define initial velocity x values for all nodes"
+description = "define initial velocity x values for outlet nodes"
 group_name =  "outlet"
 value = 0.0
 unknown = "u_1"
 
 [[initial]]
-description = "define initial velocity x values for all nodes"
+description = "define initial velocity x values for no-slip nodes"
 group_name =  "no-slip"
 value = 0.0
 unknown = "u_1"
 
 [[initial]]
-description = "define initial velocity y values for all nodes"
+description = "define initial velocity y values for inlet nodes"
 group_name =  "inlet"
 value = 0.0
 unknown = "u_2"
 
 [[initial]]
-description = "define initial velocity y values for all nodes"
+description = "define initial velocity y values for outlet nodes"
 group_name =  "outlet"
 value = 0.0
 unknown = "u_2"
 
 [[initial]]
-description = "define initial velocity y values for all nodes"
+description = "define initial velocity y values for no-slip nodes"
 group_name =  "no-slip"
 value = 0.0
 unknown = "u_2"
 
 [[initial]]
-description = "define initial pressure values for all nodes"
+description = "define initial pressure values for inlet nodes"
 group_name =  "inlet"
 value = 0.0001
 unknown = "p"
 
 [[initial]]
-description = "define initial pressure values for all nodes"
+description = "define initial pressure values for outlet nodes"
 group_name =  "outlet"
 value = 0.0
 unknown = "p"
 
 [[initial]]
-description = "define initial pressure values for all nodes"
+description = "define initial pressure values for no-slip nodes"
 group_name =  "no-slip"
 value = 0.0
 unknown = "p"
