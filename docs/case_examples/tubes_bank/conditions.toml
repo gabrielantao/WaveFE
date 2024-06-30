@@ -1,0 +1,145 @@
+[general]
+version = "1.0"
+description = "Tube tank."
+
+[[initial]]
+description = "define initial velocity x values for all nodes"
+group_name =  "inlet"
+value = 1.0
+unknown = "u_1"
+
+[[initial]]
+description = "define initial velocity x values for all nodes"
+group_name =  "outlet"
+value = 0.0
+unknown = "u_1"
+
+[[initial]]
+description = "define initial velocity x values for no-slip nodes"
+group_name =  "no-slip"
+value = 0.0
+unknown = "u_1"
+
+[[initial]]
+description = "define initial velocity x values for pseudo-walls nodes"
+group_name =  "pseudo-walls"
+value = 0.0
+unknown = "u_1"
+
+[[initial]]
+description = "define initial velocity x values for surface nodes"
+group_name =  "surface"
+value = 0.0
+unknown = "u_1"
+
+
+[[initial]]
+description = "define initial velocity y values for inlet nodes"
+group_name =  "inlet"
+value = 0.0
+unknown = "u_2"
+
+[[initial]]
+description = "define initial velocity y values for outlet nodes"
+group_name =  "outlet"
+value = 0.0
+unknown = "u_2"
+
+[[initial]]
+description = "define initial velocity y values for no-slip nodes"
+group_name =  "no-slip"
+value = 0.0
+unknown = "u_2"
+
+[[initial]]
+description = "define initial velocity y values for pseudo-walls nodes"
+group_name =  "pseudo-walls"
+value = 0.0
+unknown = "u_2"
+
+[[initial]]
+description = "define initial velocity y values for surface nodes"
+group_name =  "surface"
+value = 0.0
+unknown = "u_2"
+
+
+[[initial]]
+description = "define initial pressure values for inlet nodes"
+group_name =  "inlet"
+value = 0.0001
+unknown = "p"
+
+[[initial]]
+description = "define initial pressure values for outlet nodes"
+group_name =  "outlet"
+value = 0.0
+unknown = "p"
+
+[[initial]]
+description = "define initial pressure values for no-slip nodes"
+group_name =  "no-slip"
+value = 0.0
+unknown = "p"
+
+[[initial]]
+description = "define initial pressure values for pseudo-walls nodes"
+group_name =  "pseudo-walls"
+value = 0.0
+unknown = "p"
+
+[[initial]]
+description = "define initial pressure values for surface nodes"
+group_name =  "surface"
+value = 0.0
+unknown = "p"
+
+
+[[boundary]]
+description = "inlet boundary"
+group_name = "inlet"
+condition_type = 1
+unknown = "u_1"
+value = 1.0
+
+[[boundary]]
+description = "inlet boundary"
+group_name = "inlet"
+condition_type = 1
+unknown = "u_2"
+value = 0.0
+
+[[boundary]]
+description = "top and bottom boundary"
+group_name = "no-slip"
+condition_type = 1
+unknown = "u_1"
+value = 0.0
+
+[[boundary]]
+description = "top and bottom boundary"
+group_name = "pseudo-walls"
+condition_type = 1
+unknown = "u_1"
+value = 0.0
+
+[[boundary]]
+description = "top and bottom boundary"
+group_name = "no-slip"
+condition_type = 1
+unknown = "u_2"
+value = 0.0
+
+[[boundary]]
+description = "top and bottom boundary"
+group_name = "pseudo-walls"
+condition_type = 1
+unknown = "u_2"
+value = 0.0
+
+[[boundary]]
+description = "outlet boundary"
+group_name = "outlet"
+unknown = "p"
+condition_type = 1
+value = 0.0
