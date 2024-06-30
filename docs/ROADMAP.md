@@ -169,9 +169,35 @@ NOTE: a package that can be useful here is [FiniteMesh](https://github.com/vavri
 - implement visualize the result during the simulation or after
 
 
+# Technical Documentation
+
+## add docs describing the CBS
+### general information
+- tags: `theory`, `documents`
+- complexity: 2/5
+- description: write the notebooks with documentation about the CBS method
+- dependency: -
+
+### TODO list
+- write notebooks to explain what is the method and how this is implemented
+- write notebooks of how to deduce the equations
+
+
+## add docs describing the software architecture
+### general information
+- tags: `architecture`, `documents`
+- complexity: 2/5
+- description: write the texto to describe how the software is implemented
+- dependency: -
+
+### TODO list
+- write how the is the structure of the simulator and how it works
+- write explanation about the input and output file formats
+
+
 # List of additional features and improvements
 For these improvements contact the owner of repository or create an issue.
-
+ 
 ## Performance improvements for solver/assembler
 - add solvers and preconditioner options
 - review symmetric matrix assembling

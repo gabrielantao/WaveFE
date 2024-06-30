@@ -20,6 +20,6 @@ function calculate_area(element::Triangle, nodes::NodesContainer)
 end
 
 
-# TODO [implement one dimensional elements]
-# TODO [implement two dimensional elements]
+# TODO [implement segment elements]
+# TODO [implement quadrilateral elements]
 # TODO [implement three dimensional elements]

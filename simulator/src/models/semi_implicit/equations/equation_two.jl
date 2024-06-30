@@ -22,8 +22,8 @@ struct EquationStepTwo <: Equation
 end
 
 
-# TODO [implement one dimensional elements]
-# TODO [implement higher order elements]
+# TODO [implement segment elements]
+# TODO [implement higher order bidimensional elements]
 function assemble_element_lhs(
     equation::EquationStepTwo, 
     element::Segment,
@@ -34,8 +34,8 @@ function assemble_element_lhs(
 end
 
 
-# TODO [implement one dimensional elements]
-# TODO [implement higher order elements]
+# TODO [implement segment elements]
+# TODO [implement higher order bidimensional elements]
 function assemble_element_rhs(
     equation::EquationStepTwo, 
     element::Segment, 
@@ -46,7 +46,7 @@ function assemble_element_rhs(
 end
 
 
-# TODO [implement higher order elements]
+# TODO [implement higher order bidimensional elements]
 function assemble_element_lhs(
     equation::EquationStepTwo, 
     element::Triangle, 
@@ -60,7 +60,7 @@ function assemble_element_lhs(
 end
 
 
-# TODO [implement higher order elements]
+# TODO [implement higher order bidimensional elements]
 function assemble_element_rhs(
     equation::EquationStepTwo, 
     element::Triangle, 
@@ -87,8 +87,8 @@ function assemble_element_rhs(
 end
 
 
-# TODO [implement two dimensional elements]
-# TODO [implement higher order elements]
+# TODO [implement quadrilateral elements]
+# TODO [implement higher order bidimensional elements]
 function assemble_element_lhs(
     equation::EquationStepTwo, 
     element::Quadrilateral, 
@@ -99,8 +99,8 @@ function assemble_element_lhs(
 end
 
 
-# TODO [implement two dimensional elements]
-# TODO [implement higher order elements]
+# TODO [implement quadrilateral elements]
+# TODO [implement higher order bidimensional elements]
 function assemble_element_rhs(
     equation::EquationStepTwo, 
     element::Quadrilateral, 

@@ -4,7 +4,7 @@
         case_square_cavity_triangles.mesh_data, 
     )
 
-    # TODO [implement one dimensional elements]
+    # TODO [implement segment elements]
     ## implement tests
     @testset "segments loaded" begin
     end  

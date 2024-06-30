@@ -34,12 +34,13 @@ pixi run test-case -a
 ```
 but this can take a while.
 
-## Examples
-See the [examples](/docs/case_examples) section
-![Flow around semicircle](/docs/case_examples/centered_semicircle/reference/u_1_t1500.png)
-
 ## Usage
-See the [how to](/docs/how_to.md) section
+See the [how to](/docs/how_to.md) section on how to do simple tasks in the simulator.
+
+## Examples
+See the [examples](/docs/case_examples) section for examples of configured cases and see [test cases](/simulator/test/cases) for examples of test cases.
+
+![Flow around semicircle](/docs/case_examples/centered_semicircle/reference/u_1_t1500.png)
 
 ## How to contribute
 See the [contribute section](/docs/CONTRIBUTING.md) section

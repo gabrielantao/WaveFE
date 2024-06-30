@@ -76,7 +76,7 @@ function update_properties!(
 end
 
 
-# TODO [implement two dimensional elements]
+# TODO [implement quadrilateral elements]
 """Calculate and update areas of quadrilaterals"""
 function update_areas!(
     elements_container::QuadrilateralsContainer, 
@@ -85,8 +85,8 @@ function update_areas!(
 end
 
 
-# TODO [implement two dimensional elements]
-# TODO [implement higher order elements]
+# TODO [implement quadrilateral elements]
+# TODO [implement higher order bidimensional elements]
 function update_shape_coeficients!(
     elements_container::QuadrilateralsContainer, 
     nodes_container::NodesContainer
@@ -94,8 +94,8 @@ function update_shape_coeficients!(
 end
 
 
-# TODO [implement two dimensional elements]
-# TODO [implement higher order elements]
+# TODO [implement quadrilateral elements]
+# TODO [implement higher order bidimensional elements]
 """Update values of local time step intervals for steady state simulations"""
 function update_local_time_interval!(
     elements_container::QuadrilateralsContainer, 
@@ -107,8 +107,8 @@ function update_local_time_interval!(
 end
 
 
-# TODO [implement two dimensional elements]
-# TODO [implement higher order elements]
+# TODO [implement quadrilateral elements]
+# TODO [implement higher order bidimensional elements]
 function calculate_specific_sizes(
     element::Quadrilateral, nodes_container::NodesContainer
 )

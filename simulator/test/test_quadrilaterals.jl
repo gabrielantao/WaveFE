@@ -3,7 +3,7 @@
         case_square_cavity_triangles.mesh_data
     )
 
-    # TODO [implement two dimensional elements]
+    # TODO [implement quadrilateral elements]
     # load the quadrilaterals of the mesh (from a input file that has quadrilaterals)
     @testset "quadrilaterals loaded" begin
     end  
