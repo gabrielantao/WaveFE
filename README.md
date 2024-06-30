@@ -1,19 +1,26 @@
 # WaveFE.jl
+A simulator using CBS method to solve Navier-Stokes equations.
 
 ## How to install
-First clone the repo 
+First clone the repo
+
 ```
 git clone https://github.com/gabrielantao/WaveFE.git && cd WaveFE
 ```
-then execute the Pixi (it must be installed in your system) instalation command
+
+then execute the [Pixi](https://prefix.dev/) (it must be installed in your system) instalation command
+
 ```
 pixi install
 ``` 
+
 and finally install the Julia packages.
+
 ```
-cd src
+cd simulator
 julia --project=. -e 'using Pkg; Pkg.instantiate()'
 ```
+
 Maybe you can get some warnings about `Warning: CHOLMOD version incompatibility` but you can ignore it for now. This is gonna be fixed in the future.
 
 ## Run the tests 
@@ -27,7 +34,12 @@ pixi run test-case -a
 ```
 but this can take a while.
 
+## Examples
+See the [examples](/docs/case_examples) section
+![Flow around semicircle](/docs/case_examples/centered_semicircle/reference/u_1_t1500.png)
 
 ## Usage
+See the [how to](/docs/how_to.md) section
 
 ## How to contribute
+See the [contribute section](/docs/CONTRIBUTING.md) section
