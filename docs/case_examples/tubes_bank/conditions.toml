@@ -116,12 +116,13 @@ condition_type = 1
 unknown = "u_1"
 value = 0.0
 
-[[boundary]]
-description = "top and bottom boundary"
-group_name = "pseudo-walls"
-condition_type = 1
-unknown = "u_1"
-value = 0.0
+# uncomment this condition to enable no-slip condition for the bottom and top pseudo-walls 
+# [[boundary]]
+# description = "top and bottom boundary"
+# group_name = "pseudo-walls"
+# condition_type = 1
+# unknown = "u_1"
+# value = 0.0
 
 [[boundary]]
 description = "top and bottom boundary"
