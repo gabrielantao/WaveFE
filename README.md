@@ -11,7 +11,8 @@ pixi install
 ``` 
 and finally install the Julia packages.
 ```
-julia --project=. -e 'using Pkg; Pkg.instantiate()
+cd src
+julia --project=. -e 'using Pkg; Pkg.instantiate()'
 ```
 Maybe you can get some warnings about `Warning: CHOLMOD version incompatibility` but you can ignore it for now. This is gonna be fixed in the future.
 
