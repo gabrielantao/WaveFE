@@ -51,4 +51,15 @@ include("rectangular_channel/reference/channel_reference.jl")
         check_reference(case)
         check_step_reference(case)
     end
+
+
+    @testset "centered_circle" begin
+        case = ValidationCase(
+            ModuleSemiImplicit.MODEL_NAME, "centered_circle", ["u_1", "u_2"]
+        )
+        run_validation_case(case)
+        check_reference(case)
+        # TODO: implement vortex shedding verification here
+        #check_centered_circle_reference(case)
+    end
 end
