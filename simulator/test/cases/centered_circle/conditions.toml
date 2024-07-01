@@ -1,11 +1,29 @@
 [general]
 version = "1.0"
-description = "Basic rectangular channel with semicircle obstacle."
+description = "Basic rectangular channel with semicircle obstacle. Using parabola equation 2.45 * (2.0*y - y**2) for inlet"
 
 [[initial]]
-description = "define initial velocity x values for inlet nodes"
-group_name =  "inlet"
-value = 1.0
+description = "define initial velocity x values for inlet_1 => y=0.25, y=1.75"
+group_name =  "inlet_1"
+value = 0.875
+unknown = "u_1"
+
+[[initial]]
+description = "define initial velocity x values for inlet_2 => y=0.5, y =1.5"
+group_name =  "inlet_2"
+value = 1.8375
+unknown = "u_1"
+
+[[initial]]
+description = "define initial velocity x values for inlet_3 => y=0.75, y=1.25"
+group_name =  "inlet_3"
+value = 2.296875
+unknown = "u_1"
+
+[[initial]]
+description = "define initial velocity x values for inlet_4 => y=0.75, y=1.25"
+group_name =  "inlet_4"
+value = 2.45
 unknown = "u_1"
 
 [[initial]]
@@ -21,8 +39,32 @@ value = 0.0
 unknown = "u_1"
 
 [[initial]]
-description = "define initial velocity y values for inlet nodes"
-group_name =  "inlet"
+description = "define initial velocity x values for surface nodes"
+group_name =  "surface"
+value = 0.0
+unknown = "u_1"
+
+[[initial]]
+description = "define initial velocity x values for inlet_1 => y=0.25, y=1.75"
+group_name =  "inlet_1"
+value = 0.0
+unknown = "u_2"
+
+[[initial]]
+description = "define initial velocity x values for inlet_2 => y=0.5, y=1.5"
+group_name =  "inlet_2"
+value = 0.0
+unknown = "u_2"
+
+[[initial]]
+description = "define initial velocity x values for inlet_3 => y=0.75, y=1.25"
+group_name =  "inlet_3"
+value = 0.0
+unknown = "u_2"
+
+[[initial]]
+description = "define initial velocity x values for inlet_4 => y=0.75, y=1.25"
+group_name =  "inlet_4"
 value = 0.0
 unknown = "u_2"
 
@@ -39,8 +81,32 @@ value = 0.0
 unknown = "u_2"
 
 [[initial]]
-description = "define initial pressure values for inlet nodes"
-group_name =  "inlet"
+description = "define initial velocity y values for surface nodes"
+group_name =  "surface"
+value = 0.0
+unknown = "u_2"
+
+[[initial]]
+description = "define initial pressure values for inlet_1 => y=0.25, y=1.75"
+group_name =  "inlet_1"
+value = 0.0001
+unknown = "p"
+
+[[initial]]
+description = "define initial pressure values for inlet_2 => y=0.5, y=1.5"
+group_name =  "inlet_2"
+value = 0.0001
+unknown = "p"
+
+[[initial]]
+description = "define initial pressure values for inlet_3 => y=0.75, y=1.25"
+group_name =  "inlet_3"
+value = 0.0001
+unknown = "p"
+
+[[initial]]
+description = "define initial pressure values for inlet_4 => y=1.0"
+group_name =  "inlet_4"
 value = 0.0001
 unknown = "p"
 
@@ -56,17 +122,65 @@ group_name =  "no-slip"
 value = 0.0
 unknown = "p"
 
+[[initial]]
+description = "define initial pressure values for surface nodes"
+group_name =  "surface"
+value = 0.0
+unknown = "p"
+
 
 [[boundary]]
 description = "inlet boundary"
-group_name = "inlet"
+group_name = "inlet_1"
 condition_type = 1
 unknown = "u_1"
-value = 1.0
+value =  0.875
 
 [[boundary]]
 description = "inlet boundary"
-group_name = "inlet"
+group_name = "inlet_2"
+condition_type = 1
+unknown = "u_1"
+value = 1.8375
+
+[[boundary]]
+description = "inlet boundary"
+group_name = "inlet_3"
+condition_type = 1
+unknown = "u_1"
+value = 2.296875
+
+[[boundary]]
+description = "inlet boundary"
+group_name = "inlet_4"
+condition_type = 1
+unknown = "u_1"
+value = 2.45
+
+[[boundary]]
+description = "inlet boundary"
+group_name = "inlet_1"
+condition_type = 1
+unknown = "u_2"
+value = 0.0
+
+[[boundary]]
+description = "inlet boundary"
+group_name = "inlet_2"
+condition_type = 1
+unknown = "u_2"
+value = 0.0
+
+[[boundary]]
+description = "inlet boundary"
+group_name = "inlet_3"
+condition_type = 1
+unknown = "u_2"
+value = 0.0
+
+[[boundary]]
+description = "inlet boundary"
+group_name = "inlet_4"
 condition_type = 1
 unknown = "u_2"
 value = 0.0

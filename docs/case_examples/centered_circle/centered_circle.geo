@@ -17,7 +17,6 @@ Line(3) = {3, 4};
 //+
 Line(4) = {4, 1};
 //+
-//SetFactory("OpenCASCADE");
 Circle(5) = {5, 1, 0, 0.25, 0, 2*Pi};
 //+
 Curve Loop(1) = {1, 2, 3, 4};
