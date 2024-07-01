@@ -1,0 +1,6 @@
+# imported mesh with node alone
+mesh created in Gmsh has a problem if a node is not in the mesh itself, this node is imported by the simulator but it's not used it generates the result divergence at first timestep because it makes the problem be will conditioned having a node alone. An example is if the user add a node to be a center of a circle and this circle is a hole in the mesh, but the center itself is not part of the mesh, but it's included in an element of the mesh.
+
+If this happen so a workaround is to export a mesh with the option "save all elements" false, and create the physical group for the surface to include the nodes/elements in the surface as a group and force then to be exported. In this case remember that the order (number of) groups are created is important, lower group numbers are overwritten by greater group number for nodes, so the assigned boundary condition is of the higher group number set.
+
+See the case `tube_bank` in the examples to check how this can be done.

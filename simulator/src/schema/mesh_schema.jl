@@ -133,8 +133,6 @@ function load_elements_data(dimension)
 end
 
 
-# TODO [implement subgroups of Gmsh physical groups]
-## implement here geometrical groups as preffixed groups of physical node groups
 """Get data for the geometrical groups"""
 function load_geometrical_groups_data(total_nodes::Int64)
     # keep the mapping for the node group id to its name and

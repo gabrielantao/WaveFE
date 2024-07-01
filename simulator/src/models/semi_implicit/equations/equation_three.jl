@@ -73,7 +73,7 @@ end
 
 # TODO [review symmetric matrix assembling]
 ## it don't need to be assembled the dense matrix for the element
-# TODO [implement higher order elements]
+# TODO [implement higher order bidimensional elements]
 function assemble_element_rhs(
     equation::EquationStepThree, 
     element::Triangle, 
@@ -100,7 +100,7 @@ function assemble_element_rhs(
 end
 
 
-# TODO [implement two dimensional elements]
+# TODO [implement quadrilateral elements]
 function assemble_element_lhs(
     equation::EquationStepThree, 
     element::Quadrilateral, 
@@ -111,7 +111,7 @@ function assemble_element_lhs(
 end
 
 
-# TODO [implement two dimensional elements]
+# TODO [implement quadrilateral elements]
 function assemble_element_rhs(
     equation::EquationStepThree, 
     element::Quadrilateral, 

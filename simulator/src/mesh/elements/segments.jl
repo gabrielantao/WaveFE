@@ -52,7 +52,7 @@ function load_segments(mesh_data::MeshData)
 end
 
 
-# TODO [implement one dimensional elements]
+# TODO [implement segment elements]
 """Update properties when needed"""
 function update_properties!(
     elements_container::SegmentsContainer, 
@@ -76,7 +76,7 @@ function update_properties!(
 end
 
 
-# TODO [implement one dimensional elements]
+# TODO [implement segment elements]
 """Calculate and update lengths of segments"""
 function update_lengths!(
     elements_container::SegmentsContainer, 
@@ -85,16 +85,16 @@ function update_lengths!(
 end
 
 
-# TODO [implement one dimensional elements]
-# TODO [implement higher order elements]
+# TODO [implement segment elements]
+# TODO [implement higher order bidimensional elements]
 function update_shape_coeficients!(
     elements_container::SegmentsContainer, 
     nodes_container::NodesContainer
 )
 end
 
-# TODO [implement one dimensional elements]
-# TODO [implement higher order elements]
+# TODO [implement segment elements]
+# TODO [implement higher order bidimensional elements]
 """Update values of local time step intervals for steady state simulations"""
 function update_local_time_interval!(
     elements_container::SegmentsContainer, 
@@ -105,8 +105,8 @@ function update_local_time_interval!(
 )    
 end
 
-# TODO [implement one dimensional elements]
-# TODO [implement higher order elements]
+# TODO [implement segment elements]
+# TODO [implement higher order bidimensional elements]
 function calculate_specific_sizes(
     element::Segment, nodes_container::NodesContainer
 )

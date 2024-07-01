@@ -1,5 +1,6 @@
 # project specific
 scripts/
+docs/case_examples/*/cache/*
 simulator/test/cases/*/cache/*
 experiments/
 

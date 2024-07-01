@@ -1,6 +1,6 @@
 @testset "mesh data" begin
     @testset "mesh unidimensional" begin
-        # TODO [implement one dimensional elements]
+        # TODO [implement segment elements]
         ## implement tests
     end
 
@@ -77,7 +77,7 @@
         @test mesh.must_refresh == false
         @test mesh.nodes.moved == false
 
-        # TODO [implement hybrid mesh]
+        # TODO [implement hybrid bidimensional mesh]
         ## check how it behaves when load hybrid meshs
     end
 
@@ -86,7 +86,7 @@
         # TODO [implement three dimensional elements]
         ## implement tests
         
-        # TODO [implement hybrid mesh]
+        # TODO [implement hybrid bidimensional mesh]
         ## check how it behaves when load hybrid meshs
     end 
 end
