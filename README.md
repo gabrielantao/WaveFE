@@ -1,5 +1,14 @@
 # WaveFE.jl
-A simulator using CBS method to solve Navier-Stokes equations.
+A simulator using Characteristic-Based Split (CBS) method to solve Navier-Stokes equations. The CBS method is a powerful technique for solving fluid dynamics problems, particularly well-suited for those involving incompressible flow. It leverages the concept of characteristics, which are directions along which information propagates in the flow. CBS do this by spliting the governing equations (typically Navier-Stokes equations) into smaller, more manageable sub-problems to solve the equation in steps. 
+
+According Zienkiewicz, Taylor, Nithiarasu (The Finite Element Method for Fluid Dynamics, 7th ed. pag 89):
+> We believe that the algorithm introduced in this chapter is currently the most general one available for fluids, as it can be directly applied to almost all physical situations.
+
+So you can expect this as being a robust method to solve this class of problems. It's useful to solve a big set of problems such as:
+- Steady or unsteady flow behavior
+- Laminar or turbulent flow regimes
+- Moving boundaries
+
 
 ## How to install
 First clone the repo
