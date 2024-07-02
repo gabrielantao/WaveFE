@@ -29,8 +29,8 @@ struct EquationStepOne <: Equation
 end
 
 
-# TODO [implement one dimensional elements]
-# TODO [implement higher order elements]
+# TODO [implement segment elements]
+# TODO [implement higher order bidimensional elements]
 function assemble_element_lhs(
     equation::EquationStepOne, 
     element::Segment, 
@@ -41,8 +41,8 @@ function assemble_element_lhs(
 end
 
 
-# TODO [implement one dimensional elements]
-# TODO [implement higher order elements]
+# TODO [implement segment elements]
+# TODO [implement higher order bidimensional elements]
 function assemble_element_rhs(
     equation::EquationStepOne, 
     element::Segment, 
@@ -53,7 +53,7 @@ function assemble_element_rhs(
 end
 
 
-# TODO [implement higher order elements]
+# TODO [implement higher order bidimensional elements]
 function assemble_element_lhs(
     equation::EquationStepOne, 
     element::Triangle, 
@@ -76,7 +76,7 @@ function assemble_element_lhs(
 end
 
 
-# TODO [implement higher order elements]
+# TODO [implement higher order bidimensional elements]
 function assemble_element_rhs(
     equation::EquationStepOne, 
     element::Triangle, 
@@ -84,7 +84,7 @@ function assemble_element_rhs(
     model_parameters::ModelSemiImplicitParameters
 )
     # TODO [review the equation formulations]
-    # TODO [implement one dimensional elements]
+    # TODO [implement segment elements]
     # TODO [implement three dimensional elements]
     ## check forcing vectors in this assembling process
     ## Nithiarasu pag 210 eq 7.161, 7.162
@@ -116,8 +116,8 @@ function assemble_element_rhs(
 end
 
 
-# TODO [implement two dimensional elements]
-# TODO [implement higher order elements]
+# TODO [implement quadrilateral elements]
+# TODO [implement higher order bidimensional elements]
 function assemble_element_lhs(
     equation::EquationStepOne, 
     element::Quadrilateral, 
@@ -128,8 +128,8 @@ function assemble_element_lhs(
 end
 
 
-# TODO [implement two dimensional elements]
-# TODO [implement higher order elements]
+# TODO [implement quadrilateral elements]
+# TODO [implement higher order bidimensional elements]
 function assemble_element_rhs(
     equation::EquationStepOne, 
     element::Quadrilateral, 

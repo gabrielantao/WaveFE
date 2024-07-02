@@ -106,7 +106,7 @@ function update_areas!(
 end
 
 
-# TODO [implement higher order elements]
+# TODO [implement higher order bidimensional elements]
 # check if this coeficients are different depending on interpolation order...
 """Update triangle element shape coeficients."""
 function update_shape_coeficients!(
@@ -123,7 +123,7 @@ function update_shape_coeficients!(
 end
 
 
-# TODO [implement higher order elements]
+# TODO [implement higher order bidimensional elements]
 """Update values of local time step intervals for steady state simulations."""
 function update_local_time_interval!(
     elements_container::TrianglesContainer, 
@@ -142,7 +142,7 @@ function update_local_time_interval!(
 end
 
 
-# TODO [implement higher order elements]
+# TODO [implement higher order bidimensional elements]
 """
 This updates specific sizes.
 (see Nithiarasu eq 7.128 for a nodal version)
