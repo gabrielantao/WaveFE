@@ -25,6 +25,7 @@ mutable struct SegmentsContainer <: ElementsContainer
     name::String
     nodes_per_element::Int64
     series::Vector{Segment}
+    Δt_min::Float64
     # TODO [implement group of elements]
     ## for now these groups for elements are not used but they can be useful 
     ## to set properties for elements
@@ -47,7 +48,8 @@ function load_segments(mesh_data::MeshData)
     return SegmentsContainer(
         "segments",
         nodes_per_element,
-        elements
+        elements,
+        Inf
     )
 end
 

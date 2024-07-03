@@ -69,6 +69,17 @@
                 "triangle_coefficient_dt.csv", 
                 [element.Δt for element in WaveCore.get_elements(mesh.elements.triangles)]
             )
+
+            # check if the transient is true if all elements have the same time step interval value
+            @test !all(
+                Δt -> isapprox(Δt, 0.00019523936, rtol=0.01), 
+                [element.Δt for element in WaveCore.get_elements(mesh.elements.triangles)]
+            )
+            WaveCore.update_time_interval!(mesh, true)
+            @test all(
+                Δt -> isapprox(Δt, 0.00019523936, rtol=0.01), 
+                [element.Δt for element in WaveCore.get_elements(mesh.elements.triangles)]
+            )
         end
 
         # static mesh does nothing in update 

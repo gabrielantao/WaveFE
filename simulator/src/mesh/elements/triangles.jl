@@ -25,6 +25,7 @@ mutable struct TrianglesContainer <: ElementsContainer
     name::String
     nodes_per_element::Int64
     series::Vector{Triangle}
+    Δt_min::Float64
     # TODO [implement group of elements]
     ## for now these groups for elements are not used but they can be useful 
     ## to set properties for elements
@@ -47,7 +48,8 @@ function load_triangles(mesh_data::MeshData)
     return TrianglesContainer(
         "triangles",
         nodes_per_element,
-        elements
+        elements,
+        Inf
     )
 end
 
@@ -132,13 +134,17 @@ function update_local_time_interval!(
     Re::Float64,
     safety_Δt_factor::Float64
 )    
+    # the minimum global time step interval
+    Δt_min = Inf
     # get the velocities moduli
     velocities = sqrt.(unknowns_handler.values["u_1"] .^2 + unknowns_handler.values["u_2"] .^2)
     for element in get_elements(elements_container)
         h = calculate_specific_sizes(element, nodes_container)
         max_velocity = maximum(velocities[element.connectivity])
         element.Δt = safety_Δt_factor * min((Re / 2.0) * h^2, h / max_velocity)
-    end 
+        Δt_min = min(Δt_min, element.Δt)
+    end
+    elements_container.Δt_min = Δt_min
 end
 
 

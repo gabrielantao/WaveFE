@@ -130,6 +130,19 @@ function get_connectivity_matrix(element_container::ElementsContainer)
 end
 
 
+"""Get the minimum values of timestep for all elements in the mesh"""
+function get_minimum_timestep_interval(mesh::Mesh)
+    return minimum([element_container.Δt_min for element_container in get_containers(mesh.elements)])
+end
+
+
+"""Update the timestep intervals for the elements in the container to a given value"""
+function update_global_timestep_intervals!(element_container::ElementsContainer, Δt::Float64)
+    for element in get_elements(element_container)
+        element.Δt = Δt
+    end
+end
+
 """Update the elements calculated properties"""
 function update_elements!(
     mesh::Mesh,
@@ -145,6 +158,23 @@ function update_elements!(
             model_parameters,
             mesh.must_refresh || mesh.nodes.moved
         ) 
+    end
+end
+
+
+"""
+Update the global time step interval for each element.
+There are two modes: local time step and global time step.
+- global time step: used when the proble is set as transient=true, when the transient effects matter
+- local time step: used when the proble is set as transient=false, for steady state problem when only final state matters.
+  do nothing if local time step is used i.e. just use the local time steps previously calculated
+"""
+function update_time_interval!(mesh::Mesh, transient::Bool)
+    if transient
+        Δt_min = get_minimum_timestep_interval(mesh)
+        for element_container in get_containers(mesh.elements)
+            update_global_timestep_intervals!(element_container, Δt_min)
+        end
     end
 end
 

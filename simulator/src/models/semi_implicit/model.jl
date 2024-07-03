@@ -113,6 +113,9 @@ function run_iteration(
         model.unknowns_handler, 
         model.additional_parameters
     )
+
+    # update all time intervals 
+    update_time_interval!(mesh, model_parameters.transient)
     
     # update the unknowns by coping current values to the old values
     WaveCore.update!(model.unknowns_handler)

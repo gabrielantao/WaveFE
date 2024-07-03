@@ -25,6 +25,7 @@ mutable struct QuadrilateralsContainer <: ElementsContainer
     name::String
     nodes_per_element::Int64
     series::Vector{Quadrilateral}
+    Δt_min::Float64
     # TODO [implement group of elements]
     ## for now these groups for elements are not used but they can be useful 
     ## to set properties for elements
@@ -48,7 +49,8 @@ function load_quadrilaterals(mesh_data::MeshData)
     return QuadrilateralsContainer(
         "quadrilaterals",
         nodes_per_element,
-        elements
+        elements,
+        Inf
     )
 end
 
