@@ -101,8 +101,19 @@ function write_additional_data(
 )
     output_handler.result_file["success"] = simulation_success
     output_handler.result_file["total_steps"] = total_steps
-    output_handler.result_file["total_elapsed_time"] = elapsed_time
-    
+    output_handler.result_file["total_elapsed_time"] = elapsed_time 
+end
+
+
+"""Write the cummulative time step intervals i.e. the real times for each iteraction step"""
+function write_timestep_intervals(
+    output_handler::OutputHandler,
+    mesh::Mesh,
+    transient::Bool
+)
+    if transient
+        output_handler.result_file["times"] = cumsum(mesh.Δt)
+    end
 end
 
 

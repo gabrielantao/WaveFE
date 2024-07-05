@@ -50,6 +50,8 @@ mutable struct Mesh
     # this can trigger the assembler redo:
     # - the preallocation for the matrices
     must_refresh::Bool
+    # real adimensional time steps for transient problems
+    Δt::Vector{Float64}
 end
 
 
@@ -75,10 +77,11 @@ function build_mesh(mesh_data::MeshData)
     end
 
     return Mesh(
-        mesh_data.dimension, 
+        mesh_data.dimension,
         nodes, 
         elements,
-        must_refresh
+        must_refresh,
+        Vector{Float64}()
     )
 end
 
@@ -175,6 +178,8 @@ function update_time_interval!(mesh::Mesh, transient::Bool)
         for element_container in get_containers(mesh.elements)
             update_global_timestep_intervals!(element_container, Δt_min)
         end
+        # add the current time step interval to the intervals list
+        push!(mesh.Δt, Δt_min)
     end
 end
 

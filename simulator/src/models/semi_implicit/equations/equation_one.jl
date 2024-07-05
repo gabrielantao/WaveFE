@@ -70,9 +70,15 @@ function assemble_element_lhs(
     else
         # TODO [implement mass matrix not lumped]
         ## check if this is correct then implement it
-        ## (element.area / 12.0 / element.Δt) .* [2.0 1.0 1.0; 1.0 2.0 1.0; 1.0 1.0 2.0]
-        throw("Not implemented not lumped mass matrix!")
-    end
+        # mass_matrix = ones(nodes_per_element, nodes_per_element)
+        # mass_matrix[diagind(mass_matrix)] .= 2.0
+        # return (element.area / element.Δt / 12.0) .* mass_matrix
+        return sparse(
+            1:nodes_per_element,
+            1:nodes_per_element,
+            fill(element.area / element.Δt / 3.0, nodes_per_element)
+        )
+   end
 end
 
 

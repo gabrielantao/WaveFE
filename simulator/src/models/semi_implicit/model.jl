@@ -1,6 +1,6 @@
 module ModuleSemiImplicit
 
-using LinearAlgebra: dot
+using LinearAlgebra: dot, diagind
 using Statistics: mean
 using SparseArrays
 using Preconditioners
@@ -115,7 +115,7 @@ function run_iteration(
     )
 
     # update all time intervals 
-    update_time_interval!(mesh, model_parameters.transient)
+    WaveCore.update_time_interval!(mesh, model.additional_parameters.transient)
     
     # update the unknowns by coping current values to the old values
     WaveCore.update!(model.unknowns_handler)

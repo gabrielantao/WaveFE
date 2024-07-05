@@ -121,6 +121,11 @@ function start(simulation::Simulation, show_progress::Bool)
     # TODO [preprocessing data for simulator]
     ## should log  finhish and closing output files
     finish!(progress_bar)
+    write_timestep_intervals(
+        simulation.output_handler, 
+        simulation.mesh, 
+        simulation.model.additional_parameters.transient
+    )
     write_additional_data(simulation.output_handler, success, timestep_counter, elapsed_time)
     close_files(simulation.output_handler)
     # TODO [preprocessing data for simulator]
