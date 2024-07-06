@@ -3,6 +3,22 @@ mutable struct ValidationCase
     group_name::String
     folder::String
     checked_unknonws::Vector{String}
+    checked_timesteps::Vector{Int64}
+
+    function ValidationCase(
+        group_name::String, 
+        folder::String, 
+        checked_unknonws::Vector{String},
+        checked_timesteps::Vector{Int64}=[-1]
+    )
+        new(
+            group_name,
+            folder,
+            checked_unknonws,
+            checked_timesteps
+        )
+    end
+
 end
 
 
@@ -31,6 +47,7 @@ end
 function check_reference_hdf(
     case_folder_name::String,
     unknown::String,
+    checked_timestep::Int64=-1,
     rtol::Float64=0.001, 
     atol::Float64=0.0,
     elementwise::Bool=true
@@ -46,14 +63,15 @@ function check_reference_hdf(
 
     # get last timestep for the reference
     reference_data = h5open(reference_filepath , "r") 
-    ref_last_timestep = read(reference_data["/total_steps"])
-    reference = read(reference_data["/result/$unknown/t_$ref_last_timestep"])
+    if checked_timestep == -1
+        checked_timestep = read(reference_data["/total_steps"])
+    end
+    reference = read(reference_data["/result/$unknown/t_$checked_timestep"])
     close(reference_data)
 
     # get last timestep for the obtained 
     obtained_data = h5open(obtained_filepath , "r")
-    last_timestep = read(obtained_data["/total_steps"])
-    obtained = read(obtained_data["/result/$unknown/t_$last_timestep"])
+    obtained = read(obtained_data["/result/$unknown/t_$checked_timestep"])
     close(obtained_data)
 
     if !isfile(reference_filepath)
@@ -65,9 +83,6 @@ function check_reference_hdf(
     if size(reference) != size(obtained)
         @error "The values for the variable $unknown don't have the same size\nreference=$(size(reference)) obtained=$(size(obtained))"
         return false
-    end
-    if ref_last_timestep != last_timestep
-        @info "The reference and the obtained timestep don't have the same last time step\n reference=$ref_last_timestep obtained=$last_timestep "
     end
     if elementwise
         diff_positions = isapprox.(obtained, reference, rtol=rtol, atol=atol)
@@ -106,10 +121,13 @@ end
 
 """Check the results for each unknown of the validation case"""
 function check_reference(case::ValidationCase)
-    for unknonw in case.checked_unknonws
-        @test check_reference_hdf(
-            case.folder,
-            unknonw
-        )
+    for timestep in case.checked_timesteps
+        for unknonw in case.checked_unknonws
+            @test check_reference_hdf(
+                case.folder,
+                unknonw,
+                timestep
+            )
+        end
     end
 end
