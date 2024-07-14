@@ -204,15 +204,16 @@ For these improvements contact the owner of repository or create an issue.
 - general performance improvements
 - make the solver parallel
 - create benchmarks for the simulator
+- review quadrature options
 
 ## CBS methods
 - implement mass matrix not lumped
 - implement transient CBS 
 - review the equation formulations
-- implement mesh movement
 - implement explicit method
 - implement artificial compressibility method
 - implement how to run not adimensional models
+- implement mesh movement
 
 ## CBS new models
 - implement other domain conditions
