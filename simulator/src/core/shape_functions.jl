@@ -8,6 +8,10 @@ Fundamentals of the Finite Element Method for Head and Mass Transfer - Nithiaras
 
 using Symbolics
 
+# TODO [review shape functions]
+# - add other options of interpolation (see Pascal triangle polinomials) to be used
+#   as basis for the deduction of other shape functions with another number of points
+#   e.g. "mini" triangle element
 
 struct QuadratureParameters
     positions::Vector{Float64}
@@ -17,24 +21,59 @@ end
 
 # variables for square element
 # TODO: think if it should use r, s, t or ξ, η, ζ as notation for these functions
-@variables r, s
+@variables r, s, t
+# length, area, volume
+@variables L, A, V
+
 ∂_∂s = Differential(s)
 ∂_∂r = Differential(r)
+∂_∂t = Differential(t)
+
+# TODO: REMOVE THIS only debug
+"""Mesh elements interpolation order"""
+@enum InterpolationOrder begin
+    ORDER_ONE = 1
+    ORDER_TWO = 2
+    ORDER_THREE = 3
+end
+using LinearAlgebra
+#####
 
 
-# TODO: implement this to get the triangle shape functions
+"""
+Get the triangle shape function based on interpolation order.
+
+Here the parameters r, s, t correspond to the area coordinates of triangle
+r => L_1
+s => L_2
+t => L_3
+"""
 function get_triangle_shape_functions(interpolation_order::InterpolationOrder)
+    # equation 6.41 cap 6 Hutton
     if interpolation_order == ORDER_ONE::InterpolationOrder
-        #...
+        N_1 = 1.0 - r - s
+        N_2 = r
+        N_3 = s
+        return [N_1 N_2 N_3]
+    # equation 6.46 cap 6 Hutton
     elseif interpolation_order == ORDER_TWO::InterpolationOrder
-        #...
+        N_1 = r * (2.0 * r - 1.0)
+        N_2 = s * (2.0 * s - 1.0)
+        N_3 = t * (2.0 * t - 1.0)
+        N_4 = 4.0 * r * s
+        N_5 = 4.0 * s * t
+        N_6 = 4.0 * r * t
+        return [N_1 N_2 N_3 N_4 N_5 N_6]
     elseif interpolation_order == ORDER_THREE::InterpolationOrder
+        # TODO [implement higher order bidimensional elements]
+        # implement this interpolation order shape functions
+        # can be found in section 6.2.1.4 pag 144 of Zienkiewicz et al.
         throw("Tridimensional shape functions not implement.")
     end
 end
 
 
-"""Get the quadrilateral shape function based on interpolation set."""
+"""Get the quadrilateral shape function based on interpolation order."""
 function get_quadrilateral_shape_functions(interpolation_order::InterpolationOrder)
     # eq 6.56 cap 6 pag 186 Hutton
     if interpolation_order == ORDER_ONE::InterpolationOrder
@@ -56,29 +95,106 @@ function get_quadrilateral_shape_functions(interpolation_order::InterpolationOrd
         N_8 = (1.0 / 2.0) * (1.0 - r) * (1.0 - s^2)
         return [N_1 N_2 N_3 N_4 N_5 N_6 N_7 N_8]
     elseif interpolation_order == ORDER_THREE::InterpolationOrder
+        # TODO [implement higher order bidimensional elements]
+        # implement this interpolation order shape functions
+        # can be found in section 6.2.1.6 eq 6.11pag 159 of Zienkiewicz et al.
         throw("Tridimensional shape functions not implement.")
     end
 end
 
 
+function integration_formula(a, b, c) 
+    return 2 * A * (factorial(a) * factorial(b) * factorial(c)) / factorial(a + b + c + 2)
+end
+
+
+"""
+Calculate the integral in the triangle element using the formula for area coordinates.
+
+ref:
+equation 6.49 pag 183 Hutton
+"""
+function calculate_triangle_integral(expression)
+    # TODO: fazer aqui com que faca para cada parcela da expression e multiplique pelo fator 
+    # da parcela
+    a = Symbolics.degree(expression, r)
+    b = Symbolics.degree(expression, s)
+    c = Symbolics.degree(expression, t)
+    return integration_formula(a, b, c)
+end
+
+
+"""
+Calculate integration of a expression addends. 
+The formula giben in `calculate_triangle_integral` only works for one addend of an expression
+so this function iterates each combination of parameters to get the addend of sum 
+and then it calculates the integral based on the
+"""
+function integrate_triangle(expression)
+    # the maximum degrees presented in the expression
+    r_max_degree = Symbolics.degree(expression, r)
+    s_max_degree = Symbolics.degree(expression, s)
+    t_max_degree = Symbolics.degree(expression, t)
+
+    # ensure the expression is expanded in separeted addends
+    expression = Symbolics.simplify(expression, expand=true)
+
+    result = Vector{Num}()
+    # crete a set with all possible combinations of parameters with power
+    parameters = union(
+        Set([r^degree for degree=1:r_max_degree]),
+        Set([s^degree for degree=1:s_max_degree]),
+        Set([t^degree for degree=1:t_max_degree])
+    )
+    for current_parameter in parameters
+        # iterate the combinations and force all other combinations 
+        # different of current_parameter to be zero
+        integrand = Symbolics.substitute(
+            expression,
+            Dict(param => 0.0 for param in setdiff(parameters, current_parameter))
+        )
+        # calculate the integral
+        integral = integration_formula(
+            Symbolics.degree(integrand, r),
+            Symbolics.degree(integrand, s),
+            Symbolics.degree(integrand, t)
+        )
+        # remove the terms with parameters replacing them by one
+        # in order to get only the coefficient multiplied by the parameters
+        coeff = Symbolics.substitute(
+            integrand,
+            Dict(r => 1.0, s => 1.0, t => 1.0)
+        )
+        push!(coeff * integral)
+    end
+    return sum(result)
+end
+
+
+
 # TODO [review quadrature options] 
-#   take a look in the tables 6.3 pag 181 and 6.4 Zienkiewicz et al.
-#   and other ways of positions/weights 
+# - take a look in the tables 6.3 pag 181 and 6.4 Zienkiewicz et al.
+#   and other ways of positions/weights
 """
 Get the quadrature positions and weights. It can be used for any parameter (r, s or t)
-ref: table 6.1 pag 207 Hutton
+
+ref: 
+table 6.1 pag 207 Hutton
+table 3.3 pag 65 Zienkiewicz et al.
+https://en.wikipedia.org/wiki/Gaussian_quadrature
 """
 function get_quadrature_positions(interpolation_order)
     if interpolation_order == 1
         positions = [0.0]
         weights = [2.0]
     elseif interpolation_order == 2
-        # sqrt(3.0) / 3.0
-        positions = [0.577350269189626, -0.577350269189626]
+        positions = [1.0 / sqrt(3), -1.0 / sqrt(3)]
         weights = [1.0, 1.0]
     elseif interpolation_order == 3
-        positions = [0.0, 0.774596669241483, -0.774596669241483]
-        weights = [0.774596669241483, 0.555555555555556, 0.555555555555556]
+        positions = [0.0, sqrt(0.6), -sqrt(0.6)]
+        weights = [8.0 / 9.0, 5.0 / 9.0, 5.0 / 9.0]
+    # NOTE: there is a difference between the table of Hutton and one in Zienkiewicz et al.
+    #       for this interpolation order. The Hutton one is used here.
     elseif interpolation_order == 4
         positions = [0.339981043583856, -0.339981043583856, 0.861136311590453, -0.861136311590453]
         weights = [0.652145154862526, 0.652145154862526, 0.347854845137454, 0.347854845137454]
@@ -112,13 +228,12 @@ end
 r_params = get_quadrature_positions(2)
 s_params = get_quadrature_positions(2)
 expr = (r^3 - 1.0) * (s - 1)^2
-println(
-    calculate_gauss_quadrature(expr, r_params, s_params)
-)
-#@test calculate_gauss_quadrature(expr, W, r_pos, s_pos) ≈ -5.33333333333
+#@test calculate_gauss_quadrature(expr, r_params, s_params) ≈ -5.33333333333
 
+# TODO [implement segment elements]
+# reproduce example 3.3 of Zienkiewicz et al. to validate the integration method for segment element
 
-# reproduce the example 7.4 of Hutton pag 232
+# reproduce the example 7.4 of Hutton pag 243
 N = get_quadrilateral_shape_functions(ORDER_ONE::InterpolationOrder)
 ∂N_∂r = map(N_i -> expand_derivatives(∂_∂r(N_i)), N)
 ∂N_∂s = map(N_i -> expand_derivatives(∂_∂s(N_i)), N)
