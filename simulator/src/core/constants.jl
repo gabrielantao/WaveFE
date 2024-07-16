@@ -26,3 +26,36 @@ export LOG_FILENAME, RESULT_FILENAME, DEBUG_FILENAME
 
 export RESULT_FILE_CURRENT_VERSION, DEBUG_FILE_CURRENT_VERSION
 export MAXIMUM_LENGTH_ALIAS
+
+
+### Create the models base symbolic variables ###
+struct Variable
+    symbol::Num
+    unit::String
+    description::String
+end
+
+# local coordinate parameters
+@variables ξ, η, ζ
+
+# element size parameters (i.e. length, area, volume)
+@variables L, A, V
+
+# auxiliary variable
+@variables aux
+
+# catalogue of parameters 
+MODELING_VARIABLES = Dict(
+    ξ => Variable(ξ, "", "local coordinate ξ"),
+    η => Variable(η, "", "local coordinate η"),
+    ζ => Variable(ζ, "", "local coordinate ζ"),
+    L => Variable(L, "", "length"),
+    A => Variable(A, "", "area"),
+    V => Variable(V, "", "volume"),
+    aux => Variable(aux, "", "auxiliary"),   
+)
+
+# diferencial operators
+∂_∂ξ = Differential(ξ)
+∂_∂η = Differential(η)
+∂_∂ζ = Differential(ζ)

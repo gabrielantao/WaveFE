@@ -93,6 +93,7 @@ include("test_schemas.jl")
 include("test_simulation_schema.jl")
 include("test_conditions_schema.jl")
 include("test_mesh_data.jl")
+include("test_shape_functions.jl")
 
 # model specific elemental assemblers
 include("models/test_semi_implicit.jl")

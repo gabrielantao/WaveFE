@@ -8,6 +8,7 @@ using SparseArrays
 using Preconditioners
 using IterativeSolvers
 using Logging, LoggingExtras
+using Symbolics
 
 # export the main function of the wave core
 export run_simulation
@@ -28,6 +29,7 @@ using .SimulationFileSchema: SimulationData, load_simulation_data
 
 
 # the core functions
+include("shape_functions.jl")
 include("unknowns_handler.jl")
 include("domain_conditions.jl")
 include("../mesh/mesh.jl")
