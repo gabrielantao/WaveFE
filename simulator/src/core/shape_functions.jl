@@ -24,6 +24,8 @@ end
 @variables r, s, t
 # length, area, volume
 @variables L, A, V
+# auxiliary variable
+@variables aux
 
 ∂_∂s = Differential(s)
 ∂_∂r = Differential(r)
@@ -103,73 +105,70 @@ function get_quadrilateral_shape_functions(interpolation_order::InterpolationOrd
 end
 
 
-function integration_formula(a, b, c) 
+# TODO [implement segment elements]
+# include the 1D versions of this function 
+# TODO [implement three dimensional elements]
+# include the 3D versions of this function
+"""
+Calculate the integral in the triangle element using the formula for area coordinates.
+    
+ref:
+equation 6.49 pag 183 Hutton
+"""    
+function integration_formula_2D(a, b, c) 
+    if a == 0 && b == 0 && c == 0
+        return A
+    end
     return 2 * A * (factorial(a) * factorial(b) * factorial(c)) / factorial(a + b + c + 2)
 end
 
 
 """
-Calculate the integral in the triangle element using the formula for area coordinates.
-
-ref:
-equation 6.49 pag 183 Hutton
-"""
-function calculate_triangle_integral(expression)
-    # TODO: fazer aqui com que faca para cada parcela da expression e multiplique pelo fator 
-    # da parcela
-    a = Symbolics.degree(expression, r)
-    b = Symbolics.degree(expression, s)
-    c = Symbolics.degree(expression, t)
-    return integration_formula(a, b, c)
-end
-
-
-"""
-Calculate integration of a expression addends. 
-The formula giben in `calculate_triangle_integral` only works for one addend of an expression
-so this function iterates each combination of parameters to get the addend of sum 
-and then it calculates the integral based on the
+Calculate integration of an expression terms. This function transforms the expression into a string
+and then split the string in the positions of 
+This function iterates for each term in the expression and integrate isolated.
 """
 function integrate_triangle(expression)
-    # the maximum degrees presented in the expression
-    r_max_degree = Symbolics.degree(expression, r)
-    s_max_degree = Symbolics.degree(expression, s)
-    t_max_degree = Symbolics.degree(expression, t)
-
-    # ensure the expression is expanded in separeted addends
     expression = Symbolics.simplify(expression, expand=true)
-
-    result = Vector{Num}()
-    # crete a set with all possible combinations of parameters with power
-    parameters = union(
-        Set([r^degree for degree=1:r_max_degree]),
-        Set([s^degree for degree=1:s_max_degree]),
-        Set([t^degree for degree=1:t_max_degree])
-    )
-    for current_parameter in parameters
-        # iterate the combinations and force all other combinations 
-        # different of current_parameter to be zero
-        integrand = Symbolics.substitute(
-            expression,
-            Dict(param => 0.0 for param in setdiff(parameters, current_parameter))
-        )
-        # calculate the integral
-        integral = integration_formula(
-            Symbolics.degree(integrand, r),
-            Symbolics.degree(integrand, s),
-            Symbolics.degree(integrand, t)
-        )
-        # remove the terms with parameters replacing them by one
-        # in order to get only the coefficient multiplied by the parameters
-        coeff = Symbolics.substitute(
-            integrand,
-            Dict(r => 1.0, s => 1.0, t => 1.0)
-        )
-        push!(coeff * integral)
+    integrands = Vector{Num}()
+    for term in split(replace(string(expression), "-" => "+ aux*"), "+")
+        if length(term) == 0
+            continue
+        end
+        push!(integrands, eval(Meta.parse(term)))
     end
-    return sum(result)
+    
+    integrals = Vector{Num}()
+    for integrand in integrands
+        # remove the parameters in the term replacing them by value one
+        # in order to get only the coefficient multiplied by the parameters
+        # and then multiply the calculated integral resultant expression
+        coefficient = Symbolics.substitute(
+            integrand,
+            Dict(r => 1.0, s => 1.0, t => 1.0, aux => -1.0)
+        )
+        push!(
+            integrals, 
+            coefficient * integration_formula_2D(
+                Symbolics.degree(integrand, r),
+                Symbolics.degree(integrand, s),
+                Symbolics.degree(integrand, t)
+            )
+        )
+    end
+    return sum(integrals)
 end
 
+# example 6.2 pag 183 Hutton
+#@test isequal(integrate_triangle(8*r*s^3 - 4 * r*s^2), 0)
+# TODO: improve these examples and put expected results
+#@test integrate_triangle(-3*r)
+#@test integrate_triangle(-3*r*s^2)
+#@test integrate_triangle(-r*s^2)
+#@test integrate_triangle(-2 - r*s^2)
+#@test integrate_triangle(-r*s^2 - 2)
+#@test integrate_triangle(-r*s^2 - t)
+# ...
 
 
 # TODO [review quadrature options] 
