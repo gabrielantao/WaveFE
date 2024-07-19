@@ -10,7 +10,7 @@ struct QuadratureParameters
     positions::Vector{Float64}
     weights::Vector{Float64}
 end
-    
+
 # TODO [review shape functions]
 # - add other options of interpolation (see Pascal triangle polynomials) to be used
 #   as basis for the deduction of other shape functions with another number of points
@@ -31,7 +31,7 @@ function get_triangle_shape_functions(interpolation_order::InterpolationOrder)
         N_2 = ξ
         N_3 = η
         return [N_1 N_2 N_3]
-    # equation 6.46 cap 6 Hutton
+        # equation 6.46 cap 6 Hutton
     elseif interpolation_order == ORDER_TWO::InterpolationOrder
         N_1 = ξ * (2.0 * ξ - 1.0)
         N_2 = η * (2.0 * η - 1.0)
@@ -58,8 +58,8 @@ function get_quadrilateral_shape_functions(interpolation_order::InterpolationOrd
         N_3 = (1.0 / 4.0) * (1.0 + ξ) * (1.0 + η)
         N_4 = (1.0 / 4.0) * (1.0 - ξ) * (1.0 + η)
         return [N_1 N_2 N_3 N_4]
-    # this is the eight node version 
-    # eq 6.59 cap 6 pag 186 Hutton
+        # this is the eight node version 
+        # eq 6.59 cap 6 pag 186 Hutton
     elseif interpolation_order == ORDER_TWO::InterpolationOrder
         N_1 = (1.0 / 4.0) * (-1.0 + ξ) * (1.0 - η) * (ξ + η + 1.0)
         N_2 = (1.0 / 4.0) * (1.0 + ξ) * (1.0 - η) * (-ξ + η + 1.0)
@@ -88,8 +88,8 @@ Calculate the integral in the triangle element using the formula for area coordi
     
 ref:
 equation 6.49 pag 183 Hutton
-"""    
-function integration_formula_2D(a, b, c) 
+"""
+function integration_formula_2D(a, b, c)
     if a == 0 && b == 0 && c == 0
         return A
     end
@@ -103,33 +103,48 @@ and then split the string in the positions of
 This function iterates for each term in the expression and integrate isolated.
 """
 function integrate_triangle(expression)
-    expression = Symbolics.simplify(expression, expand=true)
-    integrands = Vector{Num}()
-    # replace the minus signals by auxiliar variable (aux = -1.0)
-    for term in split(replace(string(expression), "-" => "+ aux*"), "+")
-        if length(term) == 0
-            continue
-        end
-        push!(integrands, eval(Meta.parse(term)))
-    end
-    
+    # do a trick with polynomial expansion from SymbolicsUtils
+    # need these auxiliary variables (created with @syms) in order the PolyForm works correctly
+    Symbolics.SymbolicUtils.@syms ξ_aux η_aux ζ_aux
+    polynomial = Symbolics.SymbolicUtils.PolyForm(
+        Symbolics.substitute(
+            expression,
+            Dict(ξ => ξ_aux, η => η_aux, ζ => ζ_aux)
+        )
+    )
     integrals = Vector{Num}()
-    for integrand in integrands
+
+    # workaraound to get the operation multiply if it is only one term to integrate
+    # otherwise the arguments will return the factors of term (e.g. -3 * ξ would return -3 and ξ)
+    is_unique_term = string(operation(polynomial)) == "*"
+    all_polynomial_terms = is_unique_term ? [expression] : Symbolics.SymbolicUtils.arguments(polynomial)
+
+    # integrate the terms of the interpolation polynomial of the integrand expression
+    for polynomial_term in all_polynomial_terms
+        # substitute back the parameters of the original expression
+        # because the degree function must be used in the format suported by Symbolics
+        # and the cast BasicSymbolic{Real} to Num here is mandatory
+        integrand = Num(
+            Symbolics.substitute(
+                polynomial_term, Dict(ξ_aux => ξ, η_aux => η, ζ_aux => ζ)
+            )
+        )
+
         # remove the parameters in the term replacing them by value one
         # in order to get only the coefficient multiplied by the parameters
         # and then multiply the calculated integral resultant expression
         coefficient = Symbolics.substitute(
-            integrand,
-            Dict(ξ => 1.0, η => 1.0, ζ => 1.0, aux => -1.0)
+            integrand, Dict(ξ => 1.0, η => 1.0, ζ => 1.0)
         )
-        push!(
-            integrals, 
-            coefficient * integration_formula_2D(
-                Symbolics.degree(integrand, ξ),
-                Symbolics.degree(integrand, η),
-                Symbolics.degree(integrand, ζ)
-            )
+        integral = coefficient * integration_formula_2D(
+            Symbolics.degree(integrand, ξ),
+            Symbolics.degree(integrand, η),
+            Symbolics.degree(integrand, ζ)
         )
+        push!(integrals, integral)
+        # TODO [review shape functions]
+        # this should be loged
+        #println("$integrand ξ=$(Symbolics.degree(integrand, ξ)) η=$((Symbolics.degree(integrand, η))) ζ=$(Symbolics.degree(integrand, ζ)) integral=$integral")
     end
     return sum(integrals)
 end
@@ -156,8 +171,8 @@ function get_quadrature_positions(interpolation_order)
     elseif interpolation_order == 3
         positions = [0.0, sqrt(0.6), -sqrt(0.6)]
         weights = [8.0 / 9.0, 5.0 / 9.0, 5.0 / 9.0]
-    # NOTE: there is a difference between the table of Hutton and one in Zienkiewicz et al.
-    #       for this interpolation order. The Hutton one is used here.
+        # NOTE: there is a difference between the table of Hutton and one in Zienkiewicz et al.
+        #       for this interpolation order. The Hutton one is used here.
     elseif interpolation_order == 4
         positions = [0.339981043583856, -0.339981043583856, 0.861136311590453, -0.861136311590453]
         weights = [0.652145154862526, 0.652145154862526, 0.347854845137454, 0.347854845137454]
@@ -189,7 +204,7 @@ The expression can be the integrand, W is the vector of weights,
 r_pos and s_pos are the vector of positions in ξ and η to evaluate the quadrature.
 These values come from the table 6.1 (pag 207) Hutton
 """
-function calculate_gauss_quadrature(expression, ξ_params::QuadratureParameters, η_params::QuadratureParameters) 
+function calculate_gauss_quadrature(expression, ξ_params::QuadratureParameters, η_params::QuadratureParameters)
     f(i, j) = substitute(expression, Dict(ξ => ξ_params.positions[i], η => η_params.positions[j]))
     return sum([
         ξ_params.weights[i] * η_params.weights[j] * f(i, j)

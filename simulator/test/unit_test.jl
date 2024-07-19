@@ -8,7 +8,7 @@ using ArgParse
 using DelimitedFiles
 
 using SparseArrays
-using LinearAlgebra: dot
+using LinearAlgebra: dot, det
 using Statistics: mean
 
 include("../src/core/wave_core.jl")

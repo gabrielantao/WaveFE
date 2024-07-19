@@ -41,8 +41,15 @@ end
 # element size parameters (i.e. length, area, volume)
 @variables L, A, V
 
-# auxiliary variable
-@variables aux
+# velocity vector
+@variables u #[1:3]
+
+# viscosity and density
+@variables μ, ρ
+
+# gravity acceleration
+@variables g
+
 
 # catalogue of parameters 
 MODELING_VARIABLES = Dict(
@@ -52,7 +59,6 @@ MODELING_VARIABLES = Dict(
     L => Variable(L, "", "length"),
     A => Variable(A, "", "area"),
     V => Variable(V, "", "volume"),
-    aux => Variable(aux, "", "auxiliary"),   
 )
 
 # diferencial operators
