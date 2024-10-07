@@ -52,4 +52,4 @@ See the [examples](/docs/case_examples) section for examples of configured cases
 ![Flow around semicircle](/docs/case_examples/centered_semicircle/reference/u_1_t1500.png)
 
 ## How to contribute
-See the [contribute section](/docs/CONTRIBUTING.md) section
+See the [contribute section](/docs/CONTRIBUTING.md)

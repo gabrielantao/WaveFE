@@ -21,7 +21,7 @@ There are some features and improvements that could be implemented
 
 
 ## implement quadrilateral elements
-## general information
+### general information
 - tags: `mesh`, `element`, `assembling` 
 - complexity: 3/5
 - description: implement the bidimensional element called "quadrialteral".
@@ -205,6 +205,7 @@ For these improvements contact the owner of repository or create an issue.
 - make the solver parallel
 - create benchmarks for the simulator
 - review quadrature options
+- review shape functions
 
 ## CBS methods
 - implement mass matrix not lumped
